@@ -82,7 +82,8 @@ class User extends Authenticatable
         ];
     }
 
-    /**
+
+/**
      * Iniciales
      */
     public function initials(): string
