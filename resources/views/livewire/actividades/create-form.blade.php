@@ -2,9 +2,23 @@
 
 use Livewire\Volt\Component;
 use App\Models\Actividad;
+
+use App\Models\Archivo;
+use Livewire\WithFileUploads;
+
 use Illuminate\Support\Facades\Auth;
 
 new class extends Component {
+
+    use WithFileUploads;
+
+    public $archivos = [];
+
+    public function removeFile($index)
+        {
+            array_splice($this->archivos, $index, 1);
+        }
+
     public string $region = '';
     public string $tipo_unidad = '';
     public string $unidad_operativa = '';
@@ -48,7 +62,20 @@ new class extends Component {
             'ubicacion' => $this->ubicacion,
             'observacion' => $this->observacion,
             'activo' => true,
+
         ]);
+
+        foreach ($this->archivos as $archivo) {
+            $path = $archivo->store('uploads', 'public');
+
+            Archivo::create([
+                'actividad_id' => $actividad->actividad_id,
+                'archivo_nombre' => $archivo->getClientOriginalName(),
+                'archivo_ruta' => $path,
+                'archivo_tipo' => $archivo->getMimeType(),
+                'archivo_size' => $archivo->getSize(),
+            ]);
+        }
 
         session()->flash('success', 'Actividad registrada correctamente.');
 
@@ -143,7 +170,42 @@ new class extends Component {
             @error('observacion') <span class="error">{{ $message }}</span> @enderror
         </div>
 
-        <div class="buttons-row-action" style="display: flex; gap: 15px; margin-top: 30px; border-top: 1px solid var(--color-border); padding-top: 20px;">
+<!-- Zona de Arrastrar y Soltar con Livewire + Alpine -->
+        <div class="form-group-item" style="margin-top: 30px;" 
+             x-data="{ isDragging: false }" 
+             x-on:dragover.prevent="isDragging = true" 
+             x-on:dragleave.prevent="isDragging = false" 
+             x-on:drop.prevent="isDragging = false; @this.uploadMultiple('archivos', $event.dataTransfer.files)">
+            
+            <label>
+                Archivos de Respaldo Firmados (PDF, DOCX, XLS, JPG, PNG - Máx. 5MB c/u)
+            </label>
+
+            <div id="dropzone" class="drag-drop-file-zone" 
+                 :class="{ 'dragover': isDragging }"
+                 onclick="document.getElementById('archivo').click()">
+                <div class="file-zone-icon">⇪</div>
+                <p style="margin: 0; font-weight: 600; font-size: 1rem; color: var(--color-primary);">Arrastre aquí sus documentos o haga clic para examinar</p>
+                <div wire:loading wire:target="archivos" style="color: var(--color-secondary); font-weight: bold; margin-top: 10px;">
+                    Subiendo archivos...
+                </div>
+                <input type="file" wire:model="archivos" id="archivo" multiple style="display: none;" accept=".pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png">
+            </div>
+
+            @error('archivos.*') <span class="error">{{ $message }}</span> @enderror
+
+            <!-- Lista de archivos seleccionados (Reactiva) -->
+            <div id="file-list" style="margin-top: 15px;">
+                @foreach($archivos as $index => $archivo)
+                    <div class="file-selected-badge" style="margin-bottom: 10px;">
+                        <span>Archivo: <strong>{{ $archivo->getClientOriginalName() }}</strong></span>
+                        <button type="button" wire:click="removeFile({{ $index }})">×</button>
+                    </div>
+                @endforeach
+            </div>
+        </div>
+
+<div class="buttons-row-action" style="display: flex; gap: 15px; margin-top: 30px; border-top: 1px solid var(--color-border); padding-top: 20px;">
             <button type="button" class="btn-secondary" onclick="confirmarVolver()" style="margin-right: auto; padding: 11px 20px; font-weight: 500; font-size: 0.95rem; border-radius: var(--border-radius); border: 1px solid var(--color-border); cursor: pointer;">Volver</button>
             <button type="reset" class="btn-secondary" style="padding: 11px 20px; font-weight: 500; font-size: 0.95rem; border-radius: var(--border-radius); border: 1px solid var(--color-border); cursor: pointer;">Limpiar Formulario</button>
             <button type="submit" class="btn-primary" style="background-color: var(--color-secondary); color: var(--color-white); border: none; padding: 13px 24px; border-radius: var(--border-radius); font-weight: 600; font-size: 1rem; cursor: pointer;">
