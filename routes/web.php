@@ -31,5 +31,7 @@ Route::middleware(['auth'])->group(function () {
 
     Route::get('/actividades/create', [\App\Http\Controllers\ActividadController::class, 'create'])->name('actividades.create');
 
+    Route::get('/actividades', [\App\Http\Controllers\ActividadController::class, 'index'])->name('actividades.index');
+
 });
 

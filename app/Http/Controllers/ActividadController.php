@@ -14,4 +14,9 @@ class ActividadController extends Controller
         return view('actividades.create');
     }
 
+    public function index()
+    {
+        return view('actividades.index');
+    }
+
 }
