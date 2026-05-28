@@ -337,11 +337,25 @@ new class extends Component {
                 @if(!empty($archivos))
                     <div style="margin-top: 15px; border-top: 1px solid #cbd5e1; padding-top: 15px;">
                         <strong style="color: #64748b; font-size: 0.8rem; text-transform: uppercase;">Documentos Adjuntos ({{ count($archivos) }})</strong>
-                        <div style="margin-top: 8px; display: flex; flex-direction: column; gap: 8px;">
+                        <div style="margin-top: 10px; display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 15px;">
                             @foreach($archivos as $archivo)
-                                <div style="display: flex; align-items: center; gap: 8px; background-color: #ffffff; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 4px; font-size: 0.9rem;">
-                                    <span style="color: #2b8a3e; font-weight: bold;">✓</span>
-                                    <span>{{ $archivo->getClientOriginalName() }}</span>
+                                <div style="background-color: #ffffff; padding: 12px; border: 1px solid #cbd5e1; border-radius: 6px; text-align: center; box-shadow: 0 1px 3px rgba(0,0,0,0.02); display: flex; flex-direction: column; justify-content: space-between; min-height: 160px;">
+                                    
+                                    <!-- Previsualización si el archivo es imagen -->
+                                    @if(str_starts_with($archivo->getMimeType(), 'image/'))
+                                        <div style="width: 100%; height: 100px; overflow: hidden; border-radius: 4px; border: 1px solid #e2e8f0; margin-bottom: 8px;">
+                                            <img src="{{ $archivo->temporaryUrl() }}" style="width: 100%; height: 100%; object-fit: cover;">
+                                        </div>
+                                    @else
+                                        <!-- Placeholder elegante si es documento -->
+                                        <div style="height: 100px; display: flex; align-items: center; justify-content: center; background-color: #f1f5f9; border-radius: 4px; border: 1px solid #e2e8f0; margin-bottom: 8px; font-size: 2rem;">
+                                            📄
+                                        </div>
+                                    @endif
+                                    
+                                    <span style="font-size: 0.75rem; color: #475569; font-weight: 500; display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="{{ $archivo->getClientOriginalName() }}">
+                                        {{ $archivo->getClientOriginalName() }}
+                                    </span>
                                 </div>
                             @endforeach
                         </div>
