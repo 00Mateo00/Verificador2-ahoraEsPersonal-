@@ -67,11 +67,6 @@ body.high-contrast h1, body.high-contrast h2 { color: #ffffff; }
 a { color: var(--color-secondary); text-decoration: none; }
 a:hover { text-decoration: underline; }
 
-.header-bar-top {
-    height: 6px;
-    background: linear-gradient(to right, #005df6 33.3%, #ffffff 33.3%, #ffffff 66.6%, #ef3340 66.6%);
-    width: 100%;
-}
 
 .header-nav {
     background-color: var(--color-primary);
@@ -154,3 +149,215 @@ a:hover { text-decoration: underline; }
 
 .drag-drop-file-zone { border: 2px dashed #b5c7e0; border-radius: 4px; background-color: #f8fafc; padding: 30px; text-align: center; cursor: pointer; }
 .drag-drop-file-zone.dragover { border-color: #2b8a3e; background-color: #ebfbee; }
+
+/* ==========================================================================
+   CAJBIOBIO - Integración Intranet & ClaveÚnica (Nueva Imagen)
+   ========================================================================== */
+
+/* Ajustes globales de tipografía para todo el sistema */
+:root {
+    --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+body {
+    font-family: var(--font-sans);
+}
+
+/* Estilos de la nueva estructura del Login */
+.login-layout-body {
+    background-color: #e9eff6;
+    margin: 0;
+    padding: 0;
+    font-family: var(--font-sans);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.header-nav-caj {
+    background-color: #0d1b2a;
+    color: #ffffff;
+    padding: 18px 40px;
+    display: flex;
+    align-items: center;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.logo-text-caj {
+    font-size: 1.15rem;
+    letter-spacing: 0.5px;
+    font-family: var(--font-sans);
+}
+
+.login-main-container {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 20px;
+}
+
+.login-grid-wrapper {
+    display: grid;
+    grid-template-columns: 1.1fr 0.9fr;
+    gap: 60px;
+    max-width: 1120px;
+    width: 100%;
+    align-items: center;
+}
+
+/* Columna Izquierda: Mensajes de Bienvenida */
+.login-welcome-column {
+    text-align: left;
+}
+
+.welcome-title {
+    color: #0d1b2a;
+    font-size: 2.6rem;
+    font-weight: 800;
+    line-height: 1.25;
+    margin-bottom: 24px;
+    margin-top: 0;
+    letter-spacing: -0.5px;
+}
+
+.welcome-description {
+    color: #475569;
+    font-size: 1.1rem;
+    line-height: 1.65;
+    margin-bottom: 35px;
+}
+
+/* Botón ClaveÚnica */
+.btn-claveunica {
+    background-color: #0F69C4;
+    color: #ffffff !important;
+    border-radius: 4px;
+    width: fit-content;
+    min-height: 48px;
+    padding: 8px 14px 8px 14px !important;
+    font-size: 16px;
+    line-height: 2rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-family: "Roboto", sans-serif;
+    font-weight: bold;
+    text-align: center;
+    text-decoration: none;
+    vertical-align: middle;
+    border: 0;
+    transition: background-color 0.2s ease;
+}
+
+.btn-claveunica:hover {
+    background-color: #0B4E91;
+    text-decoration: none;
+}
+
+.cl-claveunica {
+    width: 24px;
+    height: 24px;
+    background-size: 24px 24px;
+    margin: auto 4px auto 0px;
+    text-indent: -9999px;
+    background: url(https://cajbiobio.cl/intranet/assets/img/claveunica.svg) no-repeat;
+}
+
+/* Columna Derecha: Tarjeta de Login */
+
+.login-container-card-caj {
+    background-color: #ffffff;
+    border-radius: 16px;
+    padding: 40px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.04);
+    border: 1px solid rgba(226, 232, 240, 0.8);
+}
+
+.login-card-header h2 {
+    color: #0d1b2a;
+    font-size: 1.7rem;
+    font-weight: 700;
+    margin: 0;
+}
+
+.login-card-header p {
+    color: #64748b;
+    font-size: 0.95rem;
+    margin-top: 6px;
+    margin-bottom: 30px;
+}
+
+.form-group-item-caj {
+    margin-bottom: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.form-group-item-caj label {
+    color: #334155;
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+
+.form-input-control-caj {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 12px 16px;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    font-size: 0.95rem;
+    color: #334155;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.form-input-control-caj:focus {
+    outline: none;
+    border-color: #0F69C4;
+    box-shadow: 0 0 0 3px rgba(15, 105, 196, 0.15);
+}
+
+.btn-primary-caj {
+    background-color: #0F69C4;
+    color: #ffffff;
+    border: none;
+    padding: 14px;
+    border-radius: 6px;
+    font-weight: 700;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.btn-primary-caj:hover {
+    background-color: #0B4E91;
+}
+
+/* Pie de página */
+.footer-credits-caj {
+    text-align: center;
+    padding: 24px;
+    color: #64748b;
+    font-size: 0.85rem;
+    border-top: 1px solid rgba(226, 232, 240, 0.8);
+    background-color: #ffffff;
+}
+
+/* Responsividad para pantallas móviles y tablets */
+@media (max-width: 768px) {
+    .login-grid-wrapper {
+        grid-template-columns: 1fr;
+        gap: 40px;
+        text-align: center;
+    }
+    
+    .login-welcome-column {
+        text-align: center;
+    }
+    
+    .welcome-title {
+        font-size: 2.1rem;
+    }
+}
+
