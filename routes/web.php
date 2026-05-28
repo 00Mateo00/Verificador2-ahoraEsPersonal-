@@ -20,9 +20,10 @@ Route::get('/dashboard', function () {
 })->name('dashboard');
 
 Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login')->middleware('guest');
+
+// en el futuro el login será manejado por la API de ClaveUnica (TO-DO)
 Route::post('/login', [AuthController::class, 'login'])->name('login.post')->middleware('guest');
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout')->middleware('auth');
-Route::get('/logout', [AuthController::class, 'logout'])->middleware('auth'); // Fallback para enlaces GET legacy
 
 
 Route::middleware(['auth'])->group(function () {
@@ -30,6 +31,5 @@ Route::middleware(['auth'])->group(function () {
 
     Route::get('/actividades/create', [\App\Http\Controllers\ActividadController::class, 'create'])->name('actividades.create');
 
-    Route::post('/actividades', [\App\Http\Controllers\ActividadController::class, 'store'])->name('actividades.store');
 });
 

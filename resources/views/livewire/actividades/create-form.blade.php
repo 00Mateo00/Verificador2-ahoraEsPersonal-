@@ -6,6 +6,9 @@ use App\Models\Actividad;
 use App\Models\Archivo;
 use Livewire\WithFileUploads;
 
+use App\Mail\ActividadRegistrada;
+use Illuminate\Support\Facades\Mail;
+
 use Illuminate\Support\Facades\Auth;
 
 new class extends Component {
@@ -62,7 +65,7 @@ new class extends Component {
             'ubicacion' => $this->ubicacion,
             'observacion' => $this->observacion,
             'activo' => true,
-
+            'fecha_actividad' => $this->fecha_actividad,
         ]);
 
         foreach ($this->archivos as $archivo) {
@@ -77,7 +80,13 @@ new class extends Component {
             ]);
         }
 
-        session()->flash('success', 'Actividad registrada correctamente.');
+// Cargar relaciones necesarias para el correo (persona del usuario)
+        $actividad->load('usuario.persona');
+
+        // Envío de notificación por correo
+        Mail::to('mateo.ossa.b@gmail.com')->send(new ActividadRegistrada($actividad));
+
+session()->flash('success', 'Actividad registrada correctamente.');
 
         return redirect()->route('actividades.create');
     }

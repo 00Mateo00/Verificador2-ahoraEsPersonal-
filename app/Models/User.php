@@ -12,6 +12,8 @@ use Illuminate\Support\Str;
 
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+
 #[Fillable([
     'usuario_nombre',
     'usuario_correo',
@@ -95,6 +97,14 @@ class User extends Authenticatable
             ->take(2)
             ->map(fn ($word) => Str::substr($word, 0, 1))
             ->implode('');
+    }
+
+/**
+     * Relación con los datos personales del funcionario
+     */
+    public function persona(): BelongsTo
+    {
+        return $this->belongsTo(Persona::class, 'persona_id', 'persona_id');
     }
 
 /**

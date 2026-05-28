@@ -14,8 +14,4 @@ class ActividadController extends Controller
         return view('actividades.create');
     }
 
-    public function store(Request $request)
-    {
-        return 'ÉXITO: El usuario está autenticado como ' . auth()->user()->usuario_nombre;
-    }
 }

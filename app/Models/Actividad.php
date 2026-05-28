@@ -22,7 +22,8 @@ class Actividad extends Model
         'n_participantes',
         'ubicacion',
         'observacion',
-        'activo'
+        'activo',
+        'fecha_actividad'
     ];
 
     public function usuario(): BelongsTo
