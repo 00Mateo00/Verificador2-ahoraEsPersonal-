@@ -62,7 +62,7 @@ new class extends Component {
 
     private function getFilteredActivitiesQuery()
     {
-        $query = Actividad::where('usuario_id', Auth::id())
+        $query = Actividad::where('usuario_id_asignado', Auth::id())
             ->where('activo', true);
 
         if (!empty($this->actividad_id)) {
@@ -112,7 +112,7 @@ new class extends Component {
         }
 
         $actividades = Actividad::whereIn('actividad_id', $this->selectedIds)
-            ->where('usuario_id', Auth::id())
+            ->where('usuario_id_asignado', Auth::id())
             ->orderBy('fecha_actividad', 'desc')
             ->get();
 

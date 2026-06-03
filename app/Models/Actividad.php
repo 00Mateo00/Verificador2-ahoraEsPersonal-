@@ -12,15 +12,7 @@ class Actividad extends Model
     protected $primaryKey = 'actividad_id';
 
     protected $fillable = [
-        // Columnas espejo del Excel
-        'CONSIDERAR_SI_NO',
-        'MODALIDAD_MODIFICADO',
-        'MODALIDAD_COD',
-        'TIPO_MODIFICADO',
-        'TIPO_ACT_COD',
-        'CAJ_ID',
-        'SUB_TIPO_MODIFICADO',
-        'SUB_TIPO_COD',
+        // Columnas unificadas y limpias (fuente de verdad)
         'COD',
         'FECHA',
         'FECHA_SAJ',
@@ -39,11 +31,13 @@ class Actividad extends Model
         'AÑO',
         'DET_ACTIVIDAD',
 
-        // Columnas de control interno
+        // Columnas de control interno y apoyo de formulario
         'estado',
         'carga_id',
         'usuario_id_asignado',
         'unidad_id_asignada',
+        'ubicacion',
+        'observacion',
         'activo'
     ];
 
