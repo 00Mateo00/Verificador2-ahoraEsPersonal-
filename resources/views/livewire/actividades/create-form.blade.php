@@ -85,7 +85,7 @@ new class extends Component {
         $this->validate($allRules);
 
         $actividad = Actividad::create([
-            'usuario_id' => Auth::id(),
+            'usuario_id_asignado' => Auth::id(),
             'region' => $this->region,
             'tipo_unidad' => $this->tipo_unidad,
             'unidad_operativa' => $this->unidad_operativa,
@@ -111,7 +111,7 @@ new class extends Component {
             ]);
         }
 
-        $actividad->load('usuario.persona');
+        $actividad->load('usuarioAsignado.persona');
 
         Mail::to('mateo.ossa.b@gmail.com')->send(new ActividadRegistrada($actividad));
 
