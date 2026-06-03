@@ -108,11 +108,11 @@ class User extends Authenticatable
     }
 
 /**
-     * Relación con actividades registradas
+     * Relación con las actividades asignadas para su correspondiente verificación.
      */
-    public function actividades(): HasMany
+    public function actividadesAsignadas(): HasMany
     {
-        return $this->hasMany(Actividad::class, 'usuario_id', 'usuario_id');
+        return $this->hasMany(Actividad::class, 'usuario_id_asignado', 'usuario_id');
     }
 
 }
