@@ -1,0 +1,36 @@
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+
+class CargaExcel extends Model
+{
+    protected $table = 'carga_excel';
+    protected $primaryKey = 'carga_id';
+
+    protected $fillable = [
+        'usuario_id',
+        'nombre_archivo',
+        'total_filas',
+        'estado'
+    ];
+
+    /**
+     * El usuario cargador que subió el archivo.
+     */
+    public function usuario(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'usuario_id', 'usuario_id');
+    }
+
+    /**
+     * Actividades vinculadas a esta carga en específico.
+     */
+    public function actividades(): HasMany
+    {
+        return $this->hasMany(Actividad::class, 'carga_id', 'carga_id');
+    }
+}
