@@ -19,9 +19,7 @@ return new class extends Migration
             $table->string('password');
             $table->rememberToken();
             $table->timestamps();
-            $table->foreign('unidad_id')
-                ->references('unidad_id')
-                ->on('unidad');
+            $table->foreignId('unidad_id')->nullable()->constrained('unidad', 'unidad_id')->nullOnDelete();
         });
 
         Schema::create('password_reset_tokens', function (Blueprint $table) {

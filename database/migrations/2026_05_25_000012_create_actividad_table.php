@@ -11,8 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('actividad', function (Blueprint $table)
-        {
+        Schema::create('actividad', function (Blueprint $table) {
             $table->id('actividad_id');
 
             // 1. Columnas de Origen Directo (Nombres limpios unificados)
@@ -46,9 +45,6 @@ return new class extends Migration
             $table->timestamps();
 
             // Llaves foráneas con las tablas de infraestructura existentes
-            $table->foreign('usuario_id_asignado')
-                ->references('usuario_id')
-                ->on('usuario');
 
             $table->foreign('unidad_id_asignada')
                 ->references('unidad_id')
