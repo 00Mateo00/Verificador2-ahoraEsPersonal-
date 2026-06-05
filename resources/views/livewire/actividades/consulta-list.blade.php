@@ -193,14 +193,12 @@ new class extends Component {
         $totalResults = $query->count();
         $actividades = $query->paginate($perPage);
 
-        $unidadIds = \Illuminate\Support\Facades\DB::table('unidad_persona')
-            ->where('persona_id', Auth::user()->persona_id)
-            ->pluck('unidad_id')
-            ->toArray();
+        $userUnidadId = Auth::user()->unidad_id;
+        $userRol = Auth::user()->rol;
 
         $monthQuery = Actividad::where('activo', true);
-        if (Auth::user()->usuario_rol !== 'admin' && Auth::user()->usuario_rol !== 'auditor') {
-            $monthQuery->whereIn('unidad_id_asignada', $unidadIds);
+        if ($userRol !== 'admin' && $userRol !== 'auditor') {
+            $monthQuery->where('unidad_id_asignada', $userUnidadId);
         }
 
         $monthCounts = $monthQuery->selectRaw("SUBSTRING_INDEX(FECHA, '-', -2) as ym, count(*) as total")
@@ -210,10 +208,10 @@ new class extends Component {
 
         // Cargar las unidades asociadas al usuario autenticado para el filtro dinámico
         $unidadesAsignadas = [];
-        if (Auth::user()->usuario_rol === 'admin' || Auth::user()->usuario_rol === 'auditor') {
+        if ($userRol === 'admin' || $userRol === 'auditor') {
             $unidadesAsignadas = \App\Models\Unidad::orderBy('unidad_nombre', 'asc')->get();
         } else {
-            $unidadesAsignadas = \App\Models\Unidad::whereIn('unidad_id', $unidadIds)->orderBy('unidad_nombre', 'asc')->get();
+            $unidadesAsignadas = \App\Models\Unidad::where('unidad_id', $userUnidadId)->orderBy('unidad_nombre', 'asc')->get();
         }
 
         return [
