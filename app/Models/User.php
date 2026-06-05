@@ -21,7 +21,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
     'email',
     'password',
     'rol',
-    'usuario_estado'
+    'estado'
 ])]
 #[Hidden(['password', 'two_factor_secret', 'two_factor_recovery_codes', 'remember_token'])]
 class User extends Authenticatable implements PasskeyUser
@@ -29,48 +29,11 @@ class User extends Authenticatable implements PasskeyUser
     /** @use HasFactory<UserFactory> */
     use HasFactory, Notifiable, PasskeyAuthenticatable, TwoFactorAuthenticatable;
 
-    protected $table = 'usuario';
 
     protected $primaryKey = 'usuario_id';
 
     public $timestamps = false;
 
-    /**
-     * Laravel usará esta columna como password
-     */
-    public function getAuthPassword(): string
-    {
-        return $this->usuario_pass;
-    }
-
-    /**
-     * Laravel usará este campo como "email"
-     */
-    public function getEmailForPasswordReset(): string
-    {
-        return $this->usuario_correo;
-    }
-
-    /**
-     * Opcional: si quieres que Auth::user()->name funcione
-     */
-    public function getNameAttribute(): ?string
-    {
-        return $this->usuario_nombre;
-    }
-
-    /**
-     * Opcional: si quieres que Auth::user()->email funcione
-     */
-    public function getEmailAttribute(): ?string
-    {
-        return $this->usuario_correo;
-    }
-
-    public function getRememberTokenName()
-    {
-        return null;
-    }
 
     /**
      * Get the attributes that should be cast.

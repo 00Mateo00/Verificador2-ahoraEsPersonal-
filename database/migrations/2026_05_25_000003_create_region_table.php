@@ -9,18 +9,17 @@ return new class extends Migration
     /**
      * Run the migrations.
      */
-   public function up(): void
-{
-    Schema::create('region', function (Blueprint $table) {
-        $table->id('region_id');
+    public function up(): void
+    {
+        Schema::create('region', function (Blueprint $table) {
+            $table->id('region_id');
 
-        $table->string('region_nombre', 50)->nullable();
-        $table->string('region_lat_lng', 50)->nullable();
-    });
-}
+            $table->string('region_nombre', 50)->nullable();
+        });
+    }
 
-public function down(): void
-{
-    Schema::dropIfExists('region');
-}
+    public function down(): void
+    {
+        Schema::dropIfExists('region');
+    }
 };
