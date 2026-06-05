@@ -3,30 +3,30 @@
 @section('title', 'Registrar Actividad - FirmaGob')
 
 @section('breadcrumbs')
-    <a href="#">Actividades</a>
-    <span class="separator">‣</span>
-    <span>Registrar Actividad</span>
+<a href="#">Actividades</a>
+<span class="separator">‣</span>
+<span>Registrar Actividad</span>
 @endsection
 
 @section('sidebar_menu')
-    <li>
-        <a href="{{ route('actividades.create') }}" class="active">Registrar Actividad</a>
-    </li>
-    <li>
+<li>
+    <a href="{{ route('actividades.create') }}" class="active">Registrar Actividad</a>
+</li>
+<li>
 
-<a href="{{ route('actividades.index') }}">Consultar</a>
+    <a href="{{ route('actividades.index') }}">Consultar</a>
 
 </li>
 @endsection
 
 @section('content')
-    <div class="panel-header-section">
-        <h2>Registrar Nueva Actividad Institucional</h2>
-        <p style="margin: 5px 0 0; color: var(--color-text-light); font-size: 0.95rem;">
-            Complete el siguiente formulario para dejar registro de la actividad realizada. Todos los campos de
-            texto tienen límites de caracteres para asegurar el orden público del reporte.
-        </p>
-    </div>
+<div class="panel-header-section">
+    <h2>Registrar Nueva Actividad Institucional</h2>
+    <p style="margin: 5px 0 0; color: var(--color-text-light); font-size: 0.95rem;">
+        Complete el siguiente formulario para dejar registro de la actividad realizada. Todos los campos de
+        texto tienen límites de caracteres para asegurar el orden público del reporte.
+    </p>
+</div>
 
 <livewire:actividades.create-form />
 @endsection
@@ -34,9 +34,30 @@
 @stack('styles')
 
 <style>
-    .form-grid-columns-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
-    .file-selected-badge { background-color: #f8fafc; border: 1px solid var(--color-border); padding: 10px 15px; border-radius: 4px; display: flex; justify-content: space-between; align-items: center; }
-    .file-selected-badge button { background: none; border: none; color: #ef3340; font-size: 1.2rem; cursor: pointer; line-height: 1; }
+    .form-grid-columns-2 {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+    }
+
+    .file-selected-badge {
+        background-color: #f8fafc;
+        border: 1px solid var(--color-border);
+        padding: 10px 15px;
+        border-radius: 4px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .file-selected-badge button {
+        background: none;
+        border: none;
+        color: #ef3340;
+        font-size: 1.2rem;
+        cursor: pointer;
+        line-height: 1;
+    }
 </style>
 
 @push('scripts')
