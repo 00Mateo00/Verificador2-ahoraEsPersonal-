@@ -8,16 +8,7 @@
 <span>Registrar Actividades</span>
 @endsection
 
-@section('sidebar_menu')
-<li>
-    <a href="{{ route('actividades.create') }}" class="active">Registrar Actividades</a>
-</li>
-<li>
 
-    <a href="{{ route('actividades.index') }}">Consultar</a>
-
-</li>
-@endsection
 
 @section('content')
 <div class="panel-header-section">

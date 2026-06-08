@@ -8,16 +8,7 @@
 <span>Importar Planilla</span>
 @endsection
 
-@section('sidebar_menu')
-@if(Auth::user()->rol === 'cargador' || Auth::user()->rol === 'admin')
-<li>
-    <a href="{{ route('actividades.importar') }}" class="active">Importar Planilla</a>
-</li>
-@endif
-<li>
-    <a href="{{ route('actividades.index') }}">Consultar Actividades</a>
-</li>
-@endsection
+
 
 @section('content')
 <div class="panel-header-section">

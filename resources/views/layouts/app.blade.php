@@ -44,12 +44,35 @@
                 <div style="padding: 10px 24px; font-size: 0.8rem; text-transform: uppercase; font-weight: 700; color: #0d1b2a; opacity: 0.7; letter-spacing: 0.5px;">
                     @if(Auth::user()->rol === 'admin')
                     Panel Central
+                    @elseif(Auth::user()->rol === 'cargador')
+                    Módulo Importación
                     @else
                     Menú Funcionario
                     @endif
                 </div>
                 <ul>
-                    @yield('sidebar_menu')
+                    <!-- Enlaces dinámicos centralizados por Rol -->
+                    @if(Auth::user()->rol === 'admin' || Auth::user()->rol === 'cargador')
+                    <li>
+                        <a href="{{ route('actividades.importar') }}" class="{{ request()->routeIs('actividades.importar') ? 'active' : '' }}">
+                            Importar Planilla
+                        </a>
+                    </li>
+                    @endif
+                    
+                    @if(Auth::user()->rol === 'admin')
+                    <li>
+                        <a href="{{ route('actividades.create') }}" class="{{ request()->routeIs('actividades.create') ? 'active' : '' }}">
+                            Registrar Actividades
+                        </a>
+                    </li>
+                    @endif
+
+                    <li>
+                        <a href="{{ route('actividades.index') }}" class="{{ request()->routeIs('actividades.index') ? 'active' : '' }}">
+                            Consultar Actividades
+                        </a>
+                    </li>
                 </ul>
             </div>
         </aside>
