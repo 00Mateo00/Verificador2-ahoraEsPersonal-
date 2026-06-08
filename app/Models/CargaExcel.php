@@ -12,7 +12,7 @@ class CargaExcel extends Model
     protected $primaryKey = 'carga_id';
 
     protected $fillable = [
-        'usuario_id',
+        'user_id',
         'nombre_archivo',
         'total_filas',
         'estado'
