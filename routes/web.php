@@ -7,10 +7,15 @@ use Illuminate\Support\Facades\Auth;
 
 Route::get('/', function () {
     if (Auth::check()) {
-        if (Auth::user()->usuario_rol === 'admin') {
+        $rol = Auth::user()->rol;
+        info("(routing info): Usuario autenticado con rol: $rol");
+        if ($rol === 'admin') {
             return redirect()->route('admin.actividades');
         }
-        return redirect()->route('actividades.create');
+        if ($rol === 'cargador') {
+            return redirect()->route('actividades.importar');
+        }
+        /*  return redirect()->route('actividades.index'); */
     }
     return redirect()->route('login');
 })->name('home');
@@ -32,6 +37,10 @@ Route::middleware(['auth'])->group(function () {
     })->name('admin.actividades');
 
     Route::get('/actividades/create', [\App\Http\Controllers\ActividadController::class, 'create'])->name('actividades.create');
+
+    Route::get('/actividades/importar', function () {
+        return view('actividades.import');
+    })->name('actividades.importar');
 
     Route::get('/actividades', [\App\Http\Controllers\ActividadController::class, 'index'])->name('actividades.index');
 });

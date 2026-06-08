@@ -46,6 +46,10 @@ class AuthController extends Controller
             info("(from login) login successful for admin " . $user->email);
             return redirect()->route('admin.actividades');
         }
+        if ($user->rol === 'cargador') {
+            info("(from login) login successful for cargador " . $user->email);
+            return redirect()->route('actividades.importar');
+        }
         info("(from login) login successful for user " . $user->email);
         return redirect()->route('actividades.create');
     }

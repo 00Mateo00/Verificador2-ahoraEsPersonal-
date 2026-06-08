@@ -5,12 +5,12 @@
 @section('breadcrumbs')
 <a href="#">Actividades</a>
 <span class="separator">‣</span>
-<span>Registrar Actividad</span>
+<span>Registrar Actividades</span>
 @endsection
 
 @section('sidebar_menu')
 <li>
-    <a href="{{ route('actividades.create') }}" class="active">Registrar Actividad</a>
+    <a href="{{ route('actividades.create') }}" class="active">Registrar Actividades</a>
 </li>
 <li>
 
