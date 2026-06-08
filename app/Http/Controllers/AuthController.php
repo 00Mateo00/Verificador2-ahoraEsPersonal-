@@ -43,14 +43,18 @@ class AuthController extends Controller
         $user = Auth::user();
         if ($user->rol === 'admin') {
             info("(from login) login successful for admin " . $user->email);
-            return redirect()->route('admin.actividades');
+            return redirect()->route('admin.dashboard');
         }
         if ($user->rol === 'cargador') {
             info("(from login) login successful for cargador " . $user->email);
             return redirect()->route('actividades.importar');
         }
+        if ($user->rol === 'unidad') {
+            info("(from login) login successful for unidad " . $user->email);
+            return redirect()->route('unidad.dashboard');
+        }
         info("(from login) login successful for user " . $user->email);
-        return redirect()->route('actividades.create');
+        return redirect()->route('actividades.index');
     }
 
     public function logout(Request $request)
