@@ -11,6 +11,8 @@ use App\Models\Unidad;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\NuevasActividadesPendientes;
 
 class ImportActividadesForm extends Component
 {
@@ -95,7 +97,10 @@ class ImportActividadesForm extends Component
             $data = $importer->importActividades($this->tempFilePath);
             $allRows = $data['rows'];
 
-            DB::transaction(function () use ($allRows) {
+            // Colección para registrar los IDs únicos de las unidades que reciben actividades en este lote
+            $unidadesAfectadas = [];
+
+            DB::transaction(function () use ($allRows, &$unidadesAfectadas) {
 
                 // Registrar lote de control Excel
                 $carga = CargaExcel::create([
@@ -124,12 +129,26 @@ class ImportActividadesForm extends Component
                         $carga->carga_id,
                         $unidadIdAsignada
                     );
+
+                    // Registrar de forma única la unidad afectada si fue emparejada
+                    if ($unidadIdAsignada && !in_array($unidadIdAsignada, $unidadesAfectadas)) {
+                        $unidadesAfectadas[] = $unidadIdAsignada;
+                    }
                 }
             });
 
+            // Despachar un único correo por cada unidad afectada al finalizar con éxito la persistencia
+            $unidades = Unidad::whereIn('unidad_id', $unidadesAfectadas)
+                ->whereNotNull('unidad_correo')
+                ->get();
+
+            foreach ($unidades as $unidad) {
+                Mail::to($unidad->unidad_correo)->queue(new NuevasActividadesPendientes($unidad));
+            }
+
             $this->cleanupTempFile();
             $this->step = 4;
-            session()->flash('success', "¡Excelente! Se han importado exitosamente {$this->totalRows} actividades.");
+            session()->flash('success', "¡Excelente! Se han importado exitosamente {$this->totalRows} actividades e iniciado las colas de notificación.");
         } catch (\Exception $e) {
             session()->flash('error', 'Fallo al persistir registros en base de datos: ' . $e->getMessage());
             $this->step = 2;
