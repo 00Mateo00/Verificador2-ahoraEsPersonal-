@@ -11,7 +11,11 @@
 </div>
 
 <div class="panel-dashboard-content" style="margin-top: 20px;">
-    <h1 style="color: #ef3340; font-size: 1.5rem; font-weight: 700;">TO-DO: implementar vista de dashboard de unidad</h1>
-    <p style="color: #64748b; margin-top: 10px;">Esta interfaz contendrá los paneles de control para visualizar actividades pendientes de verificación y cargadas mediante planilla.</p>
+    <h3 style="margin-top: 0; color: #0d1b2a; font-size: 1.2rem; font-weight: 700; border-bottom: 2px solid #f1f5f9; padding-bottom: 10px; margin-bottom: 20px;">
+        📥 Actividades Pendientes de Respaldo
+    </h3>
+    
+    <!-- Componente Operativo de Verificación para la Unidad -->
+    <livewire:actividades.verificar-pendientes />
 </div>
 @endsection
