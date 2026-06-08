@@ -2,42 +2,16 @@
 
 namespace App\Services;
 
+use App\Models\Actividad;
+
 class ExcelValidatorService
 {
   public function validateActividad(array $data): void
   {
 
-    // validar match de headers
-    $ACTIVIDAD_HEADERS = [
-      'CONSIDERAR_SI_NO',
-      'MODALIDAD_MODIFICADO',
-      'MODALIDAD_COD',
-      'TIPO_MODIFICADO',
-      'TIPO_ACT_COD',
-      'CAJ_ID',
-      'SUB_TIPO_MODIFICADO',
-      'SUB_TIPO_COD',
-      'COD',
-      'FECHA',
-      'FECHA_SAJ',
-      'MODALIDAD',
-      'TIPO_ACTIVIDAD',
-      'SUB_TIPO_ACTIVIDAD',
-      'PARTICIPANTES',
-      'TOTAL_HOMBRES',
-      'TOTAL_MUJERES',
-      'TOTAL_NOBINARIO',
-      'FUNCIONARIO',
-      'UNIDAD',
-      'TIPO_UNIDAD',
-      'REGION',
-      'MES',
-      'AÑO',
-      'DET_ACTIVIDAD',
-    ];
-
+    // TO-DO cambiar la validacion para que puedan existir columans extras a las estipuladas pero no pueden faltar las requeridas.
     $missing = array_diff(
-      $ACTIVIDAD_HEADERS,
+      Actividad::REQUIRED_EXCEL_HEADERS,
       $data['headers']
     );
 

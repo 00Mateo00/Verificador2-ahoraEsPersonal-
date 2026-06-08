@@ -10,36 +10,106 @@ class Actividad extends Model
 {
     protected $table = 'actividad';
     protected $primaryKey = 'actividad_id';
+    protected $fillable = [];
 
-    protected $fillable = [
-        // Columnas unificadas y limpias (fuente de verdad)
+    protected $casts = [
+        'PARTICIPANTES' => 'integer',
+        'TOTAL_HOMBRES' => 'integer',
+        'TOTAL_MUJERES' => 'integer',
+        'TOTAL_NOBINARIO' => 'integer',
+        'MES' => 'integer',
+        'AÑO' => 'integer',
+
+        'activo' => 'boolean',
+    ];
+
+    // TO-DO : tal vez debería moverlo a su propio archivo exclusivo de "Excel"
+    // Cabeceras requeridas para la validación de la planilla Excel (vienen del archivo excel original)
+    public const REQUIRED_EXCEL_HEADERS = [
+        'MODALIDAD_MODIFICADO',
+        'TIPO_MODIFICADO',
+        'SUB_TIPO_MODIFICADO',
         'COD',
         'FECHA',
-        'FECHA_SAJ',
         'MODALIDAD',
-        'TIPO_ACTIVIDAD',
-        'SUB_TIPO_ACTIVIDAD',
         'PARTICIPANTES',
         'TOTAL_HOMBRES',
         'TOTAL_MUJERES',
         'TOTAL_NOBINARIO',
         'FUNCIONARIO',
         'UNIDAD',
-        'TIPO_UNIDAD',
         'REGION',
         'MES',
         'AÑO',
         'DET_ACTIVIDAD',
-
-        // Columnas de control interno y apoyo de formulario
-        'estado',
-        'carga_id',
-        'usuario_id_asignado',
-        'unidad_id_asignada',
-        'ubicacion',
-        'observacion',
-        'activo'
     ];
+
+    public static function getPersistedExcelColumns(): array
+    {
+        return array_values(
+            array_diff(
+                self::REQUIRED_EXCEL_HEADERS,
+                [
+                    'MODALIDAD_MODIFICADO',
+                    'TIPO_MODIFICADO',
+                    'SUB_TIPO_MODIFICADO',
+                ]
+            )
+        );
+    }
+
+    public static function fromExcelRow(
+        array $row,
+        int $cargaId,
+        ?int $unidadIdAsignada
+    ): array {
+
+        $data = [];
+
+        foreach (self::getPersistedExcelColumns() as $column) {
+            $data[$column] = $row[$column] ?? null;
+        }
+
+        $data['estado'] = 'CARGADA';
+        $data['carga_id'] = $cargaId;
+        $data['unidad_id_asignada'] = $unidadIdAsignada;
+        $data['activo'] = true;
+
+        return $data;
+    }
+
+    public static function createFromExcelRow(
+        array $row,
+        int $cargaId,
+        ?int $unidadIdAsignada
+    ): self {
+
+        return self::create(
+            self::fromExcelRow(
+                $row,
+                $cargaId,
+                $unidadIdAsignada
+            )
+        );
+    }
+
+    public function __construct(array $attributes = [])
+    {
+        parent::__construct($attributes);
+
+        $this->fillable = [
+            ...self::getPersistedExcelColumns(),
+
+            'estado',
+            'carga_id',
+            'usuario_id_asignado',
+            'unidad_id_asignada',
+            'ubicacion',
+            'observacion',
+            'activo',
+        ];
+    }
+
 
     /**
      * Relación con el funcionario interno asignado para adjuntar el verificador.

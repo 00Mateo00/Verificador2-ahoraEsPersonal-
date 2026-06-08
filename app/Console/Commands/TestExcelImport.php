@@ -41,9 +41,38 @@ class TestExcelImport extends Command
             $this->info("¡Éxito! Total de registros encontrados: {$total}");
 
             // Tomar una muestra de las primeras 5 filas para renderizar una tabla de control
-            $sample = array_slice($rows, 0, 5);
+            $sample = [];
+            $unidadesMap = \App\Models\Unidad::pluck(
+                'unidad_id',
+                'unidad_nombre'
+            )->toArray();
 
-            $this->table($headers, $sample);
+            foreach (array_slice($rows, 0, 5) as $row) {
+
+                $unidadNombre = trim($row['UNIDAD'] ?? '');
+
+                $unidadIdAsignada =
+                    $unidadesMap[$unidadNombre] ?? null;
+
+                $sample[] = [
+                    'COD' => $row['COD'] ?? '',
+                    'UNIDAD_EXCEL' => $unidadNombre,
+                    'UNIDAD_ID' => $unidadIdAsignada,
+                    'FUNCIONARIO' => $row['FUNCIONARIO'] ?? '',
+                    'PARTICIPANTES' => $row['PARTICIPANTES'] ?? '',
+                ];
+            }
+
+            $this->table(
+                [
+                    'COD',
+                    'UNIDAD_EXCEL',
+                    'UNIDAD_ID',
+                    'FUNCIONARIO',
+                    'PARTICIPANTES'
+                ],
+                $sample
+            );
 
             $noMatchCount = collect($rows)->whereNull('unidad_id_asignada')->count();
             if ($noMatchCount > 0) {
