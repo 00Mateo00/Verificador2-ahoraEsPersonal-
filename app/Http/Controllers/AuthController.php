@@ -41,7 +41,6 @@ class AuthController extends Controller
         }
 
         $user = Auth::user();
-
         if ($user->rol === 'admin') {
             info("(from login) login successful for admin " . $user->email);
             return redirect()->route('admin.actividades');
