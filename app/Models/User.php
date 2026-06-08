@@ -21,7 +21,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
     'email',
     'password',
     'rol',
-    'estado'
+    'estado',
+    'unidad_id'
 ])]
 #[Hidden(['password', 'two_factor_secret', 'two_factor_recovery_codes', 'remember_token'])]
 class User extends Authenticatable implements PasskeyUser
@@ -73,5 +74,13 @@ class User extends Authenticatable implements PasskeyUser
     public function cargasExcel(): HasMany
     {
         return $this->hasMany(CargaExcel::class, 'user_id', 'id');
+    }
+
+    /* 
+    * Relación con la unidad a la que pertenece el usuario (si aplica).
+     */
+    public function unidad()
+    {
+        return $this->belongsTo(Unidad::class, 'unidad_id', 'unidad_id');
     }
 }

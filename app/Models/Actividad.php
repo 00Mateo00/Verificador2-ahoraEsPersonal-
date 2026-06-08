@@ -30,7 +30,7 @@ class Actividad extends Model
         'TIPO_MODIFICADO',
         'SUB_TIPO_MODIFICADO',
         'COD',
-        'FECHA',
+        'FECHA', // puede no ir
         'MODALIDAD',
         'PARTICIPANTES',
         'TOTAL_HOMBRES',
@@ -43,6 +43,17 @@ class Actividad extends Model
         'AÑO',
         'DET_ACTIVIDAD',
     ];
+
+    // FACHA_SAJ debe ir
+    //participantes puede no ir, pero si va, debe ser un número entero (lo mismo para total hombres, mujeres y no binario)
+    // funcionario puede no ir
+    // tipo_unidad hay que quitarlo
+    // detActividad podria no venir
+    // observacion no viene
+    // añadir filtro por mes operativo
+    //To-do: si estamos en enero 
+    // ya existen archivos de enero 2026 (A.E anterior) estas seguro que quieres subirlo? (si sube algo de enero 2026 y estamos realmente a 2027, pero solo en enero )
+    // si estamos en enero 2027 y en el excel aparece un M.E de enero 2026, estas seguro que quieres subirlo? (si sube algo de enero 2026 y estamos realmente a 2027, pero solo en enero )
 
     public static function getPersistedExcelColumns(): array
     {
