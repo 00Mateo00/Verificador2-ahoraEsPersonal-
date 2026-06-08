@@ -46,8 +46,10 @@
                     Panel Central
                     @elseif(Auth::user()->rol === 'cargador')
                     Módulo Importación
+                    @elseif(Auth::user()->rol === 'unidad')
+                    Menú Unidad
                     @else
-                    Menú Funcionario
+                    Menú Consultas
                     @endif
                 </div>
                 <ul>
@@ -56,14 +58,6 @@
                     <li>
                         <a href="{{ route('actividades.importar') }}" class="{{ request()->routeIs('actividades.importar') ? 'active' : '' }}">
                             Importar Planilla
-                        </a>
-                    </li>
-                    @endif
-                    
-                    @if(Auth::user()->rol === 'admin')
-                    <li>
-                        <a href="{{ route('actividades.create') }}" class="{{ request()->routeIs('actividades.create') ? 'active' : '' }}">
-                            Registrar Actividades
                         </a>
                     </li>
                     @endif
