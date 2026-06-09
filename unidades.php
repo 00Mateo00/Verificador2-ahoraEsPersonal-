@@ -945,1021 +945,1224 @@ return [
 ?>
 
 <!-- centros finales 100%REalNoFake 1 link Megaupload (yo no lo descargo porque ya lo tengo)
- const centros = [
+const centros = [
   [
     1,
     "DIRECCION GENERAL",
-    "oirs@cajbiobio.cl"
+    "oirs@cajbiobio.cl",
+    null
   ],
   [
     2,
     "CAJ ANCUD",
-    "cancud@cajbiobio.cl"
+    "cancud@cajbiobio.cl",
+    null
   ],
   [
     3,
     "CAJ ANGOL",
-    "cangol@cajbiobio.cl"
+    "cangol@cajbiobio.cl",
+    9
   ],
   [
     4,
     "ODL ANGOL",
-    "odlangol@cajbiobio.cl"
+    "odlangol@cajbiobio.cl",
+    9
   ],
   [
     5,
     "CAJ ARAUCO",
-    "carauco@cajbiobio.cl"
+    "carauco@cajbiobio.cl",
+    8
   ],
   [
     6,
     "CAJ PUERTO AYSEN",
-    "caysen@cajbiobio.cl"
+    "caysen@cajbiobio.cl",
+    11
   ],
   [
     7,
     "ODL AYSÉN",
-    "odlaysen@cajbiobio.cl"
+    "odlaysen@cajbiobio.cl",
+    11
   ],
   [
     8,
     "CAJ BARRIO NORTE",
-    "cbarrionorte@cajbiobio.cl"
+    "cbarrionorte@cajbiobio.cl",
+    8
   ],
   [
     9,
     "CAJ BULNES",
-    "cbulnes@cajbiobio.cl"
+    "cbulnes@cajbiobio.cl",
+    16
   ],
   [
     10,
     "CAJ CABRERO",
-    "ccabrero@cajbiobio.cl"
+    "ccabrero@cajbiobio.cl",
+    8
   ],
   [
     11,
     "CAJ CALBUCO",
-    "ccalbuco@cajbiobio.cl"
+    "ccalbuco@cajbiobio.cl",
+    10
   ],
   [
     12,
     "CAJ CAÑETE",
-    "ccanete@cajbiobio.cl"
+    "ccanete@cajbiobio.cl",
+    8
   ],
   [
     13,
     "CAJ CARAHUE",
-    "ccarahue@cajbiobio.cl"
+    "ccarahue@cajbiobio.cl",
+    9
   ],
   [
     14,
     "CAJ CASTRO",
-    "ccastro@cajbiobio.cl"
+    "ccastro@cajbiobio.cl",
+    10
   ],
   [
     15,
     "ODL CASTRO",
-    "odlcastro@cajbiobio.cl"
+    "odlcastro@cajbiobio.cl",
+    10
   ],
   [
     16,
     "CAJ CHAITEN",
-    "cchaiten@cajbiobio.cl"
+    "cchaiten@cajbiobio.cl",
+    10
   ],
   [
     17,
     "CAJ CHIGUAYANTE",
-    "cchiguayante@cajbiobio.cl"
+    "cchiguayante@cajbiobio.cl",
+    8
   ],
   [
     18,
     "CAJ CHILE CHICO",
-    "cchilechico@cajbiobio.cl"
+    "cchilechico@cajbiobio.cl",
+    11
   ],
   [
     19,
     "CAJ CHILLAN FAMILIA",
-    "cchillan@cajbiobio.cl"
+    "cchillan@cajbiobio.cl",
+    16
   ],
   [
     20,
     "CAJ CHILLAN CIVIL",
-    "cchillan@cajbiobio.cl"
+    "cchillan@cajbiobio.cl",
+    16
   ],
   [
     21,
     "OFICINA  MEDIACION CHILLAN",
-    "mediacionchillan@cajbiobio.cl"
+    "mediacionchillan@cajbiobio.cl",
+    16
   ],
   [
     22,
     "OFICINA SEGUNDA INSTANCIA CHILLAN",
-    "segundainstanciachillan@cajbiobio.cl"
+    "segundainstanciachillan@cajbiobio.cl",
+    null
   ],
   [
     23,
     "ODL CHILLAN",
-    "odlchillan@cajbiobio.cl"
+    "odlchillan@cajbiobio.cl",
+    16
   ],
   [
     24,
     "CAJ CHILLAN VIEJO",
-    "cchillanviejo@cajbiobio.cl"
+    "cchillanviejo@cajbiobio.cl",
+    16
   ],
   [
     25,
     "CAJ CHOLCHOL",
-    "ccholchol@cajbiobio.cl"
+    "ccholchol@cajbiobio.cl",
+    9
   ],
   [
     26,
     "CAJ COBQUECURA",
-    "ccobquecura@cajbiobio.cl"
+    "ccobquecura@cajbiobio.cl",
+    16
   ],
   [
     27,
     "CAJ COCHRANE",
-    "ccochrane@cajbiobio.cl"
+    "ccochrane@cajbiobio.cl",
+    11
   ],
   [
     28,
     "CAJ COELEMU",
-    "ccoelemu@cajbiobio.cl"
+    "ccoelemu@cajbiobio.cl",
+    16
   ],
   [
     29,
     "CAJ COIHUECO",
-    "ccoihueco@cajbiobio.cl"
+    "ccoihueco@cajbiobio.cl",
+    16
   ],
   [
     30,
     "CAJ COLLIPULLI",
-    "ccollipulli@cajbiobio.cl"
+    "ccollipulli@cajbiobio.cl",
+    9
   ],
   [
     31,
     "CAJ CONCEPCION CIVIL",
-    "cconcepcion@cajbiobio.cl"
+    "cconcepcion@cajbiobio.cl",
+    8
   ],
   [
     32,
     "CAJ CONCEPCION FAMILIA",
-    "familiaconcepcion@cajbiobio.cl"
+    "familiaconcepcion@cajbiobio.cl",
+    8
   ],
   [
     33,
     "CAJ CONCEPCION PENAL INFRA",
-    "penalinfraccional@cajbiobio.cl"
+    "penalinfraccional@cajbiobio.cl",
+    8
   ],
   [
     34,
     "CENTRO MEDIACION CONCEPCION",
-    "mediacion@cajbiobio.cl"
+    "mediacion@cajbiobio.cl",
+    8
   ],
   [
     35,
     "OFICINA SEGUNDA INSTANCIA CONCEPCION",
-    "segundainstanciaconcepcion@cajbiobio.cl"
+    "segundainstanciaconcepcion@cajbiobio.cl",
+    null
   ],
   [
     36,
     "ODL CONCEPCIÓN",
-    "odlconcepcion@cajbiobio.cl"
+    "odlconcepcion@cajbiobio.cl",
+    8
   ],
   [
     37,
     "CAJ CORONEL",
-    "ccoronel@cajbiobio.cl"
+    "ccoronel@cajbiobio.cl",
+    8
   ],
   [
     38,
     "CAJ COYHAIQUE",
-    "ccoyhaique@cajbiobio.cl"
+    "ccoyhaique@cajbiobio.cl",
+    11
   ],
   [
     39,
     "ODL COYHAIQUE",
-    "odlcoyhaique@cajbiobio.cl"
+    "odlcoyhaique@cajbiobio.cl",
+    11
   ],
   [
     40,
     "CAJ CUNCO",
-    "ccunco@cajbiobio.cl"
+    "ccunco@cajbiobio.cl",
+    9
   ],
   [
     41,
     "CAJ CURACAUTIN",
-    "ccuracautin@cajbiobio.cl"
+    "ccuracautin@cajbiobio.cl",
+    9
   ],
   [
     42,
     "CAJ CURANILAHUE",
-    "ccuranilahue@cajbiobio.cl"
+    "ccuranilahue@cajbiobio.cl",
+    8
   ],
   [
     43,
     "CAJ CURARREHUE",
-    "ccurarrehue@cajbiobio.cl"
+    "ccurarrehue@cajbiobio.cl",
+    9
   ],
   [
     44,
     "CAJ EL CARMEN",
-    "celcarmen@cajbiobio.cl"
+    "celcarmen@cajbiobio.cl",
+    16
   ],
   [
     45,
     "CAJ ERCILLA",
-    "cercilla@cajbiobio.cl"
+    "cercilla@cajbiobio.cl",
+    9
   ],
   [
     46,
     "CAJ FLORIDA",
-    "cflorida@cajbiobio.cl"
+    "cflorida@cajbiobio.cl",
+    8
   ],
   [
     47,
     "CAJ FREIRE",
-    "cfreire@cajbiobio.cl"
+    "cfreire@cajbiobio.cl",
+    9
   ],
   [
     48,
     "CAJ FRESIA",
-    "cfresia@cajbiobio.cl"
+    "cfresia@cajbiobio.cl",
+    10
   ],
   [
     49,
     "CAJ FRUTILLAR",
-    "cfrutillar@cajbiobio.cl"
+    "cfrutillar@cajbiobio.cl",
+    10
   ],
   [
     50,
     "CAJ FUTALEUFU",
-    "cfutaleufu@cajbiobio.cl"
+    "cfutaleufu@cajbiobio.cl",
+    10
   ],
   [
     51,
     "CAJ FUTRONO",
-    "cfutrono@cajbiobio.cl"
+    "cfutrono@cajbiobio.cl",
+    14
   ],
   [
     52,
     "CAJ GALVARINO",
-    "cgalvarino@cajbiobio.cl"
+    "cgalvarino@cajbiobio.cl",
+    9
   ],
   [
     53,
     "CAJ GORBEA",
-    "cgorbea@cajbiobio.cl"
+    "cgorbea@cajbiobio.cl",
+    9
   ],
   [
     54,
     "CAJ HUALPEN",
-    "chualpen@cajbiobio.cl"
+    "chualpen@cajbiobio.cl",
+    8
   ],
   [
     55,
     "CAJ HUALQUI",
-    "chualqui@cajbiobio.cl"
+    "chualqui@cajbiobio.cl",
+    8
   ],
   [
     56,
     "CAJ LAJA",
-    "claja@cajbiobio.cl"
+    "claja@cajbiobio.cl",
+    8
   ],
   [
     57,
     "CAJ LAUTARO",
-    "clautaro@cajbiobio.cl"
+    "clautaro@cajbiobio.cl",
+    9
   ],
   [
     58,
     "CAJ LEBU",
-    "clebu@cajbiobio.cl"
+    "clebu@cajbiobio.cl",
+    8
   ],
   [
     59,
     "CAJ LONCOCHE",
-    "cloncoche@cajbiobio.cl"
+    "cloncoche@cajbiobio.cl",
+    9
   ],
   [
     60,
     "CAJ LONQUIMAY",
-    "clonquimay@cajbiobio.cl"
+    "clonquimay@cajbiobio.cl",
+    9
   ],
   [
     61,
     "CAJ LOS ALAMOS",
-    "closalamos@cajbiobio.cl"
+    "closalamos@cajbiobio.cl",
+    8
   ],
   [
     62,
     "CAJ CIVIL LOS ANGELES",
-    "closangeles@cajbiobio.cl"
+    "closangeles@cajbiobio.cl",
+    8
   ],
   [
     63,
     "CAJ FAM LOS ANGELES",
-    "cfamilialosangeles@cajbiobio.cl"
+    "cfamilialosangeles@cajbiobio.cl",
+    8
   ],
   [
     64,
     "ODL LOS ANGELES",
-    "odllosangeles@cajbiobio.cl"
+    "odllosangeles@cajbiobio.cl",
+    8
   ],
   [
     65,
     "CAJ LOS LAGOS",
-    "closlagos@cajbiobio.cl"
+    "closlagos@cajbiobio.cl",
+    14
   ],
   [
     66,
     "CAJ LOS MUERMOS",
-    "closmuermos@cajbiobio.cl"
+    "closmuermos@cajbiobio.cl",
+    10
   ],
   [
     67,
     "CAJ LOS SAUCES",
-    "clossauces@cajbiobio.cl"
+    "clossauces@cajbiobio.cl",
+    9
   ],
   [
     68,
     "CAJ LOTA",
-    "clota@cajbiobio.cl"
+    "clota@cajbiobio.cl",
+    8
   ],
   [
     69,
     "CAJ LUMACO",
-    "clumaco@cajbiobio.cl"
+    "clumaco@cajbiobio.cl",
+    9
   ],
   [
     70,
     "CAJ MÁFIL",
-    "cmafil@cajbiobio.cl"
+    "cmafil@cajbiobio.cl",
+    14
   ],
   [
     71,
     "CAJ MAULLIN",
-    "cmaullin@cajbiobio.cl"
+    "cmaullin@cajbiobio.cl",
+    10
   ],
   [
     72,
     "UNIDAD MÓVIL CAUTÍN",
-    "movilcautin@cajbiobio.cl"
+    "movilcautin@cajbiobio.cl",
+    9
   ],
   [
     73,
     "UNIDAD MÓVIL CONCEPCION",
-    "movilconcepcion@cajbiobio.cl"
+    "movilconcepcion@cajbiobio.cl",
+    8
   ],
   [
     74,
     "UNIDAD MÓVIL CONTULMO TIRÚA",
-    "movilcontulmotirua@cajbiobio.cl"
+    "movilcontulmotirua@cajbiobio.cl",
+    8
   ],
   [
     75,
     "UNIDAD MÓVIL COSTA",
-    "movilcosta@cajbiobio.cl"
+    "movilcosta@cajbiobio.cl",
+    9
   ],
   [
     76,
     "UNIDAD MÓVIL MALLECO",
-    "movilmalleco@cajbiobio.cl"
+    "movilmalleco@cajbiobio.cl",
+    9
   ],
   [
     77,
     "UNIDAD MÓVIL OSORNO",
-    "movosorno@cajbiobio.cl"
+    "movosorno@cajbiobio.cl",
+    10
   ],
   [
     78,
     "CAJ MULCHEN",
-    "cmulchen@cajbiobio.cl"
+    "cmulchen@cajbiobio.cl",
+    8
   ],
   [
     79,
     "CAJ NACIMIENTO",
-    "cnacimiento@cajbiobio.cl"
+    "cnacimiento@cajbiobio.cl",
+    8
   ],
   [
     80,
     "CAJ NEGRETE",
-    "cnegrete@cajbiobio.cl"
+    "cnegrete@cajbiobio.cl",
+    8
   ],
   [
     81,
     "CAJ NUEVA IMPERIAL",
-    "cnvaimperial@cajbiobio.cl"
+    "cnvaimperial@cajbiobio.cl",
+    9
   ],
   [
     82,
     "CAJ OSORNO",
-    "cosorno@cajbiobio.cl"
+    "cosorno@cajbiobio.cl",
+    10
   ],
   [
     83,
     "ODL OSORNO",
-    "odlosorno@cajbiobio.cl"
+    "odlosorno@cajbiobio.cl",
+    10
   ],
   [
     84,
     "CAJ PADRE LAS CASAS",
-    "cpadrelascasas@cajbiobio.cl"
+    "cpadrelascasas@cajbiobio.cl",
+    9
   ],
   [
     85,
     "CAJ PAILLACO",
-    "cpaillaco@cajbiobio.cl"
+    "cpaillaco@cajbiobio.cl",
+    14
   ],
   [
     86,
     "CAJ PANGUIPULLI",
-    "cpanguipulli@cajbiobio.cl"
+    "cpanguipulli@cajbiobio.cl",
+    14
   ],
   [
     87,
     "CAJ PEMUCO",
-    "cpemuco@cajbiobio.cl"
+    "cpemuco@cajbiobio.cl",
+    16
   ],
   [
     88,
     "CAJ PENCO",
-    "cpenco@cajbiobio.cl"
+    "cpenco@cajbiobio.cl",
+    8
   ],
   [
     89,
     "CAJ PERQUENCO",
-    "cperquenco@cajbiobio.cl"
+    "cperquenco@cajbiobio.cl",
+    9
   ],
   [
     90,
     "CAJ PINTO",
-    "cpinto@cajbiobio.cl"
+    "cpinto@cajbiobio.cl",
+    16
   ],
   [
     91,
     "CAJ PITRUFQUEN",
-    "cpitrufquen@cajbiobio.cl"
+    "cpitrufquen@cajbiobio.cl",
+    9
   ],
   [
     92,
     "CAJ PORTEZUELO",
-    "cportezuelo@cajbiobio.cl"
+    "cportezuelo@cajbiobio.cl",
+    16
   ],
   [
     93,
     "CAJ PUCÓN",
-    "cpucon@cajbiobio.cl"
+    "cpucon@cajbiobio.cl",
+    9
   ],
   [
     94,
     "CAJ PUERTO CISNES",
-    "cpuertocisnes@cajbiobio.cl"
+    "cpuertocisnes@cajbiobio.cl",
+    11
   ],
   [
     95,
     "CENTRO MEDIACION PUERTO MONTT",
-    "mediacionpmontt@cajbiobio.cl"
+    "mediacionpmontt@cajbiobio.cl",
+    10
   ],
   [
     96,
     "CAJ CIVIL PUERTO MONTT",
-    "cptomontt@cajbiobio.cl"
+    "cptomontt@cajbiobio.cl",
+    10
   ],
   [
     97,
     "CAJ FAMILIA PUERTO MONTT",
-    "familiapuertomontt@cajbiobio.cl"
+    "familiapuertomontt@cajbiobio.cl",
+    10
   ],
   [
     98,
     "OFICINA SEGUNDA INSTANCIA PUERTO MONTT",
-    "segundainstanciapmontt@cajbiobio.cl"
+    "segundainstanciapmontt@cajbiobio.cl",
+    null
   ],
   [
     99,
     "ODL PUERTO MONTT",
-    "odlpmontt@cajbiobio.cl"
+    "odlpmontt@cajbiobio.cl",
+    10
   ],
   [
     100,
     "CAJ PUERTO SAAVEDRA",
-    "cptosaavedra@cajbiobio.cl"
+    "cptosaavedra@cajbiobio.cl",
+    9
   ],
   [
     101,
     "CAJ PUERTO VARAS",
-    "cpuertovaras@cajbiobio.cl"
+    "cpuertovaras@cajbiobio.cl",
+    10
   ],
   [
     102,
     "CAJ PUREN",
-    "cpuren@cajbiobio.cl"
+    "cpuren@cajbiobio.cl",
+    9
   ],
   [
     103,
     "CAJ PURRANQUE",
-    "cpurranque@cajbiobio.cl"
+    "cpurranque@cajbiobio.cl",
+    10
   ],
   [
     104,
     "CAJ QUELLON",
-    "cquellon@cajbiobio.cl"
+    "cquellon@cajbiobio.cl",
+    10
   ],
   [
     105,
     "CAJ QUILLECO",
-    "cquilleco@cajbiobio.cl"
+    "cquilleco@cajbiobio.cl",
+    8
   ],
   [
     106,
     "CAJ QUILLON",
-    "cquillon@cajbiobio.cl"
+    "cquillon@cajbiobio.cl",
+    16
   ],
   [
     107,
     "CAJ QUINCHAO",
-    "cachao@cajbiobio.cl"
+    "cachao@cajbiobio.cl",
+    10
   ],
   [
     108,
     "CAJ QUIRIHUE",
-    "cquirihue@cajbiobio.cl"
+    "cquirihue@cajbiobio.cl",
+    16
   ],
   [
     109,
     "CAJ RANQUIL",
-    "cranquil@cajbiobio.cl"
+    "cranquil@cajbiobio.cl",
+    16
   ],
   [
     110,
     "CAJ RENAICO",
-    "crenaico@cajbiobio.cl"
+    "crenaico@cajbiobio.cl",
+    9
   ],
   [
     111,
     "CAJ RÍO BUENO",
-    "criobueno@cajbiobio.cl"
+    "criobueno@cajbiobio.cl",
+    14
   ],
   [
     112,
     "CAJ RIO NEGRO",
-    "crionegro@cajbiobio.cl"
+    "crionegro@cajbiobio.cl",
+    10
   ],
   [
     113,
     "CAJ SAN CARLOS",
-    "csancarlos@cajbiobio.cl"
+    "csancarlos@cajbiobio.cl",
+    16
   ],
   [
     114,
     "CAJ SAN GREGORIO/ÑIQUEN",
-    "csangregorio@cajbiobio.cl"
+    "csangregorio@cajbiobio.cl",
+    16
   ],
   [
     115,
     "CAJ SAN IGNACIO",
-    "csanignacio@cajbiobio.cl"
+    "csanignacio@cajbiobio.cl",
+    16
   ],
   [
     116,
     "CAJ SAN JOSÉ DE LA MARIQUINA",
-    "csjmariquina@cajbiobio.cl"
+    "csjmariquina@cajbiobio.cl",
+    14
   ],
   [
     117,
     "CAJ SAN NICOLAS",
-    "csannicolas@cajbiobio.cl"
+    "csannicolas@cajbiobio.cl",
+    16
   ],
   [
     118,
     "CAJ SAN PEDRO DE LA PAZ",
-    "csanpedrodelapaz@cajbiobio.cl"
+    "csanpedrodelapaz@cajbiobio.cl",
+    8
   ],
   [
     119,
     "CAJ SANTA BARBARA",
-    "csantabarbara@cajbiobio.cl"
+    "csantabarbara@cajbiobio.cl",
+    8
   ],
   [
     120,
     "CAJ SANTA JUANA",
-    "csantajuana@cajbiobio.cl"
+    "csantajuana@cajbiobio.cl",
+    8
   ],
   [
     121,
     "CAJ TALCAHUANO",
-    "ctalcahuano@cajbiobio.cl"
+    "ctalcahuano@cajbiobio.cl",
+    8
   ],
   [
     122,
     "CAJ TALCAHUANO FAMILIA",
-    "familiatalcahuano@cajbiobio.cl"
+    "familiatalcahuano@cajbiobio.cl",
+    8
   ],
   [
     123,
     "CAJ TEMUCO CIVIL",
-    "ctemuco@cajbiobio.cl"
+    "ctemuco@cajbiobio.cl",
+    9
   ],
   [
     124,
     "CAJ TEMUCO FAMILIA",
-    "familiatemuco@cajbiobio.cl"
+    "familiatemuco@cajbiobio.cl",
+    9
   ],
   [
     125,
     "CENTRO MEDIACION TEMUCO",
-    "mediaciontemuco@cajbiobio.cl"
+    "mediaciontemuco@cajbiobio.cl",
+    9
   ],
   [
     126,
     "OFICINA SEGUNDA INSTANCIA TEMUCO",
-    "segundainstanciatemuco@cajbiobio.cl"
+    "segundainstanciatemuco@cajbiobio.cl",
+    null
   ],
   [
     127,
     "ODL TEMUCO",
-    "odltemuco@cajbiobio.cl"
+    "odltemuco@cajbiobio.cl",
+    9
   ],
   [
     128,
     "CAJ TEODORO SCHMIDT",
-    "ctschmidt@cajbiobio.cl"
+    "ctschmidt@cajbiobio.cl",
+    9
   ],
   [
     129,
     "CAJ TOLTÉN",
-    "ctolten@cajbiobio.cl"
+    "ctolten@cajbiobio.cl",
+    9
   ],
   [
     130,
     "CAJ TOME",
-    "ctome@cajbiobio.cl"
+    "ctome@cajbiobio.cl",
+    8
   ],
   [
     131,
     "CAJ TRAIGUEN",
-    "ctraiguen@cajbiobio.cl"
+    "ctraiguen@cajbiobio.cl",
+    9
   ],
   [
     132,
     "CAJ TREHUACO",
-    "ctrehuaco@cajbiobio.cl"
+    "ctrehuaco@cajbiobio.cl",
+    16
   ],
   [
     133,
     "CAJ VALDIVIA",
-    "cvaldivia@cajbiobio.cl"
+    "cvaldivia@cajbiobio.cl",
+    14
   ],
   [
     134,
     "OFICINA SEGUNDA INSTANCIA VALDIVIA",
-    "segundainstanciavaldivia@cajbiobio.cl"
+    "segundainstanciavaldivia@cajbiobio.cl",
+    null
   ],
   [
     135,
     "CAJ VICTORIA",
-    "cvictoria@cajbiobio.cl"
+    "cvictoria@cajbiobio.cl",
+    9
   ],
   [
     136,
     "CAJ VILCUN",
-    "cvilcun@cajbiobio.cl"
+    "cvilcun@cajbiobio.cl",
+    9
   ],
   [
     137,
     "CAJ VILLARRICA",
-    "cvillarrica@cajbiobio.cl"
+    "cvillarrica@cajbiobio.cl",
+    9
   ],
   [
     138,
     "CAJ YUMBEL",
-    "cyumbel@cajbiobio.cl"
+    "cyumbel@cajbiobio.cl",
+    8
   ],
   [
     139,
     "CAJ YUNGAY",
-    "cyungay@cajbiobio.cl"
+    "cyungay@cajbiobio.cl",
+    16
   ],
   [
     140,
     "CAJ ANTUCO",
-    "cantuco@cajbiobio.cl"
+    "cantuco@cajbiobio.cl",
+    8
   ],
   [
     141,
     "CAJ HUALAIHUE",
-    "cptomontt@cajbiobio.cl"
+    "cptomontt@cajbiobio.cl",
+    10
   ],
   [
     142,
     "CAJ HUEPIL",
-    "ctucapel@cajbiobio.cl"
+    "ctucapel@cajbiobio.cl",
+    16
   ],
   [
     143,
     "CAJ LA UNIÓN",
-    "claunion@cajbiobio.cl"
+    "claunion@cajbiobio.cl",
+    14
   ],
   [
     144,
     "CAJ LAGO RANCO",
-    "clagoranco@cajbiobio.cl"
+    "clagoranco@cajbiobio.cl",
+    14
   ],
   [
     145,
     "CAJ LANCO",
-    "clanco@cajbiobio.cl"
+    "clanco@cajbiobio.cl",
+    14
   ],
   [
     146,
     "CAJ MELIPEUCO",
-    "cmelipeuco@cajbiobio.cl"
+    "cmelipeuco@cajbiobio.cl",
+    9
   ],
   [
     147,
     "CAJ NINHUE",
-    "cninhue@cajbiobio.cl"
+    "cninhue@cajbiobio.cl",
+    16
   ],
   [
     148,
     "CAJ PALENA",
-    "cpalena@cajbiobio.cl"
+    "cpalena@cajbiobio.cl",
+    10
   ],
   [
     149,
     "CAJ QUILACO",
-    "cquilaco@cajbiobio.cl"
+    "cquilaco@cajbiobio.cl",
+    8
   ],
   [
     150,
     "ODL VALDIVIA",
-    "odlvaldivia@cajbiobio.cl"
+    "odlvaldivia@cajbiobio.cl",
+    14
   ],
   [
     151,
     "PAM ARAUCANÍA",
-    "pamaraucania@cajbiobio.cl"
+    "pamaraucania@cajbiobio.cl",
+    9
   ],
   [
     152,
     "PAM AYSÉN",
-    "pamaysen@cajbiobio.cl"
+    "pamaysen@cajbiobio.cl",
+    11
   ],
   [
     153,
     "PAM CHILLÁN",
-    "pamchillan@cajbiobio.cl"
+    "pamchillan@cajbiobio.cl",
+    16
   ],
   [
     154,
     "PAM CONCEPCIÓN",
-    "pamconcepcion@cajbiobio.cl"
+    "pamconcepcion@cajbiobio.cl",
+    8
   ],
   [
     155,
     "PAM LOS LAGOS",
-    "pamloslagos@cajbiobio.cl"
+    "pamloslagos@cajbiobio.cl",
+    10
   ],
   [
     156,
     "PAM LOS RÍOS",
-    "pamlosrios@cajbiobio.cl"
+    "pamlosrios@cajbiobio.cl",
+    14
   ],
   [
     157,
     "UNIDAD MÓVIL CASTRO",
-    "movilcastro@cajbiobio.cl"
+    "movilcastro@cajbiobio.cl",
+    10
   ],
   [
     158,
     "CAVI CHILLÁN",
-    "caivchillan@cajbiobio.cl"
+    "caivchillan@cajbiobio.cl",
+    16
   ],
   [
     162,
     "CAVI CONCEPCION",
-    "caviprovinciaconcepcion@cajbiobio.cl"
+    "caviprovinciaconcepcion@cajbiobio.cl",
+    8
   ],
   [
     163,
     "CAVI COYHAIQUE",
-    "caivcoyhaique@cajbiobio.cl"
+    "caivcoyhaique@cajbiobio.cl",
+    11
   ],
   [
     164,
     "CAVI PUERTO MONTT",
-    "caivptomontt@cajbiobio.cl"
+    "caivptomontt@cajbiobio.cl",
+    10
   ],
   [
     165,
     "CAVI TEMUCO",
-    "caivtemuco@cajbiobio.cl"
+    "caivtemuco@cajbiobio.cl",
+    9
   ],
   [
     166,
     "CAVI VALDIVIA",
-    "cavivaldivia@cajbiobio.cl"
+    "cavivaldivia@cajbiobio.cl",
+    14
   ],
   [
     167,
     "CONVENIO SENADIS ARAUCANIA",
-    "no tiene"
+    "no tiene",
+    9
   ],
   [
     168,
     "CONVENIO SENADIS AYSEN",
-    "no tiene"
+    "no tiene",
+    11
   ],
   [
     169,
     "CONVENIO SENADIS BIOBIO",
-    "no tiene"
+    "no tiene",
+    8
   ],
   [
     170,
     "CONVENIO SENADIS LOS LAGOS",
-    "no tiene"
+    "no tiene",
+    10
   ],
   [
     171,
     "CONVENIO SENADIS LOS RIOS",
-    "karina.ortega@cajbiobio.cl"
+    "karina.ortega@cajbiobio.cl",
+    14
   ],
   [
     172,
     "CONVENIO SENADIS ÑUBLE",
-    "no tiene"
+    "no tiene",
+    16
   ],
   [
     173,
     "CAJ ALTO BIO BIO",
-    "caltobiobio@cajbiobio.cl"
+    "caltobiobio@cajbiobio.cl",
+    8
   ],
   [
     183,
     "DIRECCIÓN REGIONAL AYSÉN",
-    "dirundecima@cajbiobio.cl"
+    "dirundecima@cajbiobio.cl",
+    null
   ],
   [
     184,
     "PMA CONCEPCIÓN",
-    "miabogadobiobio@cajbiobio.cl"
+    "miabogadobiobio@cajbiobio.cl",
+    8
   ],
   [
     185,
     "PMA LOS ÁNGELES",
-    "miabogadobiobio@cajbiobio.cl"
+    "miabogadobiobio@cajbiobio.cl",
+    8
   ],
   [
     186,
     "PMA ARAUCANIA",
-    "miabogadolaaraucania@cajbiobio.cl"
+    "miabogadolaaraucania@cajbiobio.cl",
+    9
   ],
   [
     187,
     "PMA AYSEN",
-    "oficinamiabogadoay@cajbiobio.cl"
+    "oficinamiabogadoay@cajbiobio.cl",
+    11
   ],
   [
     188,
     "PMA LOS LAGOS",
-    "miabogadoloslagos@cajbiobio.cl"
+    "miabogadoloslagos@cajbiobio.cl",
+    10
   ],
   [
     189,
     "PMA LOS RÍOS",
-    "miabogadolosrios@cajbiobio.cl"
+    "miabogadolosrios@cajbiobio.cl",
+    14
   ],
   [
     190,
     "PMA CHILLAN",
-    "miabogadonuble@cajbiobio.cl"
+    "miabogadonuble@cajbiobio.cl",
+    16
   ],
   [
     192,
     "[DG] DIRECCIÓN DE GESTIÓN ESTRATÉGICA",
-    "bastian.aburto@cajbiobio.cl"
+    "bastian.aburto@cajbiobio.cl",
+    null
   ],
   [
     193,
     "[DG] DIRECCIÓN DE ACCESO A LA JUSTICIA",
-    "mauricio.vergara@cajbiobio.cl"
+    "mauricio.vergara@cajbiobio.cl",
+    null
   ],
   [
     194,
     "[DG] DIRECCIÓN DE RRHH",
-    "bastian.aburto@cajbiobio.cl"
+    "bastian.aburto@cajbiobio.cl",
+    null
   ],
   [
     195,
     "[DG] DIRECCIÓN DE ADMINISTRACIÓN Y FINANZAS",
-    "manuel.medina@cajbiobio.cl"
+    "manuel.medina@cajbiobio.cl",
+    null
   ],
   [
     199,
     "UCOE",
-    "martin.taub@cajbiobio.cl"
+    "martin.taub@cajbiobio.cl",
+    null
   ],
   [
     200,
     "SECRETARIA JURIDICA",
-    "loreto.araya@cajbiobio.cl"
+    "loreto.araya@cajbiobio.cl",
+    null
   ],
   [
     201,
     "BIENESTAR",
-    "carolina.sanhueza@cajbiobio.cl"
+    "carolina.sanhueza@cajbiobio.cl",
+    null
   ],
   [
     207,
     "NAD LOS ANGELES",
-    "nadbiobio@cajbiobio.cl"
+    "nadbiobio@cajbiobio.cl",
+    8
   ],
   [
     209,
     "NAD CURANILAHUE ",
-    "nadbiobio@cajbiobio.cl"
+    "nadbiobio@cajbiobio.cl",
+    8
   ],
   [
     210,
     "NAD CONCEPCIÓN",
-    "nadbiobio@cajbiobio.cl"
+    "nadbiobio@cajbiobio.cl",
+    8
   ],
   [
     211,
     "NAD CHILLÁN",
-    "nadnuble@cajbiobio.cl"
+    "nadnuble@cajbiobio.cl",
+    16
   ],
   [
     212,
     "NAD QUIRIHUE",
-    "nadnuble@cajbiobio.cl"
+    "nadnuble@cajbiobio.cl",
+    16
   ],
   [
     213,
     "NAD SAN CARLOS",
-    "nadnuble@cajbiobio.cl"
+    "nadnuble@cajbiobio.cl",
+    16
   ],
   [
     214,
     "NAD ANGOL",
-    "nadaraucania@cajbiobio.cl"
+    "nadaraucania@cajbiobio.cl",
+    9
   ],
   [
     215,
     "NAD TEMUCO",
-    "nadaraucania@cajbiobio.cl"
+    "nadaraucania@cajbiobio.cl",
+    9
   ],
   [
     216,
     "NAD VALDIVIA",
-    "nadlosrios@cajbiobio.cl"
+    "nadlosrios@cajbiobio.cl",
+    14
   ],
   [
     217,
     "NAD PUERTO MONTT",
-    "nadloslagos@cajbiobio.cl"
+    "nadloslagos@cajbiobio.cl",
+    10
   ],
   [
     218,
     "NAD OSORNO",
-    "nadloslagos@cajbiobio.cl"
+    "nadloslagos@cajbiobio.cl",
+    10
   ],
   [
     219,
     "NAD CASTRO",
-    "nadloslagos@cajbiobio.cl"
+    "nadloslagos@cajbiobio.cl",
+    10
   ],
   [
     220,
     "NAD PALENA",
-    "nadloslagos@cajbiobio.cl"
+    "nadloslagos@cajbiobio.cl",
+    10
   ],
   [
     221,
     "NAD COYHAIQUE",
-    "curadoresaysen@cajbiobio.cl"
+    "curadoresaysen@cajbiobio.cl",
+    11
   ],
   [
     222,
     "NAD AYSÉN",
-    "curadoresaysen@cajbiobio.cl"
+    "curadoresaysen@cajbiobio.cl",
+    11
   ],
   [
     223,
     "UCEGE",
-    "ucege@cajbiobio.cl"
+    "ucege@cajbiobio.cl",
+    null
   ],
   [
     224,
     "CAJ CORRAL",
-    "ccorral@cajbiobio.cl"
+    "ccorral@cajbiobio.cl",
+    14
   ],
   [
     225,
     "NAD VILLARRICA",
-    "nadaraucania@cajbiobio.cl"
+    "nadaraucania@cajbiobio.cl",
+    9
   ]
 ];
 -->

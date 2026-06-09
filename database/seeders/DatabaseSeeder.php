@@ -36,6 +36,8 @@ class DatabaseSeeder extends Seeder
         }
 
 
+        // TO-DO : hacer que los usuarios ed las unidades se generan automaticamente a partir de los datos en $unidades
+
 
         $usuarios = [
             ['nombre' => 'admin_caj', 'correo' => 'admin@cajbiobio.cl', 'rol' => 'admin'],
@@ -56,7 +58,12 @@ class DatabaseSeeder extends Seeder
                     'email' => $u['correo'],
                     'rol' => $u['rol']
                 ]
+
             );
+            if (isset($u['unidad_id'])) {
+                $user->unidad_id = $u['unidad_id'];
+                $user->save();
+            }
         }
     }
 }
