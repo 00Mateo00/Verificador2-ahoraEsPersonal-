@@ -11,13 +11,9 @@ class Unidad extends Model
     protected $primaryKey = 'unidad_id';
 
     protected $fillable = [
-        'comuna_id',
-        'unidad_tipo_id',
         'unidad_nombre',
-        'unidad_direccion',
         'unidad_correo',
-        'unidad_jefe',
-        'unidad_fono'
+        'region_id'
     ];
 
     /**
