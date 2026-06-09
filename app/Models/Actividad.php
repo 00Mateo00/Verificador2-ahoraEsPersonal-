@@ -6,9 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use app\Services\ExcelService;
-use Mockery\Undefined;
 
-use function Laravel\Prompts\table;
 
 class Actividad extends Model
 {
