@@ -85,7 +85,6 @@ class CreateForm extends Component
         $this->validate($allRules);
 
         $actividad = Actividad::create([
-            'usuario_id_asignado' => Auth::id(),
             'region' => $this->region,
             'tipo_unidad' => $this->tipo_unidad,
             'unidad_operativa' => $this->unidad_operativa,

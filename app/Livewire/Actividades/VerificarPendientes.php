@@ -21,11 +21,11 @@ class VerificarPendientes extends Component
     public function verificarActividad($actividadId)
     {
         $this->validate([
-            'verificadores.'.$actividadId => 'required|array|min:1',
-            'verificadores.'.$actividadId.'.*' => 'file|max:5120', // Límite de 5MB por archivo
+            'verificadores.' . $actividadId => 'required|array|min:1',
+            'verificadores.' . $actividadId . '.*' => 'file|max:5120', // Límite de 5MB por archivo
         ], [
-            'verificadores.'.$actividadId.'.required' => 'Debe adjuntar al menos un archivo verificador para comprobar la realización.',
-            'verificadores.'.$actividadId.'.*.max' => 'Los archivos no deben superar los 5MB.'
+            'verificadores.' . $actividadId . '.required' => 'Debe adjuntar al menos un archivo verificador para comprobar la realización.',
+            'verificadores.' . $actividadId . '.*.max' => 'Los archivos no deben superar los 5MB.'
         ]);
 
         // Asegurar por integridad que la actividad pertenezca a la unidad del usuario y esté CARGADA
@@ -36,7 +36,6 @@ class VerificarPendientes extends Component
         // Actualizar estado y asignar al funcionario de la unidad
         $actividad->update([
             'estado' => 'VERIFICADA',
-            'usuario_id_asignado' => Auth::id(),
         ]);
 
         // Guardar cada archivo adjunto de forma física y referencial

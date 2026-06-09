@@ -42,10 +42,10 @@ class DatabaseSeeder extends Seeder
             ['nombre' => 'cargador_caj', 'correo' => 'cargador@cajbiobio.cl', 'rol' => 'cargador'],
             ['nombre' => 'auditor_caj', 'correo' => 'auditor@cajbiobio.cl', 'rol' => 'auditor'],
             ['nombre' => 'director_caj', 'correo' => 'region@cajbiobio.cl', 'rol' => 'director'],
-            ['nombre' => 'cchiguayante', 'correo' => 'cchiguayante@cajbiobio.cl', 'rol' => 'unidad'],
-            ['nombre' => 'ccanete', 'correo' => 'ccanete@cajbiobio.cl', 'rol' => 'unidad'],
-            ['nombre' => 'ccabrero', 'correo' => 'ccabrero@cajbiobio.cl', 'rol' => 'unidad'],
-            ['nombre' => 'cbarrionorte', 'correo' => 'cbarrionorte@cajbiobio.cl', 'rol' => 'unidad'],
+            ['unidad_id' => 17, 'nombre' => 'cchiguayante', 'correo' => 'cchiguayante@cajbiobio.cl', 'rol' => 'unidad'],
+            ['unidad_id' => 12, 'nombre' => 'ccanete', 'correo' => 'ccanete@cajbiobio.cl', 'rol' => 'unidad'],
+            ['unidad_id' => 10, 'nombre' => 'ccabrero', 'correo' => 'ccabrero@cajbiobio.cl', 'rol' => 'unidad'],
+            ['unidad_id' => 8, 'nombre' => 'cbarrionorte', 'correo' => 'cbarrionorte@cajbiobio.cl', 'rol' => 'unidad'],
         ];
 
         foreach ($usuarios as $u) {

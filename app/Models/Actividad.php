@@ -130,13 +130,6 @@ class Actividad extends Model
     }
 
 
-    /**
-     * Relación con el funcionario interno asignado para adjuntar el verificador.
-     */
-    public function usuarioAsignado(): BelongsTo
-    {
-        return $this->belongsTo(User::class, 'usuario_id_asignado', 'id');
-    }
 
     /**
      * Relación con la unidad del sistema que debe gestionar esta actividad.

@@ -60,13 +60,7 @@ class User extends Authenticatable implements PasskeyUser
             ->map(fn($word) => Str::substr($word, 0, 1))
             ->implode('');
     }
-    /**
-     * Relación con las actividades asignadas para su correspondiente verificación.
-     */
-    public function actividadesAsignadas(): HasMany
-    {
-        return $this->hasMany(Actividad::class, 'usuario_id_asignado', 'id');
-    }
+
 
     /**
      * Relación con las cargas de Excel realizadas por este usuario.
