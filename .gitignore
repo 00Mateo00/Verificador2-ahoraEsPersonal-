@@ -23,4 +23,4 @@ yarn-error.log
 /.vscode
 /.zed
 /ruta/del/archivo.php
-./unidades.php
+unidades.php
