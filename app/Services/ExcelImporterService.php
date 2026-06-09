@@ -6,7 +6,7 @@ class ExcelImporterService
 {
 
     public function __construct(
-        private ExcelValidatorService $validator
+        private ExcelService $excelService
     ) {}
 
 
@@ -68,10 +68,13 @@ class ExcelImporterService
     {
         $data = $this->parseXlsx($filePath);
 
-        $this->validator->validateActividad(
+
+        $this->excelService->validateActividad(
             $data
         );
 
-        return $data;
+        $result = $this->excelService->parseActividad($data);
+
+        return $result;
     }
 }

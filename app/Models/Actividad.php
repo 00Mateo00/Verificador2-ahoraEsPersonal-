@@ -5,14 +5,20 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use app\Services\ExcelService;
+use Mockery\Undefined;
+
+use function Laravel\Prompts\table;
 
 class Actividad extends Model
 {
+
     protected $table = 'actividad';
     protected $primaryKey = 'actividad_id';
     protected $fillable = [];
 
     protected $casts = [
+        // TO-DO dejar como opcionales, ya que no siempre vienen en el excel
         'PARTICIPANTES' => 'integer',
         'TOTAL_HOMBRES' => 'integer',
         'TOTAL_MUJERES' => 'integer',
@@ -23,50 +29,46 @@ class Actividad extends Model
         'activo' => 'boolean',
     ];
 
-    // TO-DO : tal vez debería moverlo a su propio archivo exclusivo de "Excel"
-    // Cabeceras requeridas para la validación de la planilla Excel (vienen del archivo excel original)
-    public const REQUIRED_EXCEL_HEADERS = [
-        'MODALIDAD_MODIFICADO',
-        'TIPO_MODIFICADO',
-        'SUB_TIPO_MODIFICADO',
-        'COD',
-        'FECHA', // puede no ir
-        'MODALIDAD',
-        'PARTICIPANTES',
-        'TOTAL_HOMBRES',
-        'TOTAL_MUJERES',
-        'TOTAL_NOBINARIO',
-        'FUNCIONARIO',
-        'UNIDAD',
-        'REGION',
-        'MES',
-        'AÑO',
-        'DET_ACTIVIDAD',
+    /**
+     * Mapeo de columnas del Excel hacia columnas persistidas.
+     *
+     * Cuando exista una columna *_MODIFICADO, su valor tendrá prioridad
+     * sobre la columna original.
+     */
+    private const EXCEL_COLUMN_MAPPING = [
+        'MODALIDAD_MODIFICADO' => 'MODALIDAD',
+        'TIPO_MODIFICADO' => 'TIPO_ACTIVIDAD',
+        'SUB_TIPO_MODIFICADO' => 'SUB_TIPO_ACTIVIDAD',
     ];
 
-    // FACHA_SAJ debe ir
-    //participantes puede no ir, pero si va, debe ser un número entero (lo mismo para total hombres, mujeres y no binario)
-    // funcionario puede no ir
-    // tipo_unidad hay que quitarlo
-    // detActividad podria no venir
-    // observacion no viene
+    // Cabeceras requeridas minimas
+
+
+    /* TO-DO : preguntar a Felipe si con "opcional" se refiera a:
+     * 1.- No es requerido en la carga?
+     * 2.- Puede tener un valor nulo?
+    
+    */
+
+    // tipo_unidad hay que quitarlo ??
+    // detActividad podria no venir ??
     // añadir filtro por mes operativo
     //To-do: si estamos en enero 
     // ya existen archivos de enero 2026 (A.E anterior) estas seguro que quieres subirlo? (si sube algo de enero 2026 y estamos realmente a 2027, pero solo en enero )
     // si estamos en enero 2027 y en el excel aparece un M.E de enero 2026, estas seguro que quieres subirlo? (si sube algo de enero 2026 y estamos realmente a 2027, pero solo en enero )
 
-    public static function getPersistedExcelColumns(): array
+    public static function excelColumnsToPersist(): array
     {
-        return array_values(
-            array_diff(
-                self::REQUIRED_EXCEL_HEADERS,
-                [
-                    'MODALIDAD_MODIFICADO',
-                    'TIPO_MODIFICADO',
-                    'SUB_TIPO_MODIFICADO',
-                ]
-            )
-        );
+        $columns = [];
+
+        foreach (ExcelService::REQUIRED_EXCEL_HEADERS as $header) {
+
+            $columns[] =
+                self::EXCEL_COLUMN_MAPPING[$header]
+                ?? $header;
+        }
+
+        return array_values(array_unique($columns));
     }
 
     public static function fromExcelRow(
@@ -77,14 +79,22 @@ class Actividad extends Model
 
         $data = [];
 
-        foreach (self::getPersistedExcelColumns() as $column) {
-            $data[$column] = $row[$column] ?? null;
-        }
+        foreach (ExcelService::REQUIRED_EXCEL_HEADERS as $header) {
+            if (isset(self::EXCEL_COLUMN_MAPPING[$header])) {
+                $data[self::EXCEL_COLUMN_MAPPING[$header]] = $row[$header];
+            } else {
 
+                $data[$header] = $row[$header];
+            }
+        }
+        // control interno 
         $data['estado'] = 'CARGADA';
         $data['carga_id'] = $cargaId;
         $data['unidad_id_asignada'] = $unidadIdAsignada;
         $data['activo'] = true;
+
+
+
 
         return $data;
     }
@@ -94,6 +104,8 @@ class Actividad extends Model
         int $cargaId,
         ?int $unidadIdAsignada
     ): self {
+        /*    esto lo uso como test */
+        /* return self::fromExcelRow($row, $cargaId, $unidadIdAsignada); */
 
         return self::create(
             self::fromExcelRow(
@@ -109,14 +121,11 @@ class Actividad extends Model
         parent::__construct($attributes);
 
         $this->fillable = [
-            ...self::getPersistedExcelColumns(),
-
+            ...self::excelColumnsToPersist(),
             'estado',
             'carga_id',
             'usuario_id_asignado',
             'unidad_id_asignada',
-            'ubicacion',
-            'observacion',
             'activo',
         ];
     }
