@@ -237,13 +237,16 @@ class ImportActividadesForm extends Component
                 }
             });
 
-            // Despachar un único correo por cada unidad afectada al finalizar con éxito la persistencia
-            $unidades = Unidad::whereIn('unidad_id', $unidadesAfectadas)
+            // Despachar un único correo consolidado por cada dirección de correo electrónico afectada
+            $unidadesAgrupadas = Unidad::whereIn('unidad_id', $unidadesAfectadas)
                 ->whereNotNull('unidad_correo')
-                ->get();
+                ->get()
+                ->groupBy('unidad_correo');
 
-            foreach ($unidades as $unidad) {
-                Mail::to($unidad->unidad_correo)->queue(new NuevasActividadesPendientes($unidad));
+            foreach ($unidadesAgrupadas as $correoDestinatario => $grupoUnidades) {
+                // Seleccionar la primera unidad del grupo como representante para la construcción de la plantilla
+                $unidadRepresentante = $grupoUnidades->first();
+                Mail::to($correoDestinatario)->queue(new NuevasActividadesPendientes($unidadRepresentante));
             }
 
             $this->cleanupTempFile();
