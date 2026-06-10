@@ -26,7 +26,7 @@ class ExcelService
     'TOTAL_NOBINARIO',
     'DET_ACTIVIDAD',
     'FUNCIONARIO',
-    'tipo_unidad',
+    'TIPO_UNIDAD',
     'TIPO_ACT_COD',
   ];
 
@@ -70,8 +70,8 @@ class ExcelService
     $filteredRows = [];
 
     foreach ($data['rows'] as $row) {
-      // 1. Excluir filas donde tipo_unidad contenga "NAD" o "SENADIS"
-      $tipoUnidad = strtoupper($row['tipo_unidad'] ?? '');
+      // 1. Excluir filas donde TIPO_UNIDAD contenga "NAD" o "SENADIS"
+      $tipoUnidad = strtoupper($row['TIPO_UNIDAD'] ?? '');
       if (str_contains($tipoUnidad, 'NAD') || str_contains($tipoUnidad, 'SENADIS')) {
         continue;
       }

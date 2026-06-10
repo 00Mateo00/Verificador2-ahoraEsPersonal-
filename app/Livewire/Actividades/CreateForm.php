@@ -17,11 +17,9 @@ class CreateForm extends Component
 
     // Propiedades del formulario
     public string $region = '';
-    public string $tipo_unidad = '';
     public string $unidad_operativa = '';
     public string $tipo = '';
     public string $nombre_actividad = '';
-    public string $objetivo = '';
     public int $n_participantes = 1;
     public string $fecha_actividad = '';
     public string $ubicacion = '';
@@ -35,7 +33,6 @@ class CreateForm extends Component
                 'label' => 'Datos generales',
                 'rules' => [
                     'region' => 'required|string',
-                    'tipo_unidad' => 'required|string',
                     'unidad_operativa' => 'required|string|max:150',
                     'tipo' => 'required|string',
                 ],
@@ -86,7 +83,6 @@ class CreateForm extends Component
 
         $actividad = Actividad::create([
             'region' => $this->region,
-            'tipo_unidad' => $this->tipo_unidad,
             'unidad_operativa' => $this->unidad_operativa,
             'tipo' => $this->tipo,
             'nombre_actividad' => $this->nombre_actividad,

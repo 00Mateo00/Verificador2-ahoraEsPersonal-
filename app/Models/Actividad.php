@@ -47,8 +47,6 @@ class Actividad extends Model
      * 2.- Puede tener un valor nulo?
     
     */
-
-    // tipo_unidad hay que quitarlo ??
     // detActividad podria no venir ??
     // añadir filtro por mes operativo
     //To-do: si estamos en enero 
@@ -58,7 +56,7 @@ class Actividad extends Model
     public static function excelColumnsToPersist(): array
     {
         $columns = [];
-        $exclude = ['tipo_unidad', 'TIPO_ACT_COD'];
+        $exclude = ['TIPO_UNIDAD', 'TIPO_ACT_COD'];
 
         foreach (ExcelService::REQUIRED_EXCEL_HEADERS as $header) {
             if (in_array($header, $exclude)) {

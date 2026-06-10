@@ -149,15 +149,11 @@ class ConsultaList extends Component
             echo '<head><meta http-equiv="Content-type" content="text/html;charset=utf-8" /></head><body><table border="1"><tr>';
             echo '<th style="background-color: #0F69C4; color: #ffffff;">ID</th>';
             echo '<th style="background-color: #0F69C4; color: #ffffff;">Fecha Realización</th>';
-            echo '<th style="background-color: #0F69C4; color: #ffffff;">Región</th>';
-            echo '<th style="background-color: #0F69C4; color: #ffffff;">Tipo Unidad</th>';
             echo '<th style="background-color: #0F69C4; color: #ffffff;">Unidad Operativa</th>';
             echo '<th style="background-color: #0F69C4; color: #ffffff;">Tipo Actividad</th>';
             echo '<th style="background-color: #0F69C4; color: #ffffff;">Subtipo Actividad</th>';
             echo '<th style="background-color: #0F69C4; color: #ffffff;">Detalle / Descripción</th>';
             echo '<th style="background-color: #0F69C4; color: #ffffff;">N° Participantes</th>';
-            echo '<th style="background-color: #0F69C4; color: #ffffff;">Ubicación</th>';
-            echo '<th style="background-color: #0F69C4; color: #ffffff;">Observaciones</th>';
             echo '</tr>';
 
             foreach ($actividades as $act) {
@@ -165,14 +161,11 @@ class ConsultaList extends Component
                 echo '<td>' . $act->actividad_id . '</td>';
                 echo '<td>' . htmlspecialchars($act->FECHA) . '</td>';
                 echo '<td>' . htmlspecialchars($act->REGION) . '</td>';
-                echo '<td>' . htmlspecialchars($act->TIPO_UNIDAD) . '</td>';
                 echo '<td>' . htmlspecialchars($act->UNIDAD) . '</td>';
                 echo '<td>' . htmlspecialchars($act->TIPO_ACTIVIDAD) . '</td>';
                 echo '<td>' . htmlspecialchars($act->SUB_TIPO_ACTIVIDAD) . '</td>';
                 echo '<td>' . htmlspecialchars($act->DET_ACTIVIDAD) . '</td>';
                 echo '<td>' . $act->PARTICIPANTES . '</td>';
-                echo '<td>' . htmlspecialchars($act->ubicacion) . '</td>';
-                echo '<td>' . htmlspecialchars($act->observacion) . '</td>';
                 echo '</tr>';
             }
             echo '</table></body></html>';
