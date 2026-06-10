@@ -1,14 +1,13 @@
 <?php
+/* TO-DO AL CAMBIAR A LOS REGISTROS DE CORREOS REALES
+"CAJ CHILLAN FAMILIA" = cfamiliachillan@cajbiobio.cl
+"CAJ HUALAIHUE" = chualaihue@cajbiobio.cl
+ARRAY DE PMA LOS ANGELES
 
+*/
 
 //TO-DO : retornar el array de centros que tiene las unidads y correos que realmente usaremos
-return  [
-  [
-    1,
-    "DIRECCION GENERAL",
-    "mateo.ossa.b+oirs@gmail.com",
-    null
-  ],
+return [
   [
     2,
     "CAJ ANCUD",
@@ -130,12 +129,6 @@ return  [
     16
   ],
   [
-    22,
-    "OFICINA SEGUNDA INSTANCIA CHILLAN",
-    "mateo.ossa.b+segundainstanciachillan@gmail.com",
-    null
-  ],
-  [
     23,
     "ODL CHILLAN",
     "mateo.ossa.b+odlchillan@gmail.com",
@@ -206,12 +199,6 @@ return  [
     "CENTRO MEDIACION CONCEPCION",
     "mateo.ossa.b+mediacion@gmail.com",
     8
-  ],
-  [
-    35,
-    "OFICINA SEGUNDA INSTANCIA CONCEPCION",
-    "mateo.ossa.b+segundainstanciaconcepcion@gmail.com",
-    null
   ],
   [
     36,
@@ -586,12 +573,6 @@ return  [
     10
   ],
   [
-    98,
-    "OFICINA SEGUNDA INSTANCIA PUERTO MONTT",
-    "mateo.ossa.b+segundainstanciapmontt@gmail.com",
-    null
-  ],
-  [
     99,
     "ODL PUERTO MONTT",
     "mateo.ossa.b+odlpmontt@gmail.com",
@@ -754,12 +735,6 @@ return  [
     9
   ],
   [
-    126,
-    "OFICINA SEGUNDA INSTANCIA TEMUCO",
-    "mateo.ossa.b+segundainstanciatemuco@gmail.com",
-    null
-  ],
-  [
     127,
     "ODL TEMUCO",
     "mateo.ossa.b+odltemuco@gmail.com",
@@ -800,12 +775,6 @@ return  [
     "CAJ VALDIVIA",
     "mateo.ossa.b+cvaldivia@gmail.com",
     14
-  ],
-  [
-    134,
-    "OFICINA SEGUNDA INSTANCIA VALDIVIA",
-    "mateo.ossa.b+segundainstanciavaldivia@gmail.com",
-    null
   ],
   [
     135,
@@ -985,24 +954,12 @@ return  [
     173,
     "CAJ ALTO BIO BIO",
     "mateo.ossa.b+caltobiobio@gmail.com",
-    null
-  ],
-  [
-    183,
-    "DIRECCIÓN REGIONAL AYSÉN",
-    "mateo.ossa.b+dirundecima@gmail.com",
-    null
+    8
   ],
   [
     184,
     "PMA CONCEPCIÓN",
     "mateo.ossa.b+miabogadobiobio@gmail.com",
-    8
-  ],
-  [
-    185,
-    "PMA LOS ÁNGELES",
-    "null",
     8
   ],
   [
@@ -1036,48 +993,17 @@ return  [
     16
   ],
   [
-    195,
-    "[DG] DIRECCIÓN DE ADMINISTRACIÓN Y FINANZAS",
-    "mateo.ossa.b+manuel.medina@gmail.com",
-    null
-  ],
-  [
-    199,
-    "UCOE",
-    "mateo.ossa.b+martin.taub@gmail.com",
-    null
-  ],
-  [
-    200,
-    "SECRETARIA JURIDICA",
-    "mateo.ossa.b+loreto.araya@gmail.com",
-    null
-  ],
-  [
-    201,
-    "BIENESTAR",
-    "mateo.ossa.b+carolina.sanhueza@gmail.com",
-    null
-  ],
-
-
-  [
-    223,
-    "UCEGE",
-    "mateo.ossa.b+ucege@gmail.com",
-    null
-  ],
-  [
     224,
     "CAJ CORRAL",
     "mateo.ossa.b+ccorral@gmail.com",
     14
-  ],
-
+  ]
 ];
+
 ?>
 <!-- centros finales 100%REalNoFake 1 link Megaupload (yo no lo descargo porque ya lo tengo)
 const centros = [
+  [73, "UNIDAD MOVIL CONCEPCION", "movilconcepcion@cajbiobio.cl", 8],
   [
     1,
     "DIRECCION GENERAL",

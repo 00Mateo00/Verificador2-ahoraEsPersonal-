@@ -61,10 +61,6 @@ class ImportActividadesForm extends Component
 
             $this->headers = $data['headers'];
             $allRows = $data['rows'];
-            $this->totalRows = count($allRows);
-
-            // Muestra limitada de 10 filas para proteger la transmisión de red del componente Livewire
-            $this->previewRows = array_slice($allRows, 0, 10);
 
             // Ejecutar análisis de advertencias en memoria O(1) con normalización
             $this->warnings = [];
@@ -75,14 +71,18 @@ class ImportActividadesForm extends Component
                 $mapaNormalizado[$this->normalizarTexto($nombre)] = $id;
             }
 
+            $validRows = [];
+
             foreach ($allRows as $index => $row) {
                 $rowNum = $index + 2; // Fila Excel física
+                $hasError = false;
 
                 // Validar campos obligatorios inferidos de la migración
                 $mandatoryFields = ['COD', 'UNIDAD', 'REGION', 'MES', 'AÑO', 'FECHA_SAJ', 'MODALIDAD_MODIFICADO', 'TIPO_MODIFICADO', 'SUB_TIPO_MODIFICADO'];
                 foreach ($mandatoryFields as $field) {
                     if (!isset($row[$field]) || trim((string)$row[$field]) === '') {
                         $this->warnings[] = "Fila #{$rowNum}: Falta el campo obligatorio requerido '{$field}'";
+                        $hasError = true;
                     }
                 }
 
@@ -90,13 +90,24 @@ class ImportActividadesForm extends Component
                 $unidadNombreRaw = trim($row['UNIDAD'] ?? '');
                 if ($unidadNombreRaw === '') {
                     $this->warnings[] = "Fila #{$rowNum}: El campo 'UNIDAD' se encuentra vacío";
+                    $hasError = true;
                 } else {
                     $unidadNombreNorm = $this->normalizarTexto($unidadNombreRaw);
                     if (!isset($mapaNormalizado[$unidadNombreNorm])) {
                         $this->warnings[] = "Fila #{$rowNum}: La unidad '{$unidadNombreRaw}' no coincide con ningún registro del catálogo del sistema";
+                        $hasError = true;
                     }
                 }
+
+                // Solo agregar a la colección limpia si no presenta errores estructurales
+                if (!$hasError) {
+                    $validRows[] = $row;
+                }
             }
+
+            // Excluir filas con advertencias de la previsualización y el conteo total
+            $this->totalRows = count($validRows);
+            $this->previewRows = array_slice($validRows, 0, 10);
 
             $this->step = 2;
         } catch (\Exception $e) {
