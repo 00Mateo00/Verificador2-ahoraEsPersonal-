@@ -2,24 +2,23 @@
 
 namespace App\Services;
 
-
 class ExcelService
 {
   public const REQUIRED_EXCEL_HEADERS = [
     // obligatorias
     'COD',
-    'UNIDAD', // TO-DO : dejar como obligatorio
-    'REGION', // TO-DO : dejar como obligatorio
-    'MES', // TO-DO : dejar como obligatorio
-    'AÑO', // TO-DO : dejar como obligatorio
-    'FECHA_SAJ', // TO-DO : dejar como obligatorio
+    'UNIDAD',
+    'REGION',
+    'MES',
+    'AÑO',
+    'FECHA_SAJ',
 
-    // se remapean a su version no modificada (tambien son obligatorios)
+    // se remapea a su version no modificada
     'MODALIDAD_MODIFICADO',
     'TIPO_MODIFICADO',
     'SUB_TIPO_MODIFICADO',
 
-    // opcionales
+    // opcionales y de control
     'FECHA',
     'PARTICIPANTES',
     'TOTAL_HOMBRES',
@@ -27,12 +26,24 @@ class ExcelService
     'TOTAL_NOBINARIO',
     'DET_ACTIVIDAD',
     'FUNCIONARIO',
-
+    'tipo_unidad',
+    'TIPO_ACT_COD',
   ];
+
+  /**
+   * Preserva los límites entre palabras durante la normalización.
+   */
+  public static function normalizarTexto(string $texto): string
+  {
+    $texto = trim($texto);
+    $texto = iconv('UTF-8', 'ASCII//TRANSLIT//IGNORE', $texto);
+    $texto = preg_replace('/[^a-zA-Z0-9]+/', ' ', $texto);
+
+    return strtoupper(trim($texto));
+  }
 
   public function validateActividad(array $data): void
   {
-    // validar rows no vacias
     if ($data['rows'] === []) {
       throw new \Exception('No hay filas de datos para validar.');
     }
@@ -56,15 +67,26 @@ class ExcelService
       array_intersect($data['headers'], self::REQUIRED_EXCEL_HEADERS)
     );
 
-    $data['rows'] = array_map(
-      fn($row) => array_intersect_key(
-        $row,
-        array_flip(self::REQUIRED_EXCEL_HEADERS)
-      ),
-      $data['rows']
-    );
+    $filteredRows = [];
 
+    foreach ($data['rows'] as $row) {
+      // 1. Excluir filas donde tipo_unidad contenga "NAD" o "SENADIS"
+      $tipoUnidad = strtoupper($row['tipo_unidad'] ?? '');
+      if (str_contains($tipoUnidad, 'NAD') || str_contains($tipoUnidad, 'SENADIS')) {
+        continue;
+      }
 
+      // 2. Preservar únicamente filas donde TIPO_ACT_COD sea 1 o 2
+      $tipoActCod = (int) ($row['TIPO_ACT_COD'] ?? 0);
+      if ($tipoActCod !== 1 && $tipoActCod !== 2) {
+        continue;
+      }
+
+      // 3. Retener solo las cabeceras registradas
+      $filteredRows[] = array_intersect_key($row, array_flip(self::REQUIRED_EXCEL_HEADERS));
+    }
+
+    $data['rows'] = $filteredRows;
 
     return $data;
   }
