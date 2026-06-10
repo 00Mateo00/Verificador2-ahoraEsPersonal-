@@ -58,8 +58,12 @@ class Actividad extends Model
     public static function excelColumnsToPersist(): array
     {
         $columns = [];
+        $exclude = ['tipo_unidad', 'TIPO_ACT_COD'];
 
         foreach (ExcelService::REQUIRED_EXCEL_HEADERS as $header) {
+            if (in_array($header, $exclude)) {
+                continue;
+            }
 
             $columns[] =
                 self::EXCEL_COLUMN_MAPPING[$header]
