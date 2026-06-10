@@ -67,9 +67,22 @@ class Actividad extends Model
     //To-do: si estamos en enero 
     // ya existen archivos de enero 2026 (A.E anterior) estas seguro que quieres subirlo? (si sube algo de enero 2026 y estamos realmente a 2027, pero solo en enero )
     // si estamos en enero 2027 y en el excel aparece un M.E de enero 2026, estas seguro que quieres subirlo? (si sube algo de enero 2026 y estamos realmente a 2027, pero solo en enero )
+    private const EXCEL_COLUMN_MAPPING = [
+        'MODALIDAD_MODIFICADO' => 'MODALIDAD',
+        'TIPO_MODIFICADO' => 'TIPO_ACTIVIDAD',
+        'SUB_TIPO_MODIFICADO' => 'SUB_TIPO_ACTIVIDAD',
+    ];
 
-
-    private const excelColumnsToPersist = [...self::MANDATORY_FIELDS_TO_CREATE_ACTIVIDAD, self::OPTIONAL_ACTIVIDAD_FIELDS];
+    private static function excelColumnsToPersist(): array
+    {
+        return [
+            ...array_map(
+                fn(string $header) => self::EXCEL_COLUMN_MAPPING[$header] ?? $header,
+                self::MANDATORY_FIELDS_TO_CREATE_ACTIVIDAD
+            ),
+            ...self::OPTIONAL_ACTIVIDAD_FIELDS,
+        ];
+    }
 
 
     /**
@@ -78,17 +91,13 @@ class Actividad extends Model
      */
     private static function mapRowToPersistableData(array $row): array
     {
-        $EXCEL_COLUMN_MAPPING = [
-            'MODALIDAD_MODIFICADO' => 'MODALIDAD',
-            'TIPO_MODIFICADO' => 'TIPO_ACTIVIDAD',
-            'SUB_TIPO_MODIFICADO' => 'SUB_TIPO_ACTIVIDAD',
-        ];
-        $allowedColumns = array_flip(self::excelColumnsToPersist);
+        // esto debe tener las topersist lists
+        $allowedColumns = array_flip(self::excelColumnsToPersist());
 
         $data = [];
 
         foreach (ExcelService::REQUIRED_EXCEL_HEADERS as $header) {
-            $column = $EXCEL_COLUMN_MAPPING[$header] ?? $header;
+            $column = self::EXCEL_COLUMN_MAPPING[$header] ?? $header;
 
             if (!isset($allowedColumns[$column])) {
                 continue;
@@ -136,7 +145,7 @@ class Actividad extends Model
         parent::__construct($attributes);
 
         $this->fillable = [
-            ...self::excelColumnsToPersist,
+            ...self::excelColumnsToPersist(),
             'estado',
             'carga_id',
             'unidad_id_asignada',

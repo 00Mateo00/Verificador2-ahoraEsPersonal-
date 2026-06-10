@@ -19,7 +19,7 @@ class ImportActividadesForm extends Component
 {
     use WithFileUploads;
     private const MANDATORY_FIELDS = Actividad::MANDATORY_FIELDS_TO_CREATE_ACTIVIDAD;
-    public object $excelFile;
+    public  $excelFile;
     public int $step = 1; // 1: Subida, 2: Previsualización, 3: Cuenta regresiva (Confirmación), 4: Éxito
 
     // Datos de la carga
@@ -105,15 +105,12 @@ class ImportActividadesForm extends Component
 
             $validRows = [];
 
-            $redirecciones = $this->obtenerRedirecciones();
-
             foreach ($allRows as $index => $row) {
                 $rowNum = $index + 2; // Fila Excel física
                 $hasError = false;
 
                 // Validar campos obligatorios inferidos de la migración
-                $mandatoryFields = self::MANDATORY_FIELDS;
-                foreach ($mandatoryFields as $field) {
+                foreach (self::MANDATORY_FIELDS as $field) {
                     if (!isset($row[$field]) || trim((string)$row[$field]) === '') {
                         $this->warnings[] = "Fila #{$rowNum}: Falta el campo obligatorio requerido '{$field}'";
                         $hasError = true;
@@ -125,6 +122,14 @@ class ImportActividadesForm extends Component
                     $unidadNombreRaw,
                     $mapaNormalizado
                 );
+                if ($unidadNombreRaw === '') {
+                    $this->warnings[] = "Fila #{$rowNum}: El campo 'UNIDAD' se encuentra vacío";
+                    $hasError = true;
+                } elseif ($unidadIdAsignada === null) {
+                    $this->warnings[] = "Fila #{$rowNum}: La unidad '{$unidadNombreRaw}' no coincide con ningún registro del catálogo del sistema";
+                    $hasError = true;
+                }
+
                 // Solo agregar a la colección limpia si no presenta errores estructurales
                 if (!$hasError) {
                     $validRows[] = $row;
@@ -192,11 +197,9 @@ class ImportActividadesForm extends Component
                 $actividadesParaInsertar = [];
 
                 // Tabla de redirecciones territoriales dinámicas en memoria (normalizadas)
-                $redirecciones = $this->obtenerRedirecciones();
 
                 foreach ($allRows as $row) {
                     $unidadNombreRaw = trim($row['UNIDAD'] ?? '');
-                    $unidadNombreNorm = $this->normalizarTexto($unidadNombreRaw);
                     // Redirección dinámica si corresponde a Los Ángeles
                     $unidadIdAsignada = $this->resolverUnidadId(
                         $unidadNombreRaw,
