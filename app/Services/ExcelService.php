@@ -36,7 +36,9 @@ class ExcelService
   public static function normalizarTexto(string $texto): string
   {
     $texto = trim($texto);
-    $texto = iconv('UTF-8', 'ASCII//TRANSLIT//IGNORE', $texto);
+    $buscar     = ['á', 'é', 'í', 'ó', 'ú', 'Á', 'É', 'Í', 'Ó', 'Ú', 'ñ', 'Ñ', 'ü', 'Ü'];
+    $reemplazar = ['a', 'e', 'i', 'o', 'u', 'A', 'E', 'I', 'O', 'U', 'n', 'N', 'u', 'U'];
+    $texto = str_replace($buscar, $reemplazar, $texto);
     $texto = preg_replace('/[^a-zA-Z0-9]+/', ' ', $texto);
 
     return strtoupper(trim($texto));
