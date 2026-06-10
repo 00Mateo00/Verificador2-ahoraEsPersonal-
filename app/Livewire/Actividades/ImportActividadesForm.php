@@ -165,14 +165,14 @@ class ImportActividadesForm extends Component
 
                 $mapaNormalizado = [];
                 foreach ($unidadesMap as $nombre => $id) {
-                    $mapaNormalizado[\App\Services\ExcelService::normalizarTexto($nombre)] = $id;
+                    $mapaNormalizado[$this->normalizarTexto($nombre)] = $id;
                 }
 
                 $actividadesParaInsertar = [];
 
                 foreach ($allRows as $row) {
                     $unidadNombreRaw = trim($row['UNIDAD'] ?? '');
-                    $unidadNombreNorm = \App\Services\ExcelService::normalizarTexto($unidadNombreRaw);
+                    $unidadNombreNorm = $this->normalizarTexto($unidadNombreRaw);
 
                     $unidadIdAsignada = $mapaNormalizado[$unidadNombreNorm] ?? null;
 

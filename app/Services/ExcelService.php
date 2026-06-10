@@ -30,6 +30,8 @@ class ExcelService
     'TIPO_ACT_COD',
   ];
 
+  public const COLUMNS_EXCLUDED = ['TIPO_UNIDAD', 'TIPO_ACT_COD'];
+
   /**
    * Preserva los límites entre palabras durante la normalización.
    */

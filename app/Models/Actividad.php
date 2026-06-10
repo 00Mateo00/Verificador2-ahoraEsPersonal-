@@ -10,6 +10,7 @@ use App\Services\ExcelService;
 
 class Actividad extends Model
 {
+    private const EXCLUDE = ExcelService::COLUMNS_EXCLUDED;
 
     protected $table = 'actividad';
     protected $primaryKey = 'actividad_id';
@@ -56,10 +57,10 @@ class Actividad extends Model
     public static function excelColumnsToPersist(): array
     {
         $columns = [];
-        $exclude = ['TIPO_UNIDAD', 'TIPO_ACT_COD'];
+
 
         foreach (ExcelService::REQUIRED_EXCEL_HEADERS as $header) {
-            if (in_array($header, $exclude)) {
+            if (in_array($header, self::EXCLUDE)) {
                 continue;
             }
 
@@ -77,15 +78,17 @@ class Actividad extends Model
         ?int $unidadIdAsignada
     ): array {
 
+        $allowedColumns = array_flip(self::excelColumnsToPersist());
+
         $data = [];
 
         foreach (ExcelService::REQUIRED_EXCEL_HEADERS as $header) {
-            if (isset(self::EXCEL_COLUMN_MAPPING[$header])) {
-                $data[self::EXCEL_COLUMN_MAPPING[$header]] = $row[$header];
-            } else {
+            $column = self::EXCEL_COLUMN_MAPPING[$header] ?? $header;
 
-                $data[$header] = $row[$header];
+            if (!isset($allowedColumns[$column])) {
+                continue;
             }
+            $data[$column] = $row[$header];
         }
         // control interno 
         $data['estado'] = 'CARGADA';
@@ -103,7 +106,7 @@ class Actividad extends Model
         array $row,
         int $cargaId,
         ?int $unidadIdAsignada
-    ): self {
+    ): array {
         /*    esto lo uso como test */
         /* return self::fromExcelRow($row, $cargaId, $unidadIdAsignada); */
 
