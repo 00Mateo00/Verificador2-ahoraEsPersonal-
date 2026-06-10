@@ -109,6 +109,26 @@
             A continuación se presenta una muestra representativa con los primeros 10 registros contenidos en el archivo Excel. Verifique que las columnas se correspondan con los datos esperados de actividades antes de persistir los datos.
         </p>
 
+        <!-- Bloque Dinámico de Advertencias (Warnings Panel) -->
+        @if(!empty($warnings))
+        <div style="background-color: #fffbeb; border: 1px solid #fef3c7; border-radius: 8px; padding: 20px; margin-bottom: 25px; box-shadow: 0 1px 3px rgba(0,0,0,0.02);">
+            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px;">
+                <span style="font-size: 1.25rem;">⚠️</span>
+                <strong style="color: #92400e; font-size: 1rem;">Advertencias de consistencia de datos detectadas ({{ count($warnings) }})</strong>
+            </div>
+            <p style="color: #b45309; font-size: 0.85rem; margin: 0 0 12px 0;">
+                Se detectaron inconsistencias menores en la planilla. Las filas afectadas se omitirán automáticamente del proceso final de inserción masiva para resguardar la integridad estructural de la base de datos, mientras que el resto de las filas elegibles se importará normalmente.
+            </p>
+            <div style="max-height: 180px; overflow-y: auto; background-color: #ffffff; border: 1px solid #fde68a; border-radius: 6px; padding: 12px; box-shadow: inset 0 1px 2px rgba(0,0,0,0.01);">
+                <ul style="margin: 0; padding-left: 20px; font-size: 0.85rem; color: #78350f; display: flex; flex-direction: column; gap: 6px;">
+                    @foreach($warnings as $warning)
+                        <li>{{ $warning }}</li>
+                    @endforeach
+                </ul>
+            </div>
+        </div>
+        @endif
+
         <div style="overflow-x: auto; border: 1px solid rgba(226, 232, 240, 0.8); border-radius: 8px; margin-bottom: 25px; background: #ffffff;">
             <table class="table-custom-data" style="width: 100%; border-collapse: collapse; min-width: 800px;">
                 <thead>
