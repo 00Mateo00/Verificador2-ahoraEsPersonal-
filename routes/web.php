@@ -1,9 +1,8 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
-
-use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\ActividadController;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
     if (Auth::check()) {
@@ -18,15 +17,16 @@ Route::get('/', function () {
         if ($rol === 'unidad') {
             return redirect()->route('unidad.dashboard');
         }
+
         return redirect()->route('actividades.index');
     }
+
     return redirect()->route('login');
 })->name('home');
 
 Route::get('/dashboard', function () {
     return redirect()->route('home');
 })->name('dashboard');
-
 
 Route::middleware(['auth'])->group(function () {
     // Consulta global: Accesible por todos los roles autenticados (TO-DO : esta vista ya debería llamarse "historial")
@@ -41,7 +41,6 @@ Route::middleware(['auth'])->group(function () {
         })->name('admin.dashboard');
 
         Route::get('/admin/actividades', [ActividadController::class, 'index'])->name('admin.actividades');
-        Route::get('/actividades/create', [ActividadController::class, 'create'])->name('actividades.create');
     });
 
     // Rutas exclusivas de Carga Masiva (Excel)
@@ -58,4 +57,4 @@ Route::middleware(['auth'])->group(function () {
         })->name('unidad.dashboard');
     });
 });
-require __DIR__ . '/settings.php';
+require __DIR__.'/settings.php';
