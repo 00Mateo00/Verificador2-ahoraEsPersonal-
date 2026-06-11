@@ -40,8 +40,11 @@ class ImportActividadesForm extends Component
     }
     private function obtenerMapaUnidadesNormalizado(): array
     {
-        $unidadesMap = Unidad::pluck('unidad_id', 'unidad_nombre')->toArray();
-
+        // Cruzar con la tabla users para obtener el nombre de la unidad operativa (users.name)
+        $unidadesMap = Unidad::query()
+            ->join('users', 'unidad.user_id', '=', 'users.id')
+            ->pluck('unidad.id', 'users.name')
+            ->toArray();
 
         $resultado = [];
 
@@ -241,11 +244,18 @@ class ImportActividadesForm extends Component
                 }
             });
 
-            // Despachar un único correo consolidado por cada dirección de correo electrónico afectada
-            $unidadesAgrupadas = Unidad::whereIn('unidad_id', $unidadesAfectadas)
-                ->whereNotNull('unidad_correo')
-                ->get()
-                ->groupBy('unidad_correo');
+            // Cargar la relación 'user' para acceder al correo electrónico de las unidades afectadas
+            $unidades = Unidad::query()
+                ->with('user')
+                ->whereIn('id', $unidadesAfectadas)
+                ->get();
+
+            // Filtrar unidades válidas y agruparlas por el email de su usuario operador asociado
+            $unidadesAgrupadas = $unidades->filter(function ($u) {
+                return $u->user && !empty($u->user->email);
+            })->groupBy(function ($u) {
+                return $u->user->email;
+            });
 
             foreach ($unidadesAgrupadas as $correoDestinatario => $grupoUnidades) {
                 // Seleccionar la primera unidad del grupo como representante para la construcción de la plantilla
