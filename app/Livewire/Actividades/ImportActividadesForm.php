@@ -42,6 +42,7 @@ class ImportActividadesForm extends Component
     {
         $unidadesMap = Unidad::pluck('unidad_id', 'unidad_nombre')->toArray();
 
+
         $resultado = [];
 
         foreach ($unidadesMap as $nombre => $id) {
@@ -70,6 +71,7 @@ class ImportActividadesForm extends Component
         if (isset($redirecciones[$unidadNombreNorm])) {
             $unidadNombreNorm = $redirecciones[$unidadNombreNorm];
         }
+
 
         return $mapaNormalizado[$unidadNombreNorm] ?? null;
     }
@@ -195,6 +197,8 @@ class ImportActividadesForm extends Component
                 $mapaNormalizado = $this->obtenerMapaUnidadesNormalizado();
 
                 $actividadesParaInsertar = [];
+
+
 
                 // Tabla de redirecciones territoriales dinámicas en memoria (normalizadas)
 

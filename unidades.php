@@ -11,7 +11,6 @@ return [
   [
     2,
     "CAJ ANCUD",
-
     "mateo.ossa.b+cancud@gmail.com",
     10
   ],
@@ -425,7 +424,7 @@ return [
   ],
   [
     73,
-    "UNIDAD MÓVIL CONCEPCION",
+    "UNIDAD MOVIL CONCEPCION",
     "mateo.ossa.b+movilconcepcion@gmail.com",
     8
   ],
@@ -989,7 +988,7 @@ return [
   ],
   [
     190,
-    "PMA CHILLAN",
+    "PMA CHILLÁN",
     "mateo.ossa.b+miabogadonuble@gmail.com",
     16
   ],
@@ -1919,7 +1918,7 @@ const centros = [
   ],
   [
     153,
-    "PAM CHILLÁN",
+    "PAM CHILLAN",
     "pamchillan@cajbiobio.cl",
     16
   ],
@@ -2033,7 +2032,7 @@ const centros = [
   ],
   [
     190,
-    "PMA CHILLAN",
+    "PMA CHILLÁN",
     "miabogadonuble@cajbiobio.cl",
     16
   ],

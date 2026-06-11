@@ -122,7 +122,7 @@
             <div style="max-height: 180px; overflow-y: auto; background-color: #ffffff; border: 1px solid #fde68a; border-radius: 6px; padding: 12px; box-shadow: inset 0 1px 2px rgba(0,0,0,0.01);">
                 <ul style="margin: 0; padding-left: 20px; font-size: 0.85rem; color: #78350f; display: flex; flex-direction: column; gap: 6px;">
                     @foreach($warnings as $warning)
-                        <li>{{ $warning }}</li>
+                    <li>{{ $warning }}</li>
                     @endforeach
                 </ul>
             </div>
