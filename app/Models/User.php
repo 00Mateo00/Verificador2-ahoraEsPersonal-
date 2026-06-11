@@ -22,7 +22,6 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
     'password',
     'rol',
     'estado',
-    'unidad_id'
 ])]
 #[Hidden(['password', 'two_factor_secret', 'two_factor_recovery_codes', 'remember_token'])]
 class User extends Authenticatable implements PasskeyUser

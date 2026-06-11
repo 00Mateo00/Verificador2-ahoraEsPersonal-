@@ -47,7 +47,7 @@ return new class extends Migration
             // Llaves foráneas con las tablas de infraestructura existentes
 
             $table->foreign('unidad_id_asignada')
-                ->references('unidad_id')
+                ->references('id')
                 ->on('unidad');
         });
     }

@@ -8,12 +8,11 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class Unidad extends Model
 {
     protected $table = 'unidad';
-    protected $primaryKey = 'unidad_id';
 
     protected $fillable = [
-        'unidad_nombre',
-        'unidad_correo',
-        'region_id'
+        'id',
+        'region_id',
+        'user_id',
     ];
 
     /**

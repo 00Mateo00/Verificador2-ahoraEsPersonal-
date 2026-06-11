@@ -12,9 +12,11 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('region', function (Blueprint $table) {
-            $table->id('region_id');
-
+            $table->id();
             $table->string('region_nombre', 50)->nullable();
+            $table->foreignId('user_id')->nullable()->constrained('users', 'id')->nullOnDelete();
+
+            
         });
     }
 

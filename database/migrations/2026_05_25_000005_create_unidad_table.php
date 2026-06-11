@@ -12,10 +12,9 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('unidad', function (Blueprint $table) {
-            $table->id('unidad_id');
-            $table->string('unidad_nombre', 50)->nullable();
-            $table->string('unidad_correo', 100)->nullable();
-            $table->foreignId('region_id')->nullable()->constrained('region', 'region_id')->nullOnDelete();
+            $table->id();
+            $table->foreignId('region_id')->nullable()->constrained('region', 'id')->nullOnDelete();
+            $table->foreignId('user_id')->nullable()->constrained('users', 'id')->nullOnDelete();
             /* $table->string('unidad_jefe', 120)->nullable(); */
         });
     }

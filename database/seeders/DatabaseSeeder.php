@@ -19,34 +19,55 @@ class DatabaseSeeder extends Seeder
         $regiones = [
             [
                 8,
-                "Biobio"
+                "Biobio",
+                "micorreo+biobio@gmail.com"
             ],
             [
                 9,
-                "Araucanía"
+                "Araucanía",
+                "micorreo+araucania@gmail.com"
             ],
             [
                 10,
-                "Los Lagos"
+                "Los Lagos",
+                "micorreo+loslagos@gmail.com"
             ],
             [
                 11,
-                "Aysén"
+                "Aysén",
+                "micorreo+aysen@gmail.com"
             ],
             [
                 14,
-                "Los Ríos"
+                "Los Ríos",
+                "micorreo+losrios@gmail.com"
             ],
             [
                 16,
-                "Ñuble"
+                "Ñuble",
+                "micorreo+nuble@gmail.com"
             ]
         ];
 
         foreach ($regiones as $r) {
             $id = $r[0];
-            $name = $r[1];
-            DB::table('region')->updateOrInsert(['region_id' => $id], ['region_nombre' => $name]);
+            $nombre = $r[1];
+            $correo = $r[2];
+
+            $director = User::factory()->create([
+                'estado' => 1,
+                'name' => "Director Regional {$nombre}",
+                'email' => $correo,
+                'rol' => 'director',
+            ]);
+
+            DB::table('region')->updateOrInsert(
+                ['id' => $id],
+                [
+                    'region_nombre' => $nombre,
+                    'user_id' => $director->id,
+                ]
+            );
         }
 
 
@@ -63,26 +84,22 @@ class DatabaseSeeder extends Seeder
             $correo = $u[2] ?? null;
             $region_id = $u[3] ?? null;
 
+            $userId = User::factory()->create([
+                'estado' => 1,
+                'name' => $nombre,
+                'email' => $correo,
+                'rol' => 'unidad',
+            ])->id;
+
+            
             DB::table('unidad')->updateOrInsert(
-                ['unidad_id' => $id],
+                ['id' => $id],
                 [
-                    'unidad_nombre' => $nombre,
-                    'unidad_correo' => $correo,
                     'region_id' => $region_id,
+                    'user_id' => $userId
                 ]
             );
 
-            // crear usuarios de rol "unidad"
-            User::factory()->create(
-                [
-                    'estado' => 1,
-                    'name' => $nombre,
-                    'email' => $correo,
-                    'rol' => 'unidad',
-                    'unidad_id' => $id
-                ]
-
-            );
         }
 
 
