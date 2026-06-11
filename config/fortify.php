@@ -161,9 +161,9 @@ return [
     */
 
     'features' => [
-        Features::registration(),
+       /*  Features::registration(), */
+       /*  Features::emailVerification(), */
         Features::resetPasswords(),
-        Features::emailVerification(),
         Features::twoFactorAuthentication([
             'confirm' => true,
             'confirmPassword' => true,

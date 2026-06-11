@@ -44,15 +44,18 @@ class FortifyServiceProvider extends ServiceProvider
     /**
      * Configure Fortify views.
      */
-    private function configureViews(): void
+      private function configureViews(): void
     {
+        // Enrutamiento de vistas de autenticación a plantillas existentes
         Fortify::loginView(fn () => view('auth.login'));
-        Fortify::verifyEmailView(fn () => view('pages::auth.verify-email'));
-        Fortify::twoFactorChallengeView(fn () => view('pages::auth.two-factor-challenge'));
-        Fortify::confirmPasswordView(fn () => view('pages::auth.confirm-password'));
-        Fortify::registerView(fn () => view('pages::auth.register'));
-        Fortify::resetPasswordView(fn () => view('pages::auth.reset-password'));
-        Fortify::requestPasswordResetLinkView(fn () => view('pages::auth.forgot-password'));
+        
+        // Mapeo defensivo para evitar excepciones por desconfiguración de namespaces inexistentes (pages::)
+        Fortify::verifyEmailView(fn () => view('auth.login'));
+        Fortify::twoFactorChallengeView(fn () => view('auth.login'));
+        Fortify::confirmPasswordView(fn () => view('auth.login'));
+        Fortify::registerView(fn () => view('auth.login'));
+        Fortify::resetPasswordView(fn () => view('auth.login'));
+        Fortify::requestPasswordResetLinkView(fn () => view('auth.login'));
     }
 
     /**
@@ -66,11 +69,15 @@ class FortifyServiceProvider extends ServiceProvider
                 return new class implements \Laravel\Fortify\Contracts\LoginResponse {
                     public function toResponse($request)
                     {
-                        $user = auth()->user();
+                        $user = \Illuminate\Support\Facades\Auth::user();
+
+                        if (!$user) {
+                            return redirect()->route('login');
+                        }
 
                         // Bloquear sesión si la cuenta está deshabilitada administrativamente
                         if (!$user->estado) {
-                            auth()->logout();
+                            \Illuminate\Support\Facades\Auth::logout();
                             $request->session()->invalidate();
                             $request->session()->regenerateToken();
                             return redirect()->route('login')->with('error', 'Su cuenta se encuentra deshabilitada.');
