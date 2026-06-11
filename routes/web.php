@@ -2,9 +2,9 @@
 
 use Illuminate\Support\Facades\Route;
 
-use App\Http\Controllers\AuthController;
 use Illuminate\Support\Facades\Auth;
-use \App\Http\Controllers\ActividadController;
+use App\Http\Controllers\ActividadController;
+
 Route::get('/', function () {
     if (Auth::check()) {
         $rol = Auth::user()->rol;
@@ -26,11 +26,6 @@ Route::get('/', function () {
 Route::get('/dashboard', function () {
     return redirect()->route('home');
 })->name('dashboard');
-
-Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login')->middleware('guest');
-
-Route::post('/login', [AuthController::class, 'login'])->name('login.post')->middleware('guest');
-Route::post('/logout', [AuthController::class, 'logout'])->name('logout')->middleware('auth');
 
 
 Route::middleware(['auth'])->group(function () {

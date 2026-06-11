@@ -46,7 +46,7 @@
                         <p>Gestión de verificadores centralizada</p>
                     </div>
 
-                    <form class="login-form-body-caj" action="{{ route('login.post') }}" method="POST">
+                    <form class="login-form-body-caj" action="{{ route('login') }}" method="POST">
                         @csrf
 
                         @if (session('error'))

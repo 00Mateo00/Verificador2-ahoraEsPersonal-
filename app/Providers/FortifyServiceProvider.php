@@ -29,6 +29,7 @@ class FortifyServiceProvider extends ServiceProvider
         $this->configureActions();
         $this->configureViews();
         $this->configureRateLimiting();
+        $this->configureLoginResponse();
     }
 
     /**
@@ -45,13 +46,53 @@ class FortifyServiceProvider extends ServiceProvider
      */
     private function configureViews(): void
     {
-        Fortify::loginView(fn () => view('pages::auth.login'));
+        Fortify::loginView(fn () => view('auth.login'));
         Fortify::verifyEmailView(fn () => view('pages::auth.verify-email'));
         Fortify::twoFactorChallengeView(fn () => view('pages::auth.two-factor-challenge'));
         Fortify::confirmPasswordView(fn () => view('pages::auth.confirm-password'));
         Fortify::registerView(fn () => view('pages::auth.register'));
         Fortify::resetPasswordView(fn () => view('pages::auth.reset-password'));
         Fortify::requestPasswordResetLinkView(fn () => view('pages::auth.forgot-password'));
+    }
+
+    /**
+     * Customiza la respuesta de autenticación exitosa para redirigir según el rol del usuario.
+     */
+    private function configureLoginResponse(): void
+    {
+        $this->app->singleton(
+            \Laravel\Fortify\Contracts\LoginResponse::class,
+            function () {
+                return new class implements \Laravel\Fortify\Contracts\LoginResponse {
+                    public function toResponse($request)
+                    {
+                        $user = auth()->user();
+
+                        // Bloquear sesión si la cuenta está deshabilitada administrativamente
+                        if (!$user->estado) {
+                            auth()->logout();
+                            $request->session()->invalidate();
+                            $request->session()->regenerateToken();
+                            return redirect()->route('login')->with('error', 'Su cuenta se encuentra deshabilitada.');
+                        }
+
+                        $rol = $user->rol;
+
+                        if ($rol === 'admin') {
+                            return redirect()->route('admin.dashboard');
+                        }
+                        if ($rol === 'cargador') {
+                            return redirect()->route('actividades.importar');
+                        }
+                        if ($rol === 'unidad') {
+                            return redirect()->route('unidad.dashboard');
+                        }
+
+                        return redirect()->route('actividades.index');
+                    }
+                };
+            }
+        );
     }
 
     /**
