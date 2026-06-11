@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Unidad extends Model
 {
@@ -16,10 +17,26 @@ class Unidad extends Model
     ];
 
     /**
+     * Relación con el usuario operador asignado a la unidad.
+     */
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'user_id', 'id');
+    }
+
+    /**
+     * Relación con la región a la que pertenece la unidad.
+     */
+    public function region(): BelongsTo
+    {
+        return $this->belongsTo(Region::class, 'region_id', 'id');
+    }
+
+    /**
      * Relación con las actividades asignadas a esta unidad.
      */
     public function actividadesAsignadas(): HasMany
     {
-        return $this->hasMany(Actividad::class, 'unidad_id_asignada', 'unidad_id');
+        return $this->hasMany(Actividad::class, 'unidad_id_asignada', 'id');
     }
 }

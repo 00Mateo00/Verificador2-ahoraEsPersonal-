@@ -69,11 +69,19 @@ class User extends Authenticatable implements PasskeyUser
         return $this->hasMany(CargaExcel::class, 'user_id', 'id');
     }
 
-    /* 
-    * Relación con la unidad a la que pertenece el usuario (si aplica).
+    /**
+     * Relación con la unidad operativa a la que pertenece el usuario.
      */
     public function unidad()
     {
-        return $this->belongsTo(Unidad::class, 'unidad_id', 'unidad_id');
+        return $this->hasOne(Unidad::class, 'user_id', 'id');
+    }
+
+    /**
+     * Relación con la región que administra el usuario como Director.
+     */
+    public function region()
+    {
+        return $this->hasOne(Region::class, 'user_id', 'id');
     }
 }
