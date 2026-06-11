@@ -69,7 +69,7 @@
 <body id="email-body">
     <div class="email-container">
 
-        <p>{{ $saludo }}, equipo de <strong>{{ $unidad->unidad_nombre }}</strong>.</p>
+        <p>{{ $saludo }}, equipo de <strong>{{ $unidad->user->name }}</strong>.</p>
 
         <p>
             Junto con saludar, se les informa que se ha procesado una nueva carga masiva de actividades en la Intranet institucional y se han detectado **nuevos registros asignados a su unidad operativa**.
