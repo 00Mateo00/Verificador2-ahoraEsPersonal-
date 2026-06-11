@@ -13,17 +13,19 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\NuevasActividadesPendientes;
+use App\Services\ExcelService;
 
 class ImportActividadesForm extends Component
 {
     use WithFileUploads;
-
-    public $excelFile;
+    private const MANDATORY_FIELDS = Actividad::MANDATORY_FIELDS_TO_CREATE_ACTIVIDAD;
+    public  $excelFile;
     public int $step = 1; // 1: Subida, 2: Previsualización, 3: Cuenta regresiva (Confirmación), 4: Éxito
 
     // Datos de la carga
     public array $headers = [];
     public array $previewRows = [];
+    public array $warnings = [];
     public int $totalRows = 0;
     public string $tempFilePath = '';
     public string $originalFileName = '';
@@ -31,6 +33,50 @@ class ImportActividadesForm extends Component
     // Temporizador
     public int $countdown = 10;
     public bool $isCountingDown = false;
+
+    private function normalizarTexto(string $texto): string
+    {
+        return ExcelService::normalizarTexto($texto);
+    }
+    private function obtenerMapaUnidadesNormalizado(): array
+    {
+        $unidadesMap = Unidad::pluck('unidad_id', 'unidad_nombre')->toArray();
+
+
+        $resultado = [];
+
+        foreach ($unidadesMap as $nombre => $id) {
+            $resultado[$this->normalizarTexto($nombre)] = $id;
+        }
+
+        return $resultado;
+    }
+
+    private function obtenerRedirecciones(): array
+    {
+        return [
+            $this->normalizarTexto('PMA LOS ANGELES')
+            => $this->normalizarTexto('PMA CONCEPCIÓN'),
+        ];
+    }
+
+    private function resolverUnidadId(
+        string $unidadNombre,
+        array $mapaNormalizado
+    ): ?int {
+        $unidadNombreNorm = $this->normalizarTexto($unidadNombre);
+
+        $redirecciones = $this->obtenerRedirecciones();
+
+        if (isset($redirecciones[$unidadNombreNorm])) {
+            $unidadNombreNorm = $redirecciones[$unidadNombreNorm];
+        }
+
+
+        return $mapaNormalizado[$unidadNombreNorm] ?? null;
+    }
+
+
 
     public function rules()
     {
@@ -54,10 +100,47 @@ class ImportActividadesForm extends Component
 
             $this->headers = $data['headers'];
             $allRows = $data['rows'];
-            $this->totalRows = count($allRows);
 
-            // Muestra limitada de 10 filas para proteger la transmisión de red del componente Livewire
-            $this->previewRows = array_slice($allRows, 0, 10);
+            // Ejecutar análisis de advertencias en memoria O(1) con normalización
+            $this->warnings = [];
+            $mapaNormalizado = $this->obtenerMapaUnidadesNormalizado();
+
+            $validRows = [];
+
+            foreach ($allRows as $index => $row) {
+                $rowNum = $index + 2; // Fila Excel física
+                $hasError = false;
+
+                // Validar campos obligatorios inferidos de la migración
+                foreach (self::MANDATORY_FIELDS as $field) {
+                    if (!isset($row[$field]) || trim((string)$row[$field]) === '') {
+                        $this->warnings[] = "Fila #{$rowNum}: Falta el campo obligatorio requerido '{$field}'";
+                        $hasError = true;
+                    }
+                }
+                // Validar correspondencia territorial de la unidad
+                $unidadNombreRaw = trim($row['UNIDAD'] ?? '');
+                $unidadIdAsignada = $this->resolverUnidadId(
+                    $unidadNombreRaw,
+                    $mapaNormalizado
+                );
+                if ($unidadNombreRaw === '') {
+                    $this->warnings[] = "Fila #{$rowNum}: El campo 'UNIDAD' se encuentra vacío";
+                    $hasError = true;
+                } elseif ($unidadIdAsignada === null) {
+                    $this->warnings[] = "Fila #{$rowNum}: La unidad '{$unidadNombreRaw}' no coincide con ningún registro del catálogo del sistema";
+                    $hasError = true;
+                }
+
+                // Solo agregar a la colección limpia si no presenta errores estructurales
+                if (!$hasError) {
+                    $validRows[] = $row;
+                }
+            }
+
+            // Excluir filas con advertencias de la previsualización y el conteo total
+            $this->totalRows = count($validRows);
+            $this->previewRows = array_slice($validRows, 0, 10);
 
             $this->step = 2;
         } catch (\Exception $e) {
@@ -110,40 +193,64 @@ class ImportActividadesForm extends Component
                     'estado' => 'PROCESADA'
                 ]);
 
-                // Cachear catálogo de unidades para emparejamiento veloz O(1)
-                $unidadesMap = Unidad::pluck(
-                    'unidad_id',
-                    'unidad_nombre'
-                )->toArray();
+                // Cachear catálogo de unidades para emparejamiento veloz O(1) con normalización
+                $mapaNormalizado = $this->obtenerMapaUnidadesNormalizado();
+
+                $actividadesParaInsertar = [];
+
+
+
+                // Tabla de redirecciones territoriales dinámicas en memoria (normalizadas)
 
                 foreach ($allRows as $row) {
+                    $unidadNombreRaw = trim($row['UNIDAD'] ?? '');
+                    // Redirección dinámica si corresponde a Los Ángeles
+                    $unidadIdAsignada = $this->resolverUnidadId(
+                        $unidadNombreRaw,
+                        $mapaNormalizado
+                    );
 
-                    $unidadNombre = trim($row['UNIDAD'] ?? '');
 
-                    // Emparejar ID de unidad si coincide con el catálogo
-                    $unidadIdAsignada =
-                        $unidadesMap[$unidadNombre] ?? null;
+                    // Omitir inserción de registros huérfanos para proteger restricciones "NOT NULL" de la BD
+                    if (!$unidadIdAsignada) {
+                        continue;
+                    }
 
-                    Actividad::createFromExcelRow(
+                    // Formatear array de atributos crudos
+                    $actividadData = Actividad::fromExcelRow(
                         $row,
                         $carga->carga_id,
                         $unidadIdAsignada
                     );
 
+                    // Estampar marcas de tiempo requeridas para Bulk Insert síncrono
+                    $actividadData['created_at'] = now();
+                    $actividadData['updated_at'] = now();
+
+                    $actividadesParaInsertar[] = $actividadData;
+
                     // Registrar de forma única la unidad afectada si fue emparejada
-                    if ($unidadIdAsignada && !in_array($unidadIdAsignada, $unidadesAfectadas)) {
+                    if (!in_array($unidadIdAsignada, $unidadesAfectadas)) {
                         $unidadesAfectadas[] = $unidadIdAsignada;
                     }
                 }
+
+                // Inserción masiva en base de datos en un solo viaje redondo de red
+                if (!empty($actividadesParaInsertar)) {
+                    Actividad::insert($actividadesParaInsertar);
+                }
             });
 
-            // Despachar un único correo por cada unidad afectada al finalizar con éxito la persistencia
-            $unidades = Unidad::whereIn('unidad_id', $unidadesAfectadas)
+            // Despachar un único correo consolidado por cada dirección de correo electrónico afectada
+            $unidadesAgrupadas = Unidad::whereIn('unidad_id', $unidadesAfectadas)
                 ->whereNotNull('unidad_correo')
-                ->get();
+                ->get()
+                ->groupBy('unidad_correo');
 
-            foreach ($unidades as $unidad) {
-                Mail::to($unidad->unidad_correo)->queue(new NuevasActividadesPendientes($unidad));
+            foreach ($unidadesAgrupadas as $correoDestinatario => $grupoUnidades) {
+                // Seleccionar la primera unidad del grupo como representante para la construcción de la plantilla
+                $unidadRepresentante = $grupoUnidades->first();
+                Mail::to($correoDestinatario)->queue(new NuevasActividadesPendientes($unidadRepresentante));
             }
 
             $this->cleanupTempFile();
@@ -157,7 +264,7 @@ class ImportActividadesForm extends Component
 
     public function resetForm()
     {
-        $this->reset(['excelFile', 'step', 'headers', 'previewRows', 'totalRows', 'tempFilePath', 'originalFileName', 'countdown', 'isCountingDown']);
+        $this->reset(['excelFile', 'step', 'headers', 'previewRows', 'warnings', 'totalRows', 'tempFilePath', 'originalFileName', 'countdown', 'isCountingDown']);
     }
 
     private function cleanupTempFile()

@@ -62,6 +62,14 @@
                     </li>
                     @endif
 
+                    @if(Auth::user()->rol === 'unidad')
+                    <li>
+                        <a href="{{ route('unidad.dashboard') }}" class="{{ request()->routeIs('unidad.dashboard') ? 'active' : '' }}">
+                            Verificar Pendientes
+                        </a>
+                    </li>
+                    @endif
+
                     <li>
                         <a href="{{ route('actividades.index') }}" class="{{ request()->routeIs('actividades.index') ? 'active' : '' }}">
                             Consultar Actividades
