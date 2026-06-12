@@ -37,11 +37,6 @@ class ConsultaList extends Component
     #[Url(as: 'id')]
     public string $actividad_id = '';
 
-    // Selección múltiple para exportación
-    public array $selectedIds = [];
-
-    public bool $selectAll = false;
-
     // Reiniciar paginación al cambiar filtros
     public function updatedBuscar()
     {
@@ -71,15 +66,6 @@ class ConsultaList extends Component
     public function updatedTipo()
     {
         $this->resetPage();
-    }
-
-    public function updatedSelectAll($value)
-    {
-        if ($value) {
-            $this->selectedIds = $this->getFilteredActivitiesQuery()->pluck('actividad_id')->map(fn ($id) => (string) $id)->toArray();
-        } else {
-            $this->selectedIds = [];
-        }
     }
 
     /**
@@ -148,53 +134,6 @@ class ConsultaList extends Component
         }
 
         return $query->orderBy('FECHA', 'desc')->orderBy('actividad_id', 'desc');
-    }
-
-    public function exportSelected()
-    {
-        if (empty($this->selectedIds)) {
-            session()->flash('error', 'Debe seleccionar al menos una actividad para exportar.');
-
-            return;
-        }
-
-        $userRol = Auth::user()->rol;
-
-        $query = Actividad::query()->whereIn('actividad_id', $this->selectedIds);
-
-        // Aplicar restricciones de rol centralizadas
-        $this->applyRoleRestrictions($query, $userRol);
-
-        $actividades = $query->orderBy('FECHA', 'desc')->get();
-
-        $filename = 'reporte_actividades_'.now()->format('Ymd_His').'.xls';
-
-        return response()->streamDownload(function () use ($actividades) {
-            echo '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">';
-            echo '<head><meta http-equiv="Content-type" content="text/html;charset=utf-8" /></head><body><table border="1"><tr>';
-            echo '<th style="background-color: #0F69C4; color: #ffffff;">ID</th>';
-            echo '<th style="background-color: #0F69C4; color: #ffffff;">Fecha Realización</th>';
-            echo '<th style="background-color: #0F69C4; color: #ffffff;">Unidad Operativa</th>';
-            echo '<th style="background-color: #0F69C4; color: #ffffff;">Tipo Actividad</th>';
-            echo '<th style="background-color: #0F69C4; color: #ffffff;">Subtipo Actividad</th>';
-            echo '<th style="background-color: #0F69C4; color: #ffffff;">Detalle / Descripción</th>';
-            echo '<th style="background-color: #0F69C4; color: #ffffff;">N° Participantes</th>';
-            echo '</tr>';
-
-            foreach ($actividades as $act) {
-                echo '<tr>';
-                echo '<td>'.$act->actividad_id.'</td>';
-                echo '<td>'.htmlspecialchars($act->FECHA).'</td>';
-                echo '<td>'.htmlspecialchars($act->REGION).'</td>';
-                echo '<td>'.htmlspecialchars($act->UNIDAD).'</td>';
-                echo '<td>'.htmlspecialchars($act->TIPO_ACTIVIDAD).'</td>';
-                echo '<td>'.htmlspecialchars($act->SUB_TIPO_ACTIVIDAD).'</td>';
-                echo '<td>'.htmlspecialchars($act->DET_ACTIVIDAD).'</td>';
-                echo '<td>'.$act->PARTICIPANTES.'</td>';
-                echo '</tr>';
-            }
-            echo '</table></body></html>';
-        }, $filename);
     }
 
     public function render()
