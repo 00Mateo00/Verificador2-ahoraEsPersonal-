@@ -101,6 +101,10 @@ class ImportActividadesForm extends Component
             // Importar y validar cabeceras estructuradas utilizando el pipeline unificado del servicio
             $data = $importer->importActividades($this->tempFilePath);
 
+            // Cachear los datos parseados para evitar el costoso doble procesamiento I/O en processImport
+            $cacheKey = 'excel_import_' . Auth::id();
+            \Illuminate\Support\Facades\Cache::put($cacheKey, $data, 900); // Duración de 15 minutos
+
             $this->headers = $data['headers'];
             $allRows = $data['rows'];
 
@@ -187,12 +191,18 @@ class ImportActividadesForm extends Component
         $this->isCountingDown = false;
 
         try {
-            if (!file_exists($this->tempFilePath)) {
-                throw new \Exception('La ruta temporal del archivo de actividades ha expirado.');
+            // Recuperar datos parseados directamente de la caché server-side
+            $cacheKey = 'excel_import_' . Auth::id();
+            $data = \Illuminate\Support\Facades\Cache::get($cacheKey);
+
+            // Re-parseo defensivo de respaldo (Fallback) únicamente si la caché expiró o fue eliminada
+            if (!$data) {
+                if (!file_exists($this->tempFilePath)) {
+                    throw new \Exception('La ruta temporal del archivo de actividades ha expirado y no se encontraron datos en caché.');
+                }
+                $data = $importer->importActividades($this->tempFilePath);
             }
 
-            // Volver a parsear el archivo completo desde el disco para asegurar persistencia íntegra
-            $data = $importer->importActividades($this->tempFilePath);
             $allRows = $data['rows'];
 
             // Colección para registrar los IDs únicos de las unidades que reciben actividades en este lote
@@ -275,6 +285,10 @@ class ImportActividadesForm extends Component
                 Mail::to($correoDestinatario)->queue(new NuevasActividadesPendientes($unidadRepresentante));
             }
 
+            // Limpieza inmediata de la caché de importación para liberar memoria del servidor
+            $cacheKey = 'excel_import_' . Auth::id();
+            \Illuminate\Support\Facades\Cache::forget($cacheKey);
+
             $this->cleanupTempFile();
             $this->step = 4;
             session()->flash('success', "¡Excelente! Se han importado exitosamente {$this->totalRows} actividades e iniciado las colas de notificación.");
@@ -286,6 +300,10 @@ class ImportActividadesForm extends Component
 
     public function resetForm()
     {
+        // Limpiar la caché de importación si se cancela o reinicia el formulario
+        $cacheKey = 'excel_import_' . Auth::id();
+        \Illuminate\Support\Facades\Cache::forget($cacheKey);
+
         $this->reset(['excelFile', 'step', 'headers', 'previewRows', 'warnings', 'totalRows', 'tempFilePath', 'originalFileName', 'countdown', 'isCountingDown']);
     }
 
