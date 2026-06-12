@@ -330,8 +330,20 @@ body {
     transition: background-color 0.2s ease;
 }
 
-.btn-primary-caj:hover {
+.btn-primary-caj:hover:not(:disabled) {
     background-color: #0B4E91;
+}
+
+/* Reglas universales de endurecimiento visual para controles deshabilitados (disabled) */
+.btn-primary-caj:disabled,
+.btn-acc:disabled,
+button:disabled,
+input:disabled,
+select:disabled {
+    cursor: not-allowed !important;
+    opacity: 0.55 !important;
+    pointer-events: none !important;
+    box-shadow: none !important;
 }
 
 /* Pie de página */

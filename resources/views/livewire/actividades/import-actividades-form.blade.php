@@ -87,8 +87,14 @@
 
         @if($excelFile)
         <div x-show="!isUploading" style="margin-top: 25px; display: flex; justify-content: flex-end;" x-cloak>
-            <button type="button" wire:click="uploadFile" class="btn-primary-caj" style="padding: 12px 24px;" wire:loading.attr="disabled" wire:target="excelFile">
-                Procesar Planilla
+            <button type="button" 
+                    wire:click="uploadFile" 
+                    class="btn-primary-caj" 
+                    style="padding: 12px 24px;" 
+                    wire:loading.attr="disabled" 
+                    wire:target="excelFile, uploadFile">
+                <span wire:loading.remove wire:target="uploadFile">Procesar Planilla</span>
+                <span wire:loading wire:target="uploadFile">Validando Planilla...</span>
             </button>
         </div>
         @endif
@@ -159,11 +165,22 @@
         </div>
 
         <div style="display: flex; gap: 15px; justify-content: flex-end; border-top: 1px solid #dee2e6; padding-top: 20px;">
-            <button type="button" wire:click="resetForm" class="btn-acc" style="border: 1px solid #cbd5e1; padding: 12px 20px;">
+            <button type="button" 
+                    wire:click="resetForm" 
+                    class="btn-acc" 
+                    style="border: 1px solid #cbd5e1; padding: 12px 20px;"
+                    wire:loading.attr="disabled"
+                    wire:target="resetForm, startCountdown">
                 Cancelar y Volver
             </button>
-            <button type="button" wire:click="startCountdown" class="btn-primary-caj" style="padding: 12px 24px; background-color: #2b8a3e;">
-                Iniciar Confirmación e Importación
+            <button type="button" 
+                    wire:click="startCountdown" 
+                    class="btn-primary-caj" 
+                    style="padding: 12px 24px; background-color: #2b8a3e;"
+                    wire:loading.attr="disabled"
+                    wire:target="startCountdown, resetForm">
+                <span wire:loading.remove wire:target="startCountdown">Iniciar Confirmación e Importación</span>
+                <span wire:loading wire:target="startCountdown">Preparando Confirmación...</span>
             </button>
         </div>
     </div>
