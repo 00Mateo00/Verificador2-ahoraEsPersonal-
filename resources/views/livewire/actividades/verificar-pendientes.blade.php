@@ -33,52 +33,32 @@
                     <div x-show="open" x-transition style="border-top: 1px solid #e2e8f0; background-color: #fbfcfd; padding: 25px;">
                         
                         <!-- Tarjeta de Resumen Detallado (Reutilizada del Paso 4 de Creación) -->
-                        <div style="background-color: #ffffff; border: 1px solid rgba(226, 232, 240, 0.8); border-radius: 8px; padding: 20px; margin-bottom: 25px; box-shadow: inset 0 2px 4px rgba(0,0,0,0.01);">
-                            <h3 style="margin-top: 0; color: #0d1b2a; border-bottom: 2px solid #f1f5f9; padding-bottom: 10px; font-size: 1.1rem; font-weight: 700; display: flex; align-items: center; gap: 6px;">
-                                📋 Detalles de la Actividad Asignada
-                            </h3>
+                        <div style="background-color: #f8fafc; border: 1px solid rgba(226, 232, 240, 0.8); border-radius: 8px; padding: 25px; box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);">
+                            <h3 style="margin-top: 0; color: #0d1b2a; border-bottom: 2px solid #cbd5e1; padding-bottom: 10px; font-size: 1.15rem; font-weight: 700;">Auditoría de Registro</h3>
                             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 20px; margin-top: 15px;">
                                 <div>
-                                    <strong style="color: #64748b; font-size: 0.75rem; text-transform: uppercase; display: block; margin-bottom: 4px;">Región</strong>
-                                    <p style="margin: 0 0 15px; color: #0d1b2a; font-weight: 600; font-size: 0.9rem;">{{ $act->REGION ?: 'N/A' }}</p>
+                                    <strong style="color: #64748b; font-size: 0.8rem; text-transform: uppercase;">Región</strong>
+                                    <p style="margin: 4px 0 15px; color: #0d1b2a; font-weight: 600;">{{ $act->REGION ?: 'N/A' }}</p>
 
-                                    <strong style="color: #64748b; font-size: 0.75rem; text-transform: uppercase; display: block; margin-bottom: 4px;">Modalidad</strong>
-                                    <p style="margin: 0 0 15px; color: #0d1b2a; font-weight: 600; font-size: 0.9rem;">{{ $act->MODALIDAD ?: 'N/A' }}</p>
+                                    <strong style="color: #64748b; font-size: 0.8rem; text-transform: uppercase;">Unidad Operativa</strong>
+                                    <p style="margin: 4px 0 15px; color: #0d1b2a; font-weight: 600;">{{ $act->UNIDAD ?: 'N/A' }}</p>
 
-                                    <strong style="color: #64748b; font-size: 0.75rem; text-transform: uppercase; display: block; margin-bottom: 4px;">Unidad Operativa Destinataria</strong>
-                                    <p style="margin: 0 0 15px; color: #0d1b2a; font-weight: 600; font-size: 0.9rem;">{{ $act->UNIDAD ?: 'N/A' }}</p>
-
-                                    <strong style="color: #64748b; font-size: 0.75rem; text-transform: uppercase; display: block; margin-bottom: 4px;">Tipo de Actividad</strong>
-                                    <p style="margin: 0 0 15px; color: #0d1b2a; font-weight: 600; font-size: 0.9rem;">{{ $act->TIPO_ACTIVIDAD ?: 'N/A' }}</p>
+                                    <strong style="color: #64748b; font-size: 0.8rem; text-transform: uppercase;">Tipo de Actividad</strong>
+                                    <p style="margin: 4px 0 15px; color: #0d1b2a; font-weight: 600;">{{ $act->TIPO_ACTIVIDAD ?: 'N/A' }}</p>
                                 </div>
                                 <div>
-                                    <strong style="color: #64748b; font-size: 0.75rem; text-transform: uppercase; display: block; margin-bottom: 4px;">Subtipo de Actividad</strong>
-                                    <p style="margin: 0 0 15px; color: #0d1b2a; font-weight: 600; font-size: 0.9rem;">{{ $act->SUB_TIPO_ACTIVIDAD ?: 'N/A' }}</p>
 
-                                    <strong style="color: #64748b; font-size: 0.75rem; text-transform: uppercase; display: block; margin-bottom: 4px;">Fecha de Realización</strong>
-                                    <p style="margin: 0 0 15px; color: #0d1b2a; font-weight: 600; font-size: 0.9rem;">{{ $act->FECHA ?: 'N/A' }}</p>
-
-                                    <strong style="color: #64748b; font-size: 0.75rem; text-transform: uppercase; display: block; margin-bottom: 4px;">Funcionario Responsable</strong>
-                                    <p style="margin: 0 0 15px; color: #0d1b2a; font-weight: 600; font-size: 0.9rem;">{{ $act->FUNCIONARIO ?: 'Sin Funcionario Asignado' }}</p>
-
-                                    <strong style="color: #64748b; font-size: 0.75rem; text-transform: uppercase; display: block; margin-bottom: 4px;">Volumen Participantes</strong>
-                                    <p style="margin: 0 0 15px; color: #0d1b2a; font-weight: 600; font-size: 0.9rem;">
-                                        {{ $act->PARTICIPANTES ?: 0 }} personas 
-                                        @if($act->TOTAL_HOMBRES || $act->TOTAL_MUJERES || $act->TOTAL_NOBINARIO)
-                                            <span style="font-size: 0.8rem; color: #64748b; font-weight: 500; display: block; margin-top: 2px;">
-                                                (H: {{ $act->TOTAL_HOMBRES ?: 0 }} | M: {{ $act->TOTAL_MUJERES ?: 0 }} | N: {{ $act->TOTAL_NOBINARIO ?: 0 }})
-                                            </span>
-                                        @endif
-                                    </p>
+                                    <strong style="color: #64748b; font-size: 0.8rem; text-transform: uppercase;">Fecha Realización</strong>
+                                    <p style="margin: 4px 0 15px; color: #0d1b2a; font-weight: 600;">{{ $act->FECHA ?: 'N/A' }}</p>
+                                    <strong style="color: #64748b; font-size: 0.8rem; text-transform: uppercase;">Participantes</strong>
+                                    <p style="margin: 4px 0 15px; color: #0d1b2a; font-weight: 600;"> {{ $act->PARTICIPANTES ?: 0 }}   personas</p>
                                 </div>
-                            </div>
-
-                            <div style="margin-top: 15px; border-top: 1px solid #f1f5f9; padding-top: 15px;">
-                                <strong style="color: #64748b; font-size: 0.75rem; text-transform: uppercase; display: block; margin-bottom: 4px;">Objetivo o Descripción Detallada</strong>
-                                <p style="margin: 0; color: #334155; line-height: 1.5; font-size: 0.9rem;">{{ $act->DET_ACTIVIDAD ?: 'Sin descripción provista.' }}</p>
-                            </div>
                         </div>
 
+                        <div style="margin-top: 15px; border-top: 1px solid #cbd5e1; padding-top: 15px;">
+                            <strong style="color: #64748b; font-size: 0.8rem; text-transform: uppercase;">Objetivo o Descripción</strong>
+                            <p style="margin: 4px 0 15px; color: #0d1b2a; line-height: 1.5;">{{ $act->DET_ACTIVIDAD ?: 'Sin descripción provista.' }}</p>
+                        </div>
                         <!-- Formulario de Carga del Verificador -->
                         <div style="background-color: #ffffff; border: 1px dashed #0F69C4; padding: 20px; border-radius: 8px; display: grid; grid-template-columns: 1fr auto; gap: 20px; align-items: center; flex-wrap: wrap;">
                             <div>
@@ -94,12 +74,13 @@
                             </div>
 
                             <div>
-                                <button type="button" wire:click="verificarActividad({{ $act->actividad_id }})" class="btn-primary-caj" style="padding: 12px 24px; font-size: 0.9rem; background-color: #2b8a3e;" wire:loading.attr="disabled" wire:target="verificadores.{{ $act->actividad_id }}">
-                                    <span wire:loading.remove wire:target="verificarActividad({{ $act->actividad_id }})">✓ Guardar Verificador</span>
+                                <button type="button" wire:click="verificarActividad({{ $act->actividad_id }})" class="btn-primary-caj" style="padding: 12px 24px;" wire:loading.attr="disabled" wire:target="verificadores.{{ $act->actividad_id }}">
+                                    <span wire:loading.remove wire:target="verificarActividad({{ $act->actividad_id }})">Guardar Verificador</span>
                                     <span wire:loading wire:target="verificarActividad({{ $act->actividad_id }})">Guardando...</span>
                                 </button>
                             </div>
                         </div>
+                        
 
                         <!-- Estado de Carga Síncrona -->
                         <div wire:loading wire:target="verificadores.{{ $act->actividad_id }}" style="color: #0F69C4; font-size: 0.8rem; font-weight: 600; margin-top: 10px;">
