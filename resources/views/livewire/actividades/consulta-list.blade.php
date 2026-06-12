@@ -2,9 +2,6 @@
     <!-- 1. Filtros Básicos y Avanzados -->
     @include('livewire.actividades.partials.filtros')
 
-    <!-- 2. Barra de Control y Acciones Masivas -->
-    @include('livewire.actividades.partials.barra-acciones')
-
     @if ($isDateRangeActive)
     <div
         style="margin-bottom: 20px; font-weight: 600; color: #0d1b2a; font-size: 0.95rem; background-color: #f1f5f9; padding: 12px 20px; border-radius: 6px;">
@@ -92,7 +89,4 @@
     <div style="margin-top: 25px;">
         {{ $actividades->links() }}
     </div>
-
-    <!-- Scripts de Portapapeles -->
-    @include('livewire.actividades.partials.scripts-copiado')
 </div>
