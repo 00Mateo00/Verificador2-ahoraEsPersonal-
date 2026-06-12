@@ -108,6 +108,11 @@ class ImportActividadesForm extends Component
             $this->warnings = [];
             $mapaNormalizado = $this->obtenerMapaUnidadesNormalizado();
 
+            // Consultar preventivamente colisiones de código de actividad COD en un único viaje redondo a BD (O(1))
+            $incomingCods = array_filter(array_map(fn($row) => trim((string)($row['COD'] ?? '')), $allRows));
+            $existingCods = Actividad::query()->whereIn('COD', $incomingCods)->pluck('COD')->toArray();
+            $existingCodsMap = array_flip($existingCods);
+
             $validRows = [];
 
             foreach ($allRows as $index => $row) {
@@ -120,6 +125,13 @@ class ImportActividadesForm extends Component
                         $this->warnings[] = "Fila #{$rowNum}: Falta el campo obligatorio requerido '{$field}'";
                         $hasError = true;
                     }
+                }
+
+                // Validar colisiones del identificador único COD en base de datos
+                $codRaw = trim((string)($row['COD'] ?? ''));
+                if ($codRaw !== '' && isset($existingCodsMap[$codRaw])) {
+                    $this->warnings[] = "Fila #{$rowNum}: El código de actividad '{$codRaw}' ya se encuentra registrado y persistido en la plataforma";
+                    $hasError = true;
                 }
                 // Validar correspondencia territorial de la unidad
                 $unidadNombreRaw = trim($row['UNIDAD'] ?? '');
