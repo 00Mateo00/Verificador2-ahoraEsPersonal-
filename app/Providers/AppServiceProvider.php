@@ -24,6 +24,18 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         $this->configureDefaults();
+        $this->registerAuditorPolicies();
+    }
+
+    /**
+     * Registrar políticas de defensa en profundidad para restringir mutaciones al rol auditor.
+     */
+    protected function registerAuditorPolicies(): void
+    {
+        // El Gate "mutate" evalúa si el usuario autenticado tiene permisos para realizar mutaciones de estado
+        \Illuminate\Support\Facades\Gate::define('mutate', function ($user) {
+            return $user->rol !== 'auditor';
+        });
     }
 
     /**

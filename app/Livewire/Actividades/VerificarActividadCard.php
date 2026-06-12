@@ -6,6 +6,8 @@ use App\Models\Actividad;
 use App\Models\Archivo;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Str;
 use Livewire\Component;
 use Livewire\WithFileUploads;
 
@@ -14,6 +16,7 @@ class VerificarActividadCard extends Component
     use WithFileUploads;
 
     public Actividad $act;
+
     public $verificador = []; // local single array of files for this isolated card
 
     public function mount(Actividad $act)
@@ -23,10 +26,14 @@ class VerificarActividadCard extends Component
 
     public function verificarActividad()
     {
+        // Defensa en profundidad: Bloquear mutación si el rol del usuario es auditor
+        Gate::authorize('mutate');
+
         // 1. Candado atómico en servidor independiente
-        $lockKey = 'lock_verificar_act_' . Auth::id() . '_' . $this->act->actividad_id;
-        if (!Cache::add($lockKey, true, 2)) {
-            session()->flash('error', 'Se está procesando otra solicitud. Por favor, espere.');
+        $lockKey = 'lock_verificar_act_'.Auth::id().'_'.$this->act->actividad_id;
+        if (! Cache::add($lockKey, true, 2)) {
+            session()->add('error', 'Se está procesando otra solicitud. Por favor, espere.');
+
             return;
         }
 
@@ -51,7 +58,7 @@ class VerificarActividadCard extends Component
             $originalName = $archivo->getClientOriginalName();
             $filename = pathinfo($originalName, PATHINFO_FILENAME);
             $extension = pathinfo($originalName, PATHINFO_EXTENSION);
-            $sanitizedFilename = \Illuminate\Support\Str::slug($filename) . '.' . $extension;
+            $sanitizedFilename = Str::slug($filename).'.'.$extension;
 
             Archivo::create([
                 'actividad_id' => $this->act->actividad_id,
@@ -67,7 +74,7 @@ class VerificarActividadCard extends Component
         // Notificar al componente padre para refrescar la lista paginada de pendientes
         $this->dispatch('actividad-verificada');
 
-        session()->flash('success', 'La actividad #' . $this->act->actividad_id . ' ha sido verificada y guardada con éxito.');
+        session()->flash('success', 'La actividad #'.$this->act->actividad_id.' ha sido verificada y guardada con éxito.');
     }
 
     public function render()

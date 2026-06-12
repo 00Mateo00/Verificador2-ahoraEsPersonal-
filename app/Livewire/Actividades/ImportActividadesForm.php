@@ -90,6 +90,9 @@ class ImportActividadesForm extends Component
 
     public function uploadFile(ExcelImporterService $importer)
     {
+        // Defensa en profundidad: Bloquear mutación si el rol del usuario es auditor
+        \Illuminate\Support\Facades\Gate::authorize('mutate');
+
         $this->validate();
 
         // Guardar archivo de forma segura en disco temporal
@@ -184,6 +187,9 @@ class ImportActividadesForm extends Component
 
     public function processImport(ExcelImporterService $importer)
     {
+        // Defensa en profundidad: Bloquear mutación si el rol del usuario es auditor
+        \Illuminate\Support\Facades\Gate::authorize('mutate');
+
         if (!$this->isCountingDown) {
             return;
         }

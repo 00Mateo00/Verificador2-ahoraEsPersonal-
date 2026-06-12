@@ -41,6 +41,11 @@ Route::middleware(['auth'])->group(function () {
         })->name('admin.dashboard');
 
         Route::get('/admin/actividades', [ActividadController::class, 'index'])->name('admin.actividades');
+
+        // Modo edición administrativa / Configuración crítica: Protegida estrictamente por confirmación de contraseña en red (Item 4.8)
+        Route::get('/admin/edicion', function () {
+            return view('admin.dashboard'); // Redirige de vuelta o renderiza la vista en modo edición protegida
+        })->middleware('password.confirm')->name('admin.edicion');
     });
 
     // Rutas exclusivas de Carga Masiva (Excel)
