@@ -97,6 +97,9 @@ class FortifyServiceProvider extends ServiceProvider
                         if ($rol === 'unidad') {
                             return redirect()->route('unidad.dashboard');
                         }
+                        if ($rol === 'director') {
+                            return redirect()->route('director.dashboard');
+                        }
 
                         return redirect()->route('actividades.historial');
                     }

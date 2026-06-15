@@ -177,6 +177,77 @@ Route::middleware(['auth'])->group(function () {
         })->name('auditor.unidades.renotificar');
     });
 
+    // Rutas exclusivas del Director Regional
+    Route::middleware(['role:director'])->group(function () {
+        Route::get('/director/dashboard', function () {
+            $currentMonth = (int) date('m');
+            $currentYear = (int) date('Y');
+
+            // Encontrar la región del director autenticado
+            $region = Region::where('user_id', Auth::id())->first();
+            $unidadIds = $region ? $region->unidades->pluck('id')->toArray() : [];
+
+            // Estadísticas del mes estadístico actual restringidas a las unidades de su región
+            $totalCargadas = Actividad::where('estado', 'CARGADA')
+                ->whereIn('unidad_id_asignada', $unidadIds)
+                ->where('MES', $currentMonth)
+                ->where('AÑO', $currentYear)
+                ->count();
+
+            $totalVerificadas = Actividad::where('estado', 'VERIFICADA')
+                ->whereIn('unidad_id_asignada', $unidadIds)
+                ->where('MES', $currentMonth)
+                ->where('AÑO', $currentYear)
+                ->count();
+
+            $totalActividades = $totalCargadas + $totalVerificadas;
+            $porcentajeVerificacion = $totalActividades > 0 ? round(($totalVerificadas / $totalActividades) * 100, 1) : 0;
+
+            // Lista de actividades vigentes de sus unidades para el mes actual
+            $actividades = Actividad::with(['archivos', 'unidadAsignada'])
+                ->whereIn('unidad_id_asignada', $unidadIds)
+                ->where('MES', $currentMonth)
+                ->where('AÑO', $currentYear)
+                ->orderBy('FECHA', 'desc')
+                ->paginate(15);
+
+            // Unidades con firmas pendientes en su región únicamente
+            $unidadesPendientes = Unidad::query()
+                ->with(['user'])
+                ->where('region_id', $region?->id)
+                ->whereHas('actividadesAsignadas', function ($q) use ($currentMonth, $currentYear) {
+                    $q->where('estado', 'CARGADA')
+                        ->where('MES', $currentMonth)
+                        ->where('AÑO', $currentYear);
+                })
+                ->get();
+
+            return view('director.dashboard', compact(
+                'region',
+                'totalCargadas',
+                'totalVerificadas',
+                'totalActividades',
+                'porcentajeVerificacion',
+                'actividades',
+                'unidadesPendientes',
+                'currentMonth',
+                'currentYear'
+            ));
+        })->name('director.dashboard');
+
+        // Acción de renotificación regional asíncrona
+        Route::post('/director/unidades/{unidad}/renotificar', function (Unidad $unidad) {
+            $region = Region::where('user_id', Auth::id())->first();
+            if (! $region || $unidad->region_id !== $region->id) {
+                abort(403, 'No tiene permisos para renotificar unidades fuera de su jurisdicción.');
+            }
+
+            Mail::to($unidad->user->email)->queue(new NuevasActividadesPendientes($unidad));
+
+            return back()->with('success', "Se ha enviado una nueva renotificación de forma asíncrona a la unidad '{$unidad->user->name}'.");
+        })->name('director.unidades.renotificar');
+    });
+
     // / Rutas exclusivas de Administración
     Route::middleware(['role:admin'])->group(function () {
         Route::get('/admin/dashboard', function () {

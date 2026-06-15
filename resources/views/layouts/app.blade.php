@@ -48,6 +48,8 @@
                     Módulo Importación
                     @elseif(Auth::user()->rol === 'unidad')
                     Menú Unidad
+                    @elseif(Auth::user()->rol === 'director')
+                    Menú Dirección
                     @else
                     Menú Consultas
                     @endif
@@ -70,6 +72,12 @@
                     <li>
                         <a href="{{ route('unidad.dashboard') }}" class="{{ request()->routeIs('unidad.dashboard') ? 'active' : '' }}">
                             Dashboard Unidad
+                        </a>
+                    </li>
+                    @elseif(Auth::user()->rol === 'director')
+                    <li>
+                        <a href="{{ route('director.dashboard') }}" class="{{ request()->routeIs('director.dashboard') ? 'active' : '' }}">
+                            Dashboard Regional
                         </a>
                     </li>
                     @endif
