@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\ActividadController;
+use App\Http\Controllers\DescargaVerificadorController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
@@ -18,7 +19,7 @@ Route::get('/', function () {
             return redirect()->route('unidad.dashboard');
         }
 
-        return redirect()->route('actividades.index');
+        return redirect()->route('actividades.historial');
     }
 
     return redirect()->route('login');
@@ -30,13 +31,13 @@ Route::get('/dashboard', function () {
 
 Route::middleware(['auth'])->group(function () {
     // Descarga segura de archivos verificadores (Almacenamiento Privado)
-    Route::get('/archivos/{archivo}/descargar', [\App\Http\Controllers\DescargaVerificadorController::class, 'descargar'])
+    Route::get('/archivos/{archivo}/descargar', [DescargaVerificadorController::class, 'descargar'])
         ->name('archivos.descargar');
 
-    // Consulta global: Accesible por todos los roles autenticados (TO-DO : esta vista ya debería llamarse "historial")
-    Route::get('/actividades', [ActividadController::class, 'index'])
+    // Historial global: Accesible por todos los roles autenticados (Renombrado de Consulta a Historial)
+    Route::get('/historial', [ActividadController::class, 'historial'])
         ->middleware('role:admin,director,auditor,cargador,unidad')
-        ->name('actividades.index');
+        ->name('actividades.historial');
 
     // Rutas exclusivas de Administración
     Route::middleware(['role:admin'])->group(function () {
@@ -44,7 +45,7 @@ Route::middleware(['auth'])->group(function () {
             return view('admin.dashboard');
         })->name('admin.dashboard');
 
-        Route::get('/admin/actividades', [ActividadController::class, 'index'])->name('admin.actividades');
+        Route::get('/admin/actividades', [ActividadController::class, 'historial'])->name('admin.actividades');
 
         // Modo edición administrativa / Configuración crítica: Protegida estrictamente por confirmación de contraseña en red (Item 4.8)
         Route::get('/admin/edicion', function () {

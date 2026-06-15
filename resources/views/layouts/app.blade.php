@@ -71,8 +71,8 @@
                     @endif
 
                     <li>
-                        <a href="{{ route('actividades.index') }}" class="{{ request()->routeIs('actividades.index') ? 'active' : '' }}">
-                            Consultar Actividades
+                        <a href="{{ route('actividades.historial') }}" class="{{ request()->routeIs('actividades.historial') ? 'active' : '' }}">
+                            Historial de Actividades
                         </a>
                     </li>
                 </ul>
