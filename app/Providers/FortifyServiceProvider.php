@@ -95,7 +95,7 @@ class FortifyServiceProvider extends ServiceProvider
                             return redirect()->route('unidad.dashboard');
                         }
 
-                        return redirect()->route('actividades.index');
+                        return redirect()->route('actividades.historial');
                     }
                 };
             }

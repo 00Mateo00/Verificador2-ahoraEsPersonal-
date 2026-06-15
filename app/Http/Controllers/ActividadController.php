@@ -2,21 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-
-
-
 class ActividadController extends Controller
 {
- 
-    public function create()
+    public function historial()
     {
-        return view('actividades.create');
+        return view('actividades.historial');
     }
-
-    public function index()
-    {
-        return view('actividades.index');
-    }
-
 }
