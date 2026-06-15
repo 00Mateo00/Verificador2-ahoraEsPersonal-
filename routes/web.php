@@ -126,9 +126,13 @@ Route::middleware(['auth'])->group(function () {
             return redirect()->route('admin.dashboard')->with('success', 'Modo edición activado. Las opciones de edición crítica ahora son usables.');
         })->middleware('password.confirm')->name('admin.edicion');
 
-        // Salir del modo edición administrativa y retornar al dashboard
+        // Salir del modo edición administrativa, invalidar confirmación de password de Laravel y retornar al dashboard
         Route::get('/admin/salir-edicion', function () {
-            session()->forget(['modo_edicion', 'modo_edicion_last_activity']);
+            session()->forget([
+                'modo_edicion',
+                'modo_edicion_last_activity',
+                'auth.password_confirmed_at' // Fuerza la reconfirmación de contraseña al volver a entrar
+            ]);
 
             return redirect()->route('admin.dashboard')->with('success', 'Modo edición desactivado. Ha retornado al modo de visualización segura.');
         })->name('admin.salir-edicion');
