@@ -133,12 +133,12 @@
         <table>
             <tr>
                 <td class="label">Fecha actividad:</td>
-                <td>{{ \Carbon\Carbon::parse($actividad->fecha_actividad)->format('d-m-Y') }}</td>
+                <td>{{ $actividad->FECHA ? $actividad->FECHA->format('d-m-Y') : 'N/A' }}</td>
             </tr>
 
             <tr>
                 <td class="label">Unidad responsable:</td>
-                <td>{{ $actividad->unidad_operativa }}</td>
+                <td>{{ $actividad->UNIDAD }}</td>
             </tr>
 
             <tr>

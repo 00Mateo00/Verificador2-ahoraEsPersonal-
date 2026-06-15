@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\NuevasActividadesPendientes;
 use App\Services\ExcelService;
+use Illuminate\Support\Facades\Cache;
 
 class ImportActividadesForm extends Component
 {
@@ -104,9 +105,7 @@ class ImportActividadesForm extends Component
             // Importar y validar cabeceras estructuradas utilizando el pipeline unificado del servicio
             $data = $importer->importActividades($this->tempFilePath);
 
-            // Cachear los datos parseados para evitar el costoso doble procesamiento I/O en processImport
             $cacheKey = 'excel_import_' . Auth::id();
-            \Illuminate\Support\Facades\Cache::put($cacheKey, $data, 900); // Duración de 15 minutos
 
             $this->headers = $data['headers'];
             $allRows = $data['rows'];
@@ -163,7 +162,10 @@ class ImportActividadesForm extends Component
             // Excluir filas con advertencias de la previsualización y el conteo total
             $this->totalRows = count($validRows);
             $this->previewRows = array_slice($validRows, 0, 10);
-
+            Cache::put($cacheKey, [
+                    'headers' => $data['headers'],
+                    'rows' => $validRows,
+            ], 1200); // Duración de 20 minutos
             $this->step = 2;
         } catch (\Exception $e) {
             $this->cleanupTempFile();
@@ -203,10 +205,7 @@ class ImportActividadesForm extends Component
 
             // Re-parseo defensivo de respaldo (Fallback) únicamente si la caché expiró o fue eliminada
             if (!$data) {
-                if (!file_exists($this->tempFilePath)) {
-                    throw new \Exception('La ruta temporal del archivo de actividades ha expirado y no se encontraron datos en caché.');
-                }
-                $data = $importer->importActividades($this->tempFilePath);
+               return redirect()->route('actividades.importar');
             }
 
             $allRows = $data['rows'];
