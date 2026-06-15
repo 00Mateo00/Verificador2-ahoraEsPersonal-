@@ -18,6 +18,12 @@ class DescargaVerificadorController extends Controller
             abort(403, 'Acceso denegado. Debe iniciar sesión para descargar documentos.');
         }
 
+        // Validar política de visualización horizontal sobre la actividad propietaria del archivo
+        $actividad = $archivo->actividad;
+        if (!$actividad || !Auth::user()->can('view', $actividad)) {
+            abort(403, 'No tiene permisos de acceso regional o de unidad para descargar los respaldos de esta actividad.');
+        }
+
         // Verificar la existencia física real del archivo en el almacenamiento local seguro
         if (!Storage::disk('local')->exists($archivo->archivo_ruta)) {
             abort(404, 'El archivo solicitado no existe o fue removido del servidor.');

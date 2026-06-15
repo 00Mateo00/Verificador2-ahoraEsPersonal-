@@ -28,6 +28,9 @@ class VerificarActividadCard extends Component
     {
         // Defensa en profundidad: Bloquear mutación si el rol del usuario es auditor
         Gate::authorize('mutate');
+        
+        // Validar autorización horizontal estricta sobre la actividad asignada
+        Gate::authorize('update', $this->act);
 
         // 1. Candado atómico en servidor independiente
         $lockKey = 'lock_verificar_act_'.Auth::id().'_'.$this->act->actividad_id;
