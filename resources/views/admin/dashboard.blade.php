@@ -139,9 +139,15 @@
                 Revisar Historial Completo
             </a>
             
-            <a href="{{ route('admin.edicion') }}" class="btn-acc" style="text-align: center; border: 1px solid #ef3340; color: #ef3340 !important; background-color: rgba(239, 51, 64, 0.02); font-weight: 700; padding: 12px; font-size: 0.9rem; border-radius: 6px;">
+            @if(session('modo_edicion'))
+            <a href="{{ route('admin.salir-edicion') }}" class="btn-acc" style="text-align: center; border: 1px solid #ef3340; color: #ef3340 !important; background-color: rgba(239, 51, 64, 0.05); font-weight: 700; padding: 12px; font-size: 0.9rem; border-radius: 6px;">
+                Salir del Modo Edición 🔓
+            </a>
+            @else
+            <a href="{{ route('admin.edicion') }}" class="btn-acc" style="text-align: center; border: 1px solid #2b8a3e; color: #2b8a3e !important; background-color: rgba(43, 138, 62, 0.02); font-weight: 700; padding: 12px; font-size: 0.9rem; border-radius: 6px;">
                 Modo Edición Crítica 🔐
             </a>
+            @endif
         </div>
     </div>
 

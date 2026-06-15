@@ -100,7 +100,7 @@ Route::middleware(['auth'])->group(function () {
             ));
         })->name('admin.dashboard');
 
-        Route::get('/admin/actividades', [ActividadController::class, 'index'])->name('admin.actividades');
+        Route::get('/admin/actividades', [ActividadController::class, 'historial'])->name('admin.actividades');
 
         // Vista de Unidades en el menú lateral: Listado de usuarios del sistema
         Route::get('/admin/unidades', function () {
@@ -118,7 +118,10 @@ Route::middleware(['auth'])->group(function () {
         })->name('admin.unidades');
 
         Route::get('/admin/edicion', function () {
-            session(['modo_edicion' => true]);
+            session([
+                'modo_edicion' => true,
+                'modo_edicion_last_activity' => time(),
+            ]);
 
             return redirect()->route('actividades.historial')->with('success', 'Modo edición activado. Ahora puede administrar verificadores directamente en las tarjetas de actividad.');
         })->middleware('password.confirm')->name('admin.edicion');
