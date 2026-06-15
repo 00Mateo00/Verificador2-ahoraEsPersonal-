@@ -123,14 +123,14 @@ Route::middleware(['auth'])->group(function () {
                 'modo_edicion_last_activity' => time(),
             ]);
 
-            return redirect()->route('actividades.historial')->with('success', 'Modo edición activado. Ahora puede administrar verificadores directamente en las tarjetas de actividad.');
+            return redirect()->route('admin.dashboard')->with('success', 'Modo edición activado. Las opciones de edición crítica ahora son usables.');
         })->middleware('password.confirm')->name('admin.edicion');
 
-        // Salir del modo edición administrativa
+        // Salir del modo edición administrativa y retornar al dashboard
         Route::get('/admin/salir-edicion', function () {
-            session()->forget('modo_edicion');
+            session()->forget(['modo_edicion', 'modo_edicion_last_activity']);
 
-            return redirect()->route('actividades.historial')->with('success', 'Modo edición desactivado.');
+            return redirect()->route('admin.dashboard')->with('success', 'Modo edición desactivado. Ha retornado al modo de visualización segura.');
         })->name('admin.salir-edicion');
 
         // Acción crítica: Alternar estado de cuentas de usuario. Requiere que el modo_edicion esté activo en sesión.
