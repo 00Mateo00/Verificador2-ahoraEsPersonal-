@@ -29,6 +29,10 @@ Route::get('/dashboard', function () {
 })->name('dashboard');
 
 Route::middleware(['auth'])->group(function () {
+    // Descarga segura de archivos verificadores (Almacenamiento Privado)
+    Route::get('/archivos/{archivo}/descargar', [\App\Http\Controllers\DescargaVerificadorController::class, 'descargar'])
+        ->name('archivos.descargar');
+
     // Consulta global: Accesible por todos los roles autenticados (TO-DO : esta vista ya debería llamarse "historial")
     Route::get('/actividades', [ActividadController::class, 'index'])
         ->middleware('role:admin,director,auditor,cargador,unidad')

@@ -83,7 +83,7 @@
                                         @endphp
                                     </td>
                                     <td style="text-align: right;">
-                                        <a href="{{ asset('storage/' . $archivo->archivo_ruta) }}" download style="font-weight: 700; color: #0F69C4;">Descargar</a>
+                                        <a href="{{ route('archivos.descargar', $archivo->archivo_id) }}" style="font-weight: 700; color: #0F69C4;">Descargar</a>
                                     </td>
                                 </tr>
                             @endforeach
