@@ -28,7 +28,7 @@ class VerificarActividadCard extends Component
     {
         // Defensa en profundidad: Bloquear mutación si el rol del usuario es auditor
         Gate::authorize('mutate');
-        
+
         // Validar autorización horizontal estricta sobre la actividad asignada
         Gate::authorize('update', $this->act);
 
@@ -54,20 +54,27 @@ class VerificarActividadCard extends Component
             'estado' => 'VERIFICADA',
         ]);
 
+        // Persistencia segura de archivos en disco local (privado por defecto)
         foreach ($this->verificador as $archivo) {
-            $path = $archivo->store('uploads', 'local');
-
+            // 1. Obtener metadatos antes de mover o guardar el archivo temporal
             $originalName = $archivo->getClientOriginalName();
+            $mimeType = $archivo->getMimeType();
+            $size = $archivo->getSize();
+
             $filename = pathinfo($originalName, PATHINFO_FILENAME);
             $extension = pathinfo($originalName, PATHINFO_EXTENSION);
             $sanitizedFilename = Str::slug($filename).'.'.$extension;
 
+            // 2. Guardar el archivo físicamente en el storage local (lo cual invalida el archivo temporal original)
+            $path = $archivo->store('uploads', 'local');
+
+            // 3. Registrar en base de datos
             Archivo::create([
                 'actividad_id' => $this->act->actividad_id,
                 'archivo_nombre' => $sanitizedFilename,
                 'archivo_ruta' => $path,
-                'archivo_tipo' => $archivo->getMimeType(),
-                'archivo_size' => $archivo->getSize(),
+                'archivo_tipo' => $mimeType,
+                'archivo_size' => $size,
             ]);
         }
 
