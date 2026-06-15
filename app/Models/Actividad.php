@@ -51,6 +51,8 @@ class Actividad extends Model
         'TOTAL_NOBINARIO' => 'integer',
         'MES' => 'integer',
         'AÑO' => 'integer',
+        'FECHA' => 'date',
+        'FECHA_SAJ' => 'date',
 
         'activo' => 'boolean',
     ];
