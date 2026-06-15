@@ -20,7 +20,7 @@ return new class extends Migration
             $table->string('REGION', 100);
             $table->integer('MES');
             $table->integer('AÑO');
-            $table->string('FECHA_SAJ', 50);
+            $table->date('FECHA_SAJ');
 
             // deben venir remapeadas
             $table->string('MODALIDAD', 50);
@@ -28,7 +28,7 @@ return new class extends Migration
             $table->string('SUB_TIPO_ACTIVIDAD', 150);
 
             // opcionales:
-            $table->string('FECHA', 50)->nullable();
+            $table->date('FECHA')->nullable();
             $table->integer('PARTICIPANTES')->nullable();
             $table->integer('TOTAL_HOMBRES')->nullable();
             $table->integer('TOTAL_MUJERES')->nullable();
