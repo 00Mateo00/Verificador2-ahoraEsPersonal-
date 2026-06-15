@@ -3,78 +3,136 @@
 namespace App\Services;
 
 use App\Models\Actividad;
+use Carbon\Carbon;
 
 class ExcelService
 {
+    public const REQUIRED_EXCEL_HEADERS = [
+        ...Actividad::MANDATORY_FIELDS_TO_CREATE_ACTIVIDAD,
+        ...Actividad::OPTIONAL_ACTIVIDAD_FIELDS,
+        'TIPO_UNIDAD',
+        'TIPO_ACT_COD',
+    ];
 
-  public const REQUIRED_EXCEL_HEADERS = [
-    ...Actividad::MANDATORY_FIELDS_TO_CREATE_ACTIVIDAD,
-    ...Actividad::OPTIONAL_ACTIVIDAD_FIELDS,
-    'TIPO_UNIDAD',
-    'TIPO_ACT_COD',
-  ];
+    /**
+     * Preserva los límites entre palabras durante la normalización.
+     */
+    public static function normalizarTexto(string $texto): string
+    {
+        $texto = trim($texto);
+        $buscar = ['á', 'é', 'í', 'ó', 'ú', 'Á', 'É', 'Í', 'Ó', 'Ú', 'ñ', 'Ñ', 'ü', 'Ü'];
+        $reemplazar = ['a', 'e', 'i', 'o', 'u', 'A', 'E', 'I', 'O', 'U', 'n', 'N', 'u', 'U'];
+        $texto = str_replace($buscar, $reemplazar, $texto);
+        $texto = preg_replace('/[^a-zA-Z0-9]+/', ' ', $texto);
 
-
-  /**
-   * Preserva los límites entre palabras durante la normalización.
-   */
-  public static function normalizarTexto(string $texto): string
-  {
-    $texto = trim($texto);
-    $buscar     = ['á', 'é', 'í', 'ó', 'ú', 'Á', 'É', 'Í', 'Ó', 'Ú', 'ñ', 'Ñ', 'ü', 'Ü'];
-    $reemplazar = ['a', 'e', 'i', 'o', 'u', 'A', 'E', 'I', 'O', 'U', 'n', 'N', 'u', 'U'];
-    $texto = str_replace($buscar, $reemplazar, $texto);
-    $texto = preg_replace('/[^a-zA-Z0-9]+/', ' ', $texto);
-
-    return strtoupper(trim($texto));
-  }
-
-  public function validateActividad(array $data): void
-  {
-    if ($data['rows'] === []) {
-      throw new \Exception('No hay filas de datos para validar.');
+        return strtoupper(trim($texto));
     }
 
-    $missing = array_diff(
-      self::REQUIRED_EXCEL_HEADERS,
-      $data['headers']
-    );
+    /**
+     * Normaliza formatos de fecha habituales en Excel para SQL (YYYY-MM-DD).
+     */
+    public static function normalizarFecha(?string $fecha): ?string
+    {
+        if (empty($fecha)) {
+            return null;
+        }
 
-    if (!empty($missing)) {
-      throw new \Exception(
-        'Faltan columnas requeridas: '
-          . implode(', ', $missing)
-      );
+        $fecha = trim($fecha);
+        $fecha = str_replace('\\', '', $fecha);
+
+        $fecha = preg_replace('/,\d+$/', '', $fecha);
+
+        if (preg_match('/^\d{4}-\d{2}-\d{2}$/', $fecha)) {
+            return $fecha;
+        }
+
+        // Formatos habituales encontrados en Excel/CSV
+        $formatos = [
+            'd-m-Y',
+            'd/m/Y',
+            'Y-m-d',
+            'Y/m/d',
+            'j-n-Y',
+            'j/n/Y',
+
+            // Fechas con hora
+            'd/m/y H:i:s',
+            'd/m/Y H:i:s',
+            'd-m-y H:i:s',
+            'd-m-Y H:i:s',
+        ];
+
+        foreach ($formatos as $formato) {
+            try {
+                return Carbon::createFromFormat($formato, $fecha)
+                    ->format('Y-m-d');
+            } catch (\Throwable $e) {
+                continue;
+            }
+        }
+
+        // Fallback para otros formatos válidos que Carbon pueda interpretar
+        try {
+            return Carbon::parse($fecha)->format('Y-m-d');
+        } catch (\Throwable $e) {
+            return null;
+        }
     }
-  }
 
-  public function parseActividad(array $data): array
-  {
-    $data['headers'] = array_values(
-      array_intersect($data['headers'], self::REQUIRED_EXCEL_HEADERS)
-    );
+    public function validateActividad(array $data): void
+    {
+        if ($data['rows'] === []) {
+            throw new \Exception('No hay filas de datos para validar.');
+        }
 
-    $filteredRows = [];
+        $missing = array_diff(
+            self::REQUIRED_EXCEL_HEADERS,
+            $data['headers']
+        );
 
-    foreach ($data['rows'] as $row) {
-      // 1. Excluir filas donde TIPO_UNIDAD contenga "NAD" o "SENADIS"
-      $tipoUnidad = strtoupper($row['TIPO_UNIDAD'] ?? '');
-      if (str_contains($tipoUnidad, 'NAD') || str_contains($tipoUnidad, 'SENADIS')) {
-        continue;
-      }
-
-      // 2. Preservar únicamente filas donde TIPO_ACT_COD sea 1 o 2
-      $tipoActCod = (int) ($row['TIPO_ACT_COD'] ?? 0);
-      if ($tipoActCod !== 1 && $tipoActCod !== 2) {
-        continue;
-      }
-
-      // 3. Retener solo las cabeceras registradas
-      $filteredRows[] = array_intersect_key($row, array_flip(self::REQUIRED_EXCEL_HEADERS));
+        if (! empty($missing)) {
+            throw new \Exception(
+                'Faltan columnas requeridas: '
+                  .implode(', ', $missing)
+            );
+        }
     }
 
-    $data['rows'] = $filteredRows;
+    public function parseActividad(array $data): array
+    {
+        $data['headers'] = array_values(
+            array_intersect($data['headers'], self::REQUIRED_EXCEL_HEADERS)
+        );
 
-    return $data;
-  }
+        $filteredRows = [];
+
+        foreach ($data['rows'] as $row) {
+            // 1. Excluir filas donde TIPO_UNIDAD contenga "NAD" o "SENADIS"
+            $tipoUnidad = strtoupper($row['TIPO_UNIDAD'] ?? '');
+            if (str_contains($tipoUnidad, 'NAD') || str_contains($tipoUnidad, 'SENADIS')) {
+                continue;
+            }
+
+            // 2. Preservar únicamente filas donde TIPO_ACT_COD sea 1 o 2
+            $tipoActCod = (int) ($row['TIPO_ACT_COD'] ?? 0);
+            if ($tipoActCod !== 1 && $tipoActCod !== 2) {
+                continue;
+            }
+
+            // 3. Normalizar campos de fecha a formato SQL YYYY-MM-DD
+            if (isset($row['FECHA_SAJ'])) {
+                $row['FECHA_SAJ'] = self::normalizarFecha($row['FECHA_SAJ']);
+            }
+            if (isset($row['FECHA'])) {
+                $row['FECHA'] = self::normalizarFecha($row['FECHA']);
+            }
+
+            // 4. Retener solo las cabeceras registradas
+            $filteredRows[] = array_intersect_key($row, array_flip(self::REQUIRED_EXCEL_HEADERS));
+        }
+
+        $data['rows'] = $filteredRows;
+
+        return $data;
+    }
 }

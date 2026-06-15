@@ -22,7 +22,7 @@
         @php $lastMonthYear = null; @endphp
         @foreach ($actividades as $act)
         @php
-        $actDate = \Carbon\Carbon::parse($act->fecha_actividad);
+        $actDate = $act->FECHA ?? now();
         $monthYearKey = $actDate->format('Y-m');
         @endphp
 
