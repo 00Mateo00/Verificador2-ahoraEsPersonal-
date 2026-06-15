@@ -5,6 +5,7 @@ use App\Http\Controllers\DescargaVerificadorController;
 use App\Models\Actividad;
 use App\Models\CargaExcel;
 use App\Models\Region;
+use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
@@ -103,8 +104,28 @@ Route::middleware(['auth'])->group(function () {
 
         // Modo edición administrativa / Configuración crítica: Protegida estrictamente por confirmación de contraseña en red (Item 4.8)
         Route::get('/admin/edicion', function () {
-            return view('admin.dashboard'); // Redirige de vuelta o renderiza la vista en modo edición protegida
+            $usuarios = User::query()
+                ->orderBy('rol', 'asc')
+                ->orderBy('name', 'asc')
+                ->paginate(15);
+
+            return view('admin.edicion', compact('usuarios'));
         })->middleware('password.confirm')->name('admin.edicion');
+
+        // Acción crítica: Alternar estado de cuentas de usuario protegido por reconfirmación
+        Route::patch('/admin/usuarios/{user}/toggle', function (User $user) {
+            if ($user->id === auth()->id()) {
+                return back()->with('error', 'No puede deshabilitar su propia cuenta de administrador.');
+            }
+
+            $user->update([
+                'estado' => ! $user->estado,
+            ]);
+
+            $statusText = $user->estado ? 'habilitada' : 'deshabilitada';
+
+            return back()->with('success', "La cuenta de {$user->name} ha sido {$statusText} con éxito.");
+        })->middleware('password.confirm')->name('admin.usuarios.toggle');
     });
 
     // Rutas exclusivas de Carga Masiva (Excel)
