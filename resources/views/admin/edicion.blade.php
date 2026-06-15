@@ -49,8 +49,17 @@
 
 <!-- Tabla de Usuarios y Control de Acceso -->
 <div style="background-color: #ffffff; border: 1px solid rgba(226, 232, 240, 0.8); border-radius: 8px; padding: 25px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.02);">
-    <h3 style="margin-top: 0; margin-bottom: 20px; font-size: 1.15rem; color: #0d1b2a; font-weight: 700; border-bottom: 2px solid #f1f5f9; padding-bottom: 12px;">
-        👤 Catálogo General de Unidades y Operadores
+    <h3 style="margin-top: 0; margin-bottom: 20px; font-size: 1.15rem; color: #0d1b2a; font-weight: 700; border-bottom: 2px solid #f1f5f9; padding-bottom: 12px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+        <span>👤 Catálogo General de Unidades y Operadores</span>
+        @if(session('modo_edicion'))
+        <span style="background-color: rgba(239, 51, 64, 0.08); color: #ef3340; font-size: 0.75rem; font-weight: bold; padding: 4px 10px; border-radius: 20px; border: 1px solid rgba(239, 51, 64, 0.2);">
+            Modo Edición Activo 🔓
+        </span>
+        @else
+        <span style="background-color: rgba(100, 116, 139, 0.08); color: #64748b; font-size: 0.75rem; font-weight: bold; padding: 4px 10px; border-radius: 20px; border: 1px solid rgba(100, 116, 139, 0.2);">
+            Modo Solo Lectura 🔒
+        </span>
+        @endif
     </h3>
 
     <div style="overflow-x: auto;">
@@ -101,16 +110,26 @@
                         @if($usr->id === auth()->id())
                         <span style="font-size: 0.8rem; color: #94a3b8; font-style: italic;">Su Cuenta</span>
                         @else
-                        <form action="{{ route('admin.usuarios.toggle', $usr->id) }}" method="POST" style="display: inline;">
-                            @csrf
-                            @method('PATCH')
-                            <button type="submit" 
+                            @if(session('modo_edicion'))
+                            <form action="{{ route('admin.usuarios.toggle', $usr->id) }}" method="POST" style="display: inline;">
+                                @csrf
+                                @method('PATCH')
+                                <button type="submit" 
+                                        class="btn-acc" 
+                                        style="padding: 6px 12px; font-size: 0.8rem; font-weight: 700; border-radius: 4px; cursor: pointer; transition: all 0.15s ease;
+                                               @if($usr->estado) border-color: #ef3340; color: #ef3340 !important; background-color: rgba(239, 51, 64, 0.02); @else border-color: #2b8a3e; color: #2b8a3e !important; background-color: rgba(43, 138, 62, 0.02); @endif">
+                                    {{ $usr->estado ? 'Deshabilitar' : 'Habilitar' }}
+                                </button>
+                            </form>
+                            @else
+                            <button type="button" 
                                     class="btn-acc" 
-                                    style="padding: 6px 12px; font-size: 0.8rem; font-weight: 700; border-radius: 4px; cursor: pointer; transition: all 0.15s ease;
-                                           @if($usr->estado) border-color: #ef3340; color: #ef3340 !important; background-color: rgba(239, 51, 64, 0.02); @else border-color: #2b8a3e; color: #2b8a3e !important; background-color: rgba(43, 138, 62, 0.02); @endif">
-                                {{ $usr->estado ? 'Deshabilitar' : 'Habilitar' }}
+                                    disabled
+                                    title="Debe activar el Modo Edición en el Dashboard para realizar modificaciones"
+                                    style="padding: 6px 12px; font-size: 0.8rem; font-weight: 600; border-radius: 4px; cursor: not-allowed; border-color: #cbd5e1; color: #94a3b8 !important; background-color: #f1f5f9;">
+                                Bloqueado 🔒
                             </button>
-                        </form>
+                            @endif
                         @endif
                     </td>
                 </tr>

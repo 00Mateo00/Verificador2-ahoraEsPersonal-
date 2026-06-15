@@ -86,18 +86,12 @@
                     </li>
                     @endif
                     
-                    <!-- Control rápido del Modo Edición para Administrador -->
-                    @if(Auth::user()->rol === 'admin')
+                    <!-- Control rápido del Modo Edición para Administrador (Solo botón Desactivar) -->
+                    @if(Auth::user()->rol === 'admin' && session('modo_edicion'))
                     <li style="margin-top: 15px; border-top: 1px dashed #cbd5e1; padding-top: 10px;">
-                        @if(session('modo_edicion'))
                         <a href="{{ route('admin.salir-edicion') }}" style="color: #ef3340 !important; font-weight: 700; background-color: rgba(239, 51, 64, 0.05); border-radius: 4px; display: block; padding: 10px 15px;">
                             Desactivar Edición 🔓
                         </a>
-                        @else
-                        <a href="{{ route('admin.edicion') }}" style="color: #2b8a3e !important; font-weight: 700; background-color: rgba(43, 138, 62, 0.05); border-radius: 4px; display: block; padding: 10px 15px;">
-                            Activar Modo Edición 🔒
-                        </a>
-                        @endif
                     </li>
                     @endif
 

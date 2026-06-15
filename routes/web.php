@@ -130,18 +130,25 @@ Route::middleware(['auth'])->group(function () {
             return redirect()->route('actividades.historial')->with('success', 'Modo edición desactivado.');
         })->name('admin.salir-edicion');
 
-        // Acción crítica: Alternar estado de cuentas de usuario protegido por reconfirmación (usado en Unidades)
+        // Acción crítica: Alternar estado de cuentas de usuario. Requiere que el modo_edicion esté activo en sesión.
         Route::patch('/admin/usuarios/{user}/toggle', function (User $user) {
+            // Defensa: Bloquear si no se encuentra en modo edición
+            if (! session('modo_edicion')) {
+                abort(403, 'Acción bloqueada. Debe activar el Modo Edición para realizar modificaciones en las unidades.');
+            }
+
             if ($user->id === auth()->id()) {
                 return back()->with('error', 'No puede deshabilitar su propia cuenta de administrador.');
             }
+
             $user->update([
                 'estado' => ! $user->estado,
             ]);
+
             $statusText = $user->estado ? 'habilitada' : 'deshabilitada';
 
             return back()->with('success', "La cuenta de {$user->name} ha sido {$statusText} con éxito.");
-        })->middleware('password.confirm')->name('admin.usuarios.toggle');
+        })->name('admin.usuarios.toggle');
     });
 
     // Rutas exclusivas de Carga Masiva (Excel)
