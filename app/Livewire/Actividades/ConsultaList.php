@@ -133,7 +133,9 @@ class ConsultaList extends Component
             $query->where('TIPO_ACTIVIDAD', $this->tipo);
         }
 
-        return $query->orderBy('FECHA', 'desc')->orderBy('actividad_id', 'desc');
+        return $query->with(['archivos', 'unidadAsignada'])
+            ->orderBy('FECHA', 'desc')
+            ->orderBy('actividad_id', 'desc');
     }
 
     public function render()
