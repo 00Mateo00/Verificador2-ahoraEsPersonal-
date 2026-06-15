@@ -14,6 +14,7 @@ class CargaExcel extends Model
     protected $fillable = [
         'user_id',
         'nombre_archivo',
+        'hash_archivo',
         'total_filas',
         'estado'
     ];

@@ -45,6 +45,8 @@ class ImportActividadesForm extends Component
 
     public string $originalFileName = '';
 
+    public string $fileHash = '';
+
     // Temporizador
     public int $countdown = 10;
 
@@ -133,6 +135,22 @@ class ImportActividadesForm extends Component
         $this->tempFilePath = Storage::path($path);
         $this->originalFileName = $this->excelFile->getClientOriginalName();
 
+        // Calcular huella digital única (SHA-256) del contenido del archivo
+        $this->fileHash = hash_file('sha256', $this->tempFilePath);
+
+        // Validar duplicados únicamente si la planilla previa está activa ("PROCESADA")
+        $hashDuplicado = CargaExcel::query()
+            ->where('hash_archivo', $this->fileHash)
+            ->where('estado', 'PROCESADA')
+            ->exists();
+
+        if ($hashDuplicado) {
+            $this->cleanupTempFile();
+            session()->flash('error', 'Esta planilla (o una con exactamente el mismo contenido) ya ha sido procesada de manera exitosa anteriormente.');
+
+            return;
+        }
+
         try {
             // Importar y validar cabeceras estructuradas utilizando el pipeline unificado del servicio
             $data = $importer->importActividades($this->tempFilePath);
@@ -207,6 +225,7 @@ class ImportActividadesForm extends Component
             Cache::put($cacheKey, [
                 'headers' => $data['headers'],
                 'rows' => $validRows,
+                'hash' => $this->fileHash,
             ], 1200); // Duración de 20 minutos
             $this->step = 2;
         } catch (\Exception $e) {
@@ -251,16 +270,18 @@ class ImportActividadesForm extends Component
             }
 
             $allRows = $data['rows'];
+            $finalHash = $data['hash'] ?? $this->fileHash;
 
             // Colección para registrar los IDs únicos de las unidades que reciben actividades en este lote
             $unidadesAfectadas = [];
 
-            DB::transaction(function () use ($allRows, &$unidadesAfectadas) {
+            DB::transaction(function () use ($allRows, $finalHash, &$unidadesAfectadas) {
 
                 // Registrar lote de control Excel
                 $carga = CargaExcel::create([
                     'user_id' => Auth::id(),
                     'nombre_archivo' => $this->originalFileName,
+                    'hash_archivo' => $finalHash,
                     'total_filas' => $this->totalRows,
                     'estado' => 'PROCESADA',
                 ]);

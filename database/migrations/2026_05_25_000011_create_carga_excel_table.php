@@ -12,6 +12,7 @@ return new class extends Migration
             $table->id('carga_id');
             $table->unsignedBigInteger('user_id'); // Operador de carga
             $table->string('nombre_archivo', 255);
+            $table->string('hash_archivo', 64)->unique();
             $table->integer('total_filas')->default(0);
             $table->string('estado', 50)->default('PROCESADA'); // PROCESADA, CANCELADA
             $table->timestamps();
