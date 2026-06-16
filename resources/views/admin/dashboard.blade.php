@@ -10,7 +10,7 @@
     </p>
 </div>
 
-<!-- Alertas Dinámicas de Seguridad (Dashboard) -->
+<!-- Alertas Dinámicas de (Dashboard) -->
 @if(session('modo_edicion'))
 <div style="background-color: #fff1f2; border: 1px solid #fecdd3; border-radius: 8px; padding: 20px; margin-bottom: 30px; display: flex; align-items: flex-start; gap: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.01);">
     <span style="font-size: 1.5rem; line-height: 1;">⚠️</span>
