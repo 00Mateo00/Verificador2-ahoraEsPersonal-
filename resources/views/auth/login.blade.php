@@ -12,10 +12,14 @@
 
     <!-- Navegación Principal adaptada a Intranet CAJBIOBIO -->
     <header class="header-nav-caj">
-        <div class="header-logo-container-caj">
-            <span class="logo-text-caj">
-                <strong>Intranet CAJBIOBIO</strong>
-            </span>
+        <div class="header-brand-sgv">
+            <div class="header-brand-icon">
+                SGV
+            </div>
+            <div class="header-brand-text">
+                <h1>Sistema de Gestión Verificador</h1>
+                <span>Corporación de Asistencia Judicial · Región del Biobío</span>
+            </div>
         </div>
     </header>
 
@@ -25,22 +29,38 @@
 
             <!-- Columna Izquierda: Mensaje de Bienvenida Relacionado a la App -->
             <div class="login-welcome-column">
-                <h1 class="welcome-title">Bienvenido al Registro de Actividades</h1>
+                <span class="welcome-badge">
+                    Plataforma Institucional
+                </span>
+                <h1 class="welcome-title">
+                    Sistema de Gestión Verificador
+                </h1>
                 <p class="welcome-description">
-                    Plataforma interna de la Corporación de Asistencia Judicial. Accede para registrar tus actividades, subir documentos de respaldo y automatizar las notificaciones, reemplazando de forma definitiva la antigua metodología de envío de correos con formularios manuales.
+                    Centraliza el registro de actividades, la gestión documental
+                    y el seguimiento de procesos internos en una plataforma segura,
+                    eficiente y orientada a la trazabilidad de la información.
                 </p>
-
-                <!-- Botón ClaveÚnica Oficial -->
-                <a class="btn-claveunica" aria-label="Continuar con ClaveÚnica" href="#">
-                    <span class="cl-claveunica" aria-hidden="true"></span>
-                    <span class="texto" aria-hidden="true">ClaveÚnica</span>
-                </a>
+                <div class="system-info-box">
+                    <div class="system-info-title">
+                        Funcionalidades principales
+                    </div>
+                    <div><strong>01.</strong>&nbsp; Registro de Actividades</div>
+                    <div><strong>02.</strong>&nbsp; Gestión Documental</div>
+                    <div><strong>03.</strong>&nbsp; Seguimiento Institucional</div>
+                    <div><strong>04.</strong>&nbsp; Notificaciones Automáticas</div>
+                </div>
             </div>
 
             <!-- Columna Derecha: Tarjeta de Acceso Institucional -->
 
             <div class="login-card-column">
                 <div class="login-container-card-caj">
+                    @if($errors->any())
+                    <div class="alert-error-top">
+                        <strong>⚠ Error de autenticación</strong>
+                        <p>{{ $errors->first() }}</p>
+                    </div>
+                    @endif
                     <div class="login-card-header">
                         <h2>Acceso al Sistema</h2>
                         <p>Gestión de verificadores centralizada</p>
@@ -48,21 +68,10 @@
 
                     <form class="login-form-body-caj" action="{{ route('login') }}" method="POST">
                         @csrf
-
-                        @if (session('error'))
-                        <div class="error-info-alert" style="background-color: #f8d7da; color: #721c24; padding: 10px; border-radius: 4px; margin-bottom: 20px; font-size: 0.9rem;">
-                            <strong>Atención:</strong> {{ session('error') }}
-                        </div>
-                        @endif
-
                         <div class="form-group-item-caj">
                             <label for="email">Usuario Institucional</label>
-                            <input type="text" id="email" name="email" class="form-input-control-caj" placeholder="ejemplo@cajbiobio.cl" required>
-                            @error('email')
-                            <span style="color: red;">{{ $message }}</span>
-                            @enderror
+                            <input type="text" id="email" name="email" class="form-input-control-caj" placeholder="ejemplo@cajbiobio.cl" autocomplete="username" required>
                         </div>
-
                         <div class="form-group-item-caj">
                             <div style="display: flex; justify-content: space-between; align-items: center;">
                                 <label for="password" style="margin: 0;">Contraseña</label>
@@ -70,16 +79,26 @@
                                     ¿Olvidó su contraseña?
                                 </a>
                             </div>
-                            <input type="password" id="password" name="password" class="form-input-control-caj" placeholder="••••••••••••" required>
-                            @error('password')
-                            <span style="color: red;">{{ $message }}</span>
-                            @enderror
+                            <div class="password-wrapper">
+                                <input type="password" id="password" name="password" class="form-input-control-caj" autocomplete="current-password" placeholder="••••••••••••" required>
+                                <button
+                                    type="button"
+                                    id="togglePassword"
+                                    class="password-toggle"
+                                    aria-label="Mostrar contraseña"
+                                    onclick="togglePasswordVisibility()">
+                                    Mostrar
+                                </button>
+                            </div>
                         </div>
 
                         <div class="form-group-item-caj" style="margin-top: 25px;">
                             <button type="submit" class="btn-primary-caj">
-                                Ingresar al Panel
+                                Acceder al Sistema
                             </button>
+                            <p class="login-security-note">
+                                Acceso restringido a personal autorizado.
+                            </p>
                         </div>
                     </form>
                 </div>
@@ -91,7 +110,27 @@
     <footer class="footer-credits-caj">
         <p>© 2026 Corporación de Asistencia Judicial de la Región del Biobío. Todos los derechos reservados.</p>
     </footer>
+<script>
+    function togglePasswordVisibility() {
 
+        const password = document.getElementById("password");
+        const button = document.getElementById("togglePassword");
+
+        if (password.type === "password") {
+
+            password.type = "text";
+            button.textContent = "Ocultar";
+            button.setAttribute("aria-label", "Ocultar contraseña");
+
+        } else {
+
+            password.type = "password";
+            button.textContent = "Mostrar";
+            button.setAttribute("aria-label", "Mostrar contraseña");
+
+        }
+    }
+</script>
 </body>
 
 </html>

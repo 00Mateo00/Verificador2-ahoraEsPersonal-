@@ -22,6 +22,12 @@
         <div class="login-grid-wrapper" style="grid-template-columns: 1fr; max-width: 480px;">
 
             <div class="login-container-card-caj">
+                @if($errors->any())
+                    <div class="alert-error-top">
+                        <strong>⚠ Error de autenticación</strong>
+                        <p>{{ $errors->first() }}</p>
+                    </div>
+                    @endif
                 <div class="login-card-header">
                     <h2>Recuperar Contraseña</h2>
                     <p>Ingrese su correo institucional para recibir un enlace de restablecimiento.</p>
@@ -39,11 +45,6 @@
                     <div class="form-group-item-caj">
                         <label for="email">Correo Institucional</label>
                         <input type="email" id="email" name="email" class="form-input-control-caj" placeholder="ejemplo@cajbiobio.cl" value="{{ old('email') }}" required autofocus>
-                        @error('email')
-                        <span style="color: #ef3340; font-size: 0.85rem; font-weight: 600; display: block; margin-top: 6px;">
-                            ⚠️ {{ $message }}
-                        </span>
-                        @enderror
                     </div>
 
                     <div class="form-group-item-caj" style="margin-top: 25px;">
