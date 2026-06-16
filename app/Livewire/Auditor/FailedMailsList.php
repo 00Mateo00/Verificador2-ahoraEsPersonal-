@@ -24,7 +24,7 @@ class FailedMailsList extends Component
     public function resendIndividual($id)
     {
         $mail = FailedMail::findOrFail($id);
-        
+
         if ($mail->sendSynchronously()) {
             session()->flash('success', "Correo para {$mail->recipient} reenviado con éxito.");
         } else {
@@ -41,6 +41,7 @@ class FailedMailsList extends Component
 
         if ($pendingMails->isEmpty()) {
             session()->flash('info', 'No hay correos pendientes o fallidos para reenviar.');
+
             return;
         }
 
@@ -70,7 +71,7 @@ class FailedMailsList extends Component
         $user = Auth::user();
 
         // Defensa: Validar rol admin y que el Modo Edición esté activo en sesión
-        if ($user->rol !== 'admin' || !session('modo_edicion')) {
+        if ($user->rol !== 'admin' || ! session('modo_edicion')) {
             abort(403, 'Acción no autorizada. Solo un Administrador en Modo Edición puede eliminar correos fallidos.');
         }
 

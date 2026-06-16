@@ -1,31 +1,51 @@
 <div>
+    <!-- Pestañas de navegación exclusivas para el Administrador -->
+    @if($isAdmin)
+        <div style="display: flex; gap: 8px; margin-bottom: 25px; border-bottom: 1px solid #cbd5e1; padding-bottom: 15px; flex-wrap: wrap;">
+            <button type="button" 
+                    wire:click="setTab('pending')" 
+                    style="padding: 10px 20px; font-size: 0.85rem; font-weight: 700; border-radius: 6px; cursor: pointer; border: none; transition: all 0.2s ease;
+                           @if($activeTab === 'pending') background-color: #ef3340; color: #ffffff; @else background-color: #ffffff; color: #475569; border: 1px solid #cbd5e1; @endif">
+                ✉️ Pendientes y Fallidos
+            </button>
+            <button type="button" 
+                    wire:click="setTab('sent')" 
+                    style="padding: 10px 20px; font-size: 0.85rem; font-weight: 700; border-radius: 6px; cursor: pointer; border: none; transition: all 0.2s ease;
+                           @if($activeTab === 'sent') background-color: #2b8a3e; color: #ffffff; @else background-color: #ffffff; color: #475569; border: 1px solid #cbd5e1; @endif">
+                ✅ Historial de Enviados
+            </button>
+        </div>
+    @endif
+
     <!-- Barra de búsqueda e indicador de acciones masivas -->
     <div style="background-color: #ffffff; border: 1px solid rgba(226, 232, 240, 0.8); padding: 25px; border-radius: 8px; margin-bottom: 25px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.02); display: flex; justify-content: space-between; align-items: center; gap: 20px; flex-wrap: wrap;">
         
         <div style="flex: 1; min-width: 250px;">
-            <label for="searchMails" style="font-size: 0.85rem; font-weight: 700; color: #475569; display: block; margin-bottom: 6px;">Buscar por destinatario o asunto</label>
+            <label for="searchMails" style="font-size: 0.85rem; font-weight: 700; color: #475569; display: block; margin-bottom: 6px;">Buscar por destinatario o nombre</label>
             <input type="text" 
                    wire:model.live.debounce.350ms="search" 
                    id="searchMails" 
                    class="form-input-control-caj" 
-                   placeholder="Ej: micorreo@gmail.com, Aviso: Nuevas actividades..." 
+                   placeholder="Ej: micorreo@gmail.com, Juan Pérez..." 
                    style="width: 100%;">
         </div>
 
-        <div style="display: flex; gap: 10px;">
-            <button type="button" 
-                    wire:click="resendAll" 
-                    class="btn-primary-caj" 
-                    style="padding: 12px 24px; font-size: 0.9rem; background-color: #2b8a3e; border: none; display: inline-flex; align-items: center; gap: 8px;"
-                    wire:loading.attr="disabled"
-                    wire:target="resendAll">
-                <span wire:loading.remove wire:target="resendAll">🔄 Reintentar Todos los Pendientes</span>
-                <span wire:loading wire:target="resendAll">⏳ Reenviando...</span>
-            </button>
-        </div>
+        @if($activeTab === 'pending')
+            <div style="display: flex; gap: 10px;">
+                <button type="button" 
+                        wire:click="resendAll" 
+                        class="btn-primary-caj" 
+                        style="padding: 12px 24px; font-size: 0.9rem; background-color: #2b8a3e; border: none; display: inline-flex; align-items: center; gap: 8px;"
+                        wire:loading.attr="disabled"
+                        wire:target="resendAll">
+                    <span wire:loading.remove wire:target="resendAll">🔄 Reintentar Todos los Pendientes</span>
+                    <span wire:loading wire:target="resendAll">⏳ Reenviando...</span>
+                </button>
+            </div>
+        @endif
     </div>
 
-    <!-- Alertas dinámicas internas del componente Livewire -->
+    <!-- Alertas dinámicas internas -->
     @if (session()->has('success'))
         <div style="background-color: #d4edda; color: #155724; padding: 15px; border-radius: 6px; margin-bottom: 20px; border: 1px solid #c3e6cb; font-size: 0.9rem; font-weight: 600;">
             ✅ {{ session('success') }}
@@ -42,27 +62,43 @@
         </div>
     @endif
 
-    <!-- Tabla del catálogo -->
+    <!-- Tabla de datos -->
     <div style="background-color: #ffffff; border: 1px solid rgba(226, 232, 240, 0.8); border-radius: 8px; padding: 25px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.02);">
         <h3 style="margin-top: 0; margin-bottom: 20px; font-size: 1.15rem; color: #0d1b2a; font-weight: 700; border-bottom: 2px solid #f1f5f9; padding-bottom: 12px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
-            <span>Lista de Correos que Fallaron</span>
-            <span style="font-size: 0.8rem; color: #64748b; font-weight: 500;">Operación Síncrona</span>
+            <span>
+                @if($isAdmin)
+                    {{ $activeTab === 'sent' ? 'Historial de Correos Enviados' : 'Correos Pendientes y Fallidos' }}
+                @else
+                    Lista de Correos que Fallaron
+                @endif
+            </span>
+            <span style="font-size: 0.8rem; color: #64748b; font-weight: 500;">
+                @if($isAdmin)
+                    {{ $activeTab === 'sent' ? 'Exitosos' : 'Pendientes de entrega' }}
+                @else
+                    Módulo de Auditoría
+                @endif
+            </span>
         </h3>
 
         @if($mails->isEmpty())
             <div style="text-align: center; padding: 40px; color: #94a3b8; font-size: 0.95rem;">
-                📁 No se registran correos fallidos o pendientes de entrega.
+                📁 No se registran correos en esta sección.
             </div>
         @else
             <div style="overflow-x: auto;">
                 <table class="table-custom-data" style="width: 100%; border-collapse: collapse; min-width: 800px;">
                     <thead>
                         <tr>
-                            <th style="padding: 12px 16px; background-color: #f1f5f9; text-align: left; font-size: 0.8rem; font-weight: 700; color: #475569;">Destinatario</th>
-                            <th style="padding: 12px 16px; background-color: #f1f5f9; text-align: left; font-size: 0.8rem; font-weight: 700; color: #475569;">Asunto</th>
+                            <th style="padding: 12px 16px; background-color: #f1f5f9; text-align: left; font-size: 0.8rem; font-weight: 700; color: #475569;">Para</th>
+                            <th style="padding: 12px 16px; background-color: #f1f5f9; text-align: left; font-size: 0.8rem; font-weight: 700; color: #475569;">Tipo de Correo</th>
                             <th style="padding: 12px 16px; background-color: #f1f5f9; text-align: center; font-size: 0.8rem; font-weight: 700; color: #475569; width: 100px;">Intentos</th>
                             <th style="padding: 12px 16px; background-color: #f1f5f9; text-align: center; font-size: 0.8rem; font-weight: 700; color: #475569; width: 120px;">Estado</th>
-                            <th style="padding: 12px 16px; background-color: #f1f5f9; text-align: left; font-size: 0.8rem; font-weight: 700; color: #475569;">Último Error de Conexión</th>
+                            @if($activeTab !== 'sent')
+                                <th style="padding: 12px 16px; background-color: #f1f5f9; text-align: left; font-size: 0.8rem; font-weight: 700; color: #475569;">Último Error de Conexión</th>
+                            @else
+                                <th style="padding: 12px 16px; background-color: #f1f5f9; text-align: center; font-size: 0.8rem; font-weight: 700; color: #475569; width: 180px;">Fecha Envío</th>
+                            @endif
                             <th style="padding: 12px 16px; background-color: #f1f5f9; text-align: right; font-size: 0.8rem; font-weight: 700; color: #475569; width: 180px;">Acciones</th>
                         </tr>
                     </thead>
@@ -70,13 +106,16 @@
                         @foreach($mails as $mail)
                             <tr style="border-bottom: 1px solid #e2e8f0; @if($mail->status === 'SENT') background-color: #f0fdf4; @endif">
                                 <td style="padding: 14px 16px; font-size: 0.9rem; font-weight: 600; color: #0d1b2a;">
-                                    {{ $mail->recipient }}
-                                    <span style="display: block; font-size: 0.75rem; color: #94a3b8; font-weight: normal; font-family: monospace;">
-                                        {{ class_basename($mail->mailable_class) }}
+                                    {{ $mail->user->name ?? 'Usuario de Sistema' }}
+                                    @if($isAdmin && $mail->user)
+                                        <span style="font-size: 0.72rem; background-color: #f1f5f9; color: #475569; padding: 2px 4px; border-radius: 4px; font-weight: normal; margin-left: 6px;">ID: #{{ $mail->user->id }}</span>
+                                    @endif
+                                    <span style="display: block; font-size: 0.78rem; color: #64748b; font-weight: normal; margin-top: 2px;">
+                                        {{ $mail->recipient }}
                                     </span>
                                 </td>
-                                <td style="padding: 14px 16px; font-size: 0.85rem; color: #475569;">
-                                    {{ $mail->subject }}
+                                <td style="padding: 14px 16px; font-size: 0.85rem; color: #475569; font-weight: 500;">
+                                    {{ $mail->mail_type }}
                                 </td>
                                 <td style="padding: 14px 16px; text-align: center; font-size: 0.85rem; color: #334155; font-weight: 600;">
                                     {{ $mail->attempts }}
@@ -96,9 +135,15 @@
                                         </span>
                                     @endif
                                 </td>
-                                <td style="padding: 14px 16px; font-size: 0.8rem; color: #ef3340; max-width: 250px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="{{ $mail->error_message }}">
-                                    {{ $mail->error_message ?: 'Ninguno' }}
-                                </td>
+                                @if($activeTab !== 'sent')
+                                    <td style="padding: 14px 16px; font-size: 0.8rem; color: #ef3340; max-width: 250px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="{{ $mail->error_message }}">
+                                        {{ $mail->error_message ?: 'Ninguno' }}
+                                    </td>
+                                @else
+                                    <td style="padding: 14px 16px; text-align: center; font-size: 0.85rem; color: #475569; font-weight: 500;">
+                                        {{ $mail->updated_at->format('d-m-Y H:i') }}
+                                    </td>
+                                @endif
                                 <td style="padding: 14px 16px; text-align: right;">
                                     <div style="display: flex; gap: 8px; justify-content: flex-end;">
                                         @if($mail->status !== 'SENT')
@@ -115,7 +160,7 @@
                                         @if($isModoEdicion)
                                             <button type="button" 
                                                     wire:click="deleteMail({{ $mail->id }})" 
-                                                    wire:confirm="¿Está seguro de que desea eliminar permanentemente este registro de correo fallido?"
+                                                    wire:confirm="¿Está seguro de que desea eliminar permanentemente este registro?"
                                                     class="btn-acc" 
                                                     style="padding: 6px 12px; font-size: 0.8rem; font-weight: 700; border-color: #ef3340; color: #ef3340 !important; background-color: rgba(239, 51, 64, 0.02); border-radius: 4px;">
                                                 Eliminar 🗑️

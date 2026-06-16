@@ -1,18 +1,22 @@
 @extends('layouts.app')
 
-@section('title', 'Correos Fallidos - Intranet CAJBIOBIO')
+@section('title', (Auth::user()->rol === 'admin' ? 'Historial de Correos' : 'Correos Fallidos') . ' - Intranet CAJBIOBIO')
 
 @section('breadcrumbs')
 <a href="#">Administración</a>
 <span class="separator">‣</span>
-<span>Correos Fallidos</span>
+<span>{{ Auth::user()->rol === 'admin' ? 'Historial de Correos' : 'Correos Fallidos' }}</span>
 @endsection
 
 @section('content')
 <div class="panel-header-section" style="margin-bottom: 25px;">
-    <h2>Módulo de Monitoreo de Correos Fallidos</h2>
+    <h2>{{ Auth::user()->rol === 'admin' ? 'Consola de Historial de Correos' : 'Módulo de Monitoreo de Correos Fallidos' }}</h2>
     <p style="margin: 5px 0 0; color: #64748b; font-size: 0.95rem;">
-        Consulte, diagnostique y gestione de forma manual o masiva el reenvío de los correos automáticos que fallaron de forma síncrona en el sistema.
+        @if(Auth::user()->rol === 'admin')
+            Consulte y gestione el historial de envíos exitosos y resuelva de forma manual o masiva los correos que quedaron pendientes o fallaron.
+        @else
+            Consulte, diagnostique y gestione de forma manual o masiva el reenvío de los correos automáticos que fallaron de forma síncrona en el sistema.
+        @endif
     </p>
 </div>
 
@@ -24,7 +28,7 @@
         <div>
             <strong style="color: #9f1239; font-size: 1rem; display: block; margin-bottom: 4px;">Modo Edición Activado (Administrador)</strong>
             <p style="color: #be123c; font-size: 0.85rem; margin: 0; line-height: 1.5;">
-                Se encuentra en modo interactivo de administración crítica. Puede eliminar registros de correos fallidos de forma permanente de la base de datos si así lo requiere.
+                Se encuentra en modo interactivo de administración crítica. Puede eliminar registros de correos de forma permanente de la base de datos si así lo requiere.
             </p>
         </div>
     </div>
