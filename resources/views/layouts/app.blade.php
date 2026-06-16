@@ -96,7 +96,7 @@
                         <li>
                             <a href="{{ route('auditor.correos-fallidos') }}" 
                                class="{{ $routeActive ? 'active' : '' }}"
-                               style="@if($hasPendingMails && !$routeActive) background-color: rgba(239, 51, 64, 0.05); color: #ef3340 !important; font-weight: 700; border-left: 4px solid #ef3340; @elseif($hasPendingMails && $routeActive) border-left: 4px solid #ef3340; @endif display: flex; justify-content: space-between; align-items: center; width: 100%; box-sizing: border-box; transition: all 0.2s ease;">
+                               style="@if($hasPendingMails && !$routeActive) background-color: rgba(239, 51, 64, 0.05); color: #ef3340 !important; font-weight: 700;  @endif display: flex; justify-content: space-between; align-items: center; width: 100%; box-sizing: border-box; transition: all 0.2s ease;">
                                 <span>
                                     {{ Auth::user()->rol === 'admin' ? 'Historial de Correos' : 'Correos Fallidos' }}
                                 </span>

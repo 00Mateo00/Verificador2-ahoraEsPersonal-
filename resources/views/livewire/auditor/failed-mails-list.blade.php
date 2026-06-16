@@ -86,9 +86,11 @@
                 📁 No se registran correos en esta sección.
             </div>
         @else
-            <div style="overflow-x: auto;">
+            <div style="overflow-x: auto;"> 
                 <table class="table-custom-data" style="width: 100%; border-collapse: collapse; min-width: 800px;">
+                   
                     <thead>
+                         
                         <tr>
                             <th style="padding: 12px 16px; background-color: #f1f5f9; text-align: left; font-size: 0.8rem; font-weight: 700; color: #475569;">Para</th>
                             <th style="padding: 12px 16px; background-color: #f1f5f9; text-align: left; font-size: 0.8rem; font-weight: 700; color: #475569;">Tipo de Correo</th>
@@ -101,6 +103,7 @@
                             @endif
                             <th style="padding: 12px 16px; background-color: #f1f5f9; text-align: right; font-size: 0.8rem; font-weight: 700; color: #475569; width: 180px;">Acciones</th>
                         </tr>
+                        
                     </thead>
                     <tbody>
                         @foreach($mails as $mail)
@@ -136,8 +139,58 @@
                                     @endif
                                 </td>
                                 @if($activeTab !== 'sent')
-                                    <td style="padding: 14px 16px; font-size: 0.8rem; color: #ef3340; max-width: 250px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="{{ $mail->error_message }}">
-                                        {{ $mail->error_message ?: 'Ninguno' }}
+                                    <td style="padding: 14px 16px; font-size: 0.8rem; color: #ef3340; max-width: 250px;">
+                                        @if($mail->error_message)
+                                            <div x-data="{ open: false, errorText: @js($mail->error_message) }">
+                                                <span style="display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="{{ $mail->error_message }}">
+                                                    {{ \Illuminate\Support\Str::limit($mail->error_message, 35) }}
+                                                </span>
+                                                <button type="button" 
+                                                        @click="open = true" 
+                                                        style="background: none; border: none; color: #0F69C4; font-size: 0.72rem; font-weight: 700; cursor: pointer; padding: 2px 0 0; text-decoration: underline; display: block;">
+                                                    Mostrar más 🔍
+                                                </button>
+
+                                                <!-- Ventana Modal de Detalle de Error -->
+                                                <div x-show="open" 
+                                                     x-transition 
+                                                     style="position: fixed; inset: 0; background-color: rgba(13, 27, 42, 0.45); display: flex; align-items: center; justify-content: center; z-index: 9999; padding: 20px;"
+                                                     x-cloak>
+                                                    <div @click.away="open = false" 
+                                                         style="background-color: #ffffff; border-radius: 8px; border: 1px solid #cbd5e1; width: 90vw; max-width: 90%; height: 80vh; max-height: 90%; box-shadow: 0 10px 25px rgba(0,0,0,0.15); display: flex; flex-direction: column; overflow: hidden;">
+                                                        
+                                                        <!-- Cabecera de la Modal -->
+                                                        <div style="padding: 15px 20px; border-bottom: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center; background-color: #f8fafc; border-top-left-radius: 8px; border-top-right-radius: 8px; flex-shrink: 0;">
+                                                            <strong style="color: #0d1b2a; font-size: 0.95rem;">Detalle del Error de Conexión</strong>
+                                                            <button type="button" @click="open = false" style="background: none; border: none; font-size: 1.25rem; color: #64748b; cursor: pointer; line-height: 1;">&times;</button>
+                                                        </div>
+
+                                                        <!-- Detalle del Error (Monoespacio con Wrap Obligatorio) -->
+                                                        <div style="padding: 20px; flex: 1; overflow-y: auto; overflow-x: hidden; background-color: #f8fafc;">
+                                                            <pre style="margin: 0; white-space: pre-wrap; word-wrap: break-word; word-break: break-all; font-family: monospace; font-size: 0.82rem; background-color: #f1f5f9; padding: 20px; border-radius: 6px; border: 1px solid #cbd5e1; color: #ef3340; text-align: left; width: 100%; box-sizing: border-box;" x-text="errorText"></pre>
+                                                        </div>
+
+                                                        <!-- Pie con Botón de Copiado -->
+                                                        <div style="padding: 12px 20px; border-top: 1px solid #e2e8f0; display: flex; justify-content: flex-end; gap: 10px; background-color: #f8fafc; border-bottom-left-radius: 8px; border-bottom-right-radius: 8px; flex-shrink: 0;">
+                                                            <button type="button" 
+                                                                    @click="navigator.clipboard.writeText(errorText); alert('Mensaje de error copiado al portapapeles')" 
+                                                                    class="btn-primary-caj" 
+                                                                    style="padding: 8px 16px; font-size: 0.8rem; background-color: #0F69C4;">
+                                                                📋 Copiar Mensaje
+                                                            </button>
+                                                            <button type="button" 
+                                                                    @click="open = false" 
+                                                                    class="btn-acc" 
+                                                                    style="padding: 8px 16px; font-size: 0.8rem; border-color: #cbd5e1; border-radius: 4px;">
+                                                                Cerrar
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        @else
+                                            <span style="color: #64748b; font-style: italic;">Ninguno</span>
+                                        @endif
                                     </td>
                                 @else
                                     <td style="padding: 14px 16px; text-align: center; font-size: 0.85rem; color: #475569; font-weight: 500;">
@@ -173,7 +226,6 @@
                     </tbody>
                 </table>
             </div>
-
             <!-- Paginación -->
             <div style="margin-top: 25px;">
                 {{ $mails->links() }}
