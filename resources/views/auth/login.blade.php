@@ -45,9 +45,9 @@
                         Funcionalidades principales
                     </div>
                     <div><strong>01.</strong>&nbsp; Registro de Actividades</div>
-                    <div><strong>02.</strong>&nbsp; Gestión Documental</div>
-                    <div><strong>03.</strong>&nbsp; Seguimiento Institucional</div>
-                    <div><strong>04.</strong>&nbsp; Notificaciones Automáticas</div>
+            <div><strong>02.</strong>&nbsp; Gestión Documental</div>
+            <div><strong>03.</strong>&nbsp; Seguimiento Institucional</div>
+            <div><strong>04.</strong>&nbsp; Notificaciones Automáticas</div>
                 </div>
             </div>
 
