@@ -106,7 +106,9 @@ class ConsultaList extends Component
     {
         $userRol = Auth::user()->rol;
 
-        $query = Actividad::query()->where('activo', true);
+        $query = Actividad::query()
+            ->where('activo', true)
+            ->where('estado', 'VERIFICADA');
 
         // Limitación jerárquica por unidad de acuerdo al rol usando el helper centralizado
         $this->applyRoleRestrictions($query, $userRol);
@@ -238,7 +240,9 @@ class ConsultaList extends Component
 
         $userRol = Auth::user()->rol;
 
-        $monthQuery = Actividad::query()->where('activo', true);
+        $monthQuery = Actividad::query()
+            ->where('activo', true)
+            ->where('estado', 'VERIFICADA');
 
         // Aplicar restricciones de rol centralizadas
         $this->applyRoleRestrictions($monthQuery, $userRol);
