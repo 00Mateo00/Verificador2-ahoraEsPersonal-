@@ -12,10 +12,34 @@ class FailedMailsList extends Component
     use WithPagination;
 
     public string $search = '';
+    public string $activeTab = 'pending'; // 'pending' o 'sent'
+
+    public function mount()
+    {
+        $user = Auth::user();
+        
+        if ($user->rol === 'admin') {
+            // Lógica por defecto para el admin:
+            // Si hay correos pendientes, la pestaña por defecto es 'pending'. De lo contrario, es 'sent'.
+            $hasPending = MailLog::whereIn('status', ['PENDING', 'FAILED'])->exists();
+            $this->activeTab = $hasPending ? 'pending' : 'sent';
+        } else {
+            // Auditor no tiene pestañas, siempre visualiza pendientes
+            $this->activeTab = 'pending';
+        }
+    }
 
     public function updatedSearch()
     {
         $this->resetPage();
+    }
+
+    public function setTab($tab)
+    {
+        if (Auth::user()->rol === 'admin') {
+            $this->activeTab = $tab;
+            $this->resetPage();
+        }
     }
 
     /**
