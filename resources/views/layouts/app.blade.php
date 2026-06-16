@@ -86,6 +86,27 @@
                     </li>
                     @endif
 
+                    <!-- Historial de Correos (Admin) y Correos Fallidos (Auditor) con indicador dinámico -->
+                    @if(Auth::user()->rol === 'admin' || Auth::user()->rol === 'auditor')
+                        @php
+                            $pendingMailsCount = \App\Models\MailLog::whereIn('status', ['PENDING', 'FAILED'])->count();
+                            $hasPendingMails = $pendingMailsCount > 0;
+                            $routeActive = request()->routeIs('auditor.correos-fallidos');
+                        @endphp
+                        <li>
+                            <a href="{{ route('auditor.correos-fallidos') }}" 
+                               class="{{ $routeActive ? 'active' : '' }}"
+                               style="@if($hasPendingMails && !$routeActive) background-color: rgba(239, 51, 64, 0.05); color: #ef3340 !important; font-weight: 700;  @endif display: flex; justify-content: space-between; align-items: center; width: 100%; box-sizing: border-box; transition: all 0.2s ease;">
+                                <span>
+                                    {{ Auth::user()->rol === 'admin' ? 'Historial de Correos' : 'Correos Fallidos' }}
+                                </span>
+                                <span style="background-color: {{ $hasPendingMails ? '#ef3340' : '#cbd5e1' }}; color: #ffffff; padding: 2px 7px; border-radius: 10px; font-size: 0.75rem; font-weight: 700; margin-left: auto; transition: all 0.2s ease;">
+                                    {{ $pendingMailsCount }}
+                                </span>
+                            </a>
+                        </li>
+                    @endif
+
                     <!-- Enlaces dinámicos centralizados por Rol -->
                     @if(Auth::user()->rol === 'admin' || Auth::user()->rol === 'cargador')
                     <li>

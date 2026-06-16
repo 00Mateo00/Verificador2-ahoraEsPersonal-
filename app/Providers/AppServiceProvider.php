@@ -2,11 +2,14 @@
 
 namespace App\Providers;
 
+use App\Listeners\LogFailedNotification;
 use Carbon\CarbonImmutable;
 use Illuminate\Auth\Notifications\ResetPassword;
+use Illuminate\Notifications\Events\NotificationFailed;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Validation\Rules\Password;
@@ -29,6 +32,12 @@ class AppServiceProvider extends ServiceProvider
         $this->configureDefaults();
         $this->registerAuditorPolicies();
         $this->configurePasswordResetEmail();
+
+        // Registrar listener global para capturar fallos de notificaciones (ej: Fortify resets)
+        Event::listen(
+            NotificationFailed::class,
+            LogFailedNotification::class
+        );
     }
 
     /**

@@ -80,7 +80,7 @@
         </p>
 
         <div class="button-wrapper">
-            <a href="{{ route('actividades.index') }}" class="button">
+            <a href="{{ route('unidad.dashboard') }}" class="button">
                 IR A MIS ACTIVIDADES PENDIENTES
             </a>
         </div>
