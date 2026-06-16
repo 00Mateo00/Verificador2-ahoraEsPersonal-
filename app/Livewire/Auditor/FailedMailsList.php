@@ -2,7 +2,7 @@
 
 namespace App\Livewire\Auditor;
 
-use App\Models\FailedMail;
+use App\Models\MailLog;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -23,7 +23,7 @@ class FailedMailsList extends Component
      */
     public function resendIndividual($id)
     {
-        $mail = FailedMail::findOrFail($id);
+        $mail = MailLog::findOrFail($id);
 
         if ($mail->sendSynchronously()) {
             session()->flash('success', "Correo para {$mail->recipient} reenviado con éxito.");
@@ -37,7 +37,7 @@ class FailedMailsList extends Component
      */
     public function resendAll()
     {
-        $pendingMails = FailedMail::whereIn('status', ['PENDING', 'FAILED'])->get();
+        $pendingMails = MailLog::whereIn('status', ['PENDING', 'FAILED'])->get();
 
         if ($pendingMails->isEmpty()) {
             session()->flash('info', 'No hay correos pendientes o fallidos para reenviar.');
@@ -72,29 +72,49 @@ class FailedMailsList extends Component
 
         // Defensa: Validar rol admin y que el Modo Edición esté activo en sesión
         if ($user->rol !== 'admin' || ! session('modo_edicion')) {
-            abort(403, 'Acción no autorizada. Solo un Administrador en Modo Edición puede eliminar correos fallidos.');
+            abort(403, 'Acción no autorizada. Solo un Administrador en Modo Edición puede eliminar registros de correos.');
         }
 
-        $mail = FailedMail::findOrFail($id);
+        $mail = MailLog::findOrFail($id);
         $recipient = $mail->recipient;
         $mail->delete();
 
-        session()->flash('success', "Se eliminó el correo fallido destinado a {$recipient} de forma administrativa.");
+        session()->flash('success', "Se eliminó el correo destinado a {$recipient} de forma administrativa.");
     }
 
     public function render()
     {
-        $mails = FailedMail::query()
-            ->when($this->search, function ($query) {
-                $query->where('recipient', 'like', "%{$this->search}%")
-                    ->orWhere('subject', 'like', "%{$this->search}%");
-            })
+        $user = Auth::user();
+        $isAdmin = $user->rol === 'admin';
+
+        $query = MailLog::query()->with('user');
+
+        if ($isAdmin) {
+            if ($this->activeTab === 'sent') {
+                $query->where('status', 'SENT');
+            } else {
+                $query->whereIn('status', ['PENDING', 'FAILED']);
+            }
+        } else {
+            // Auditor siempre ve pendientes/fallidos
+            $query->whereIn('status', ['PENDING', 'FAILED']);
+        }
+
+        $mails = $query->when($this->search, function ($q) {
+            $q->where(function ($sub) {
+                $sub->where('recipient', 'like', "%{$this->search}%")
+                    ->orWhereHas('user', function ($uQ) {
+                        $uQ->where('name', 'like', "%{$this->search}%");
+                    });
+            });
+        })
             ->latest()
             ->paginate(15);
 
         return view('livewire.auditor.failed-mails-list', [
             'mails' => $mails,
-            'isModoEdicion' => (Auth::user()->rol === 'admin' && session('modo_edicion')),
+            'isAdmin' => $isAdmin,
+            'isModoEdicion' => ($isAdmin && session('modo_edicion')),
         ]);
     }
 }
