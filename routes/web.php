@@ -8,6 +8,7 @@ use App\Models\CargaExcel;
 use App\Models\Region;
 use App\Models\Unidad;
 use App\Models\User;
+use App\Services\MailService;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
@@ -170,10 +171,18 @@ Route::middleware(['auth'])->group(function () {
                 abort(403, 'Solo el rol de auditor puede despachar renotificaciones.');
             }
 
-            // Despachar la renotificación agrupada asíncronamente en la cola
-            Mail::to($unidad->user->email)->queue(new NuevasActividadesPendientes($unidad));
+            // Intentar envío síncrono seguro
+            $sent = MailService::sendSafe(
+                $unidad->user->email,
+                new NuevasActividadesPendientes($unidad),
+                ['unidad_id' => $unidad->id]
+            );
 
-            return back()->with('success', "Se ha enviado una nueva renotificación por correo a la cola de procesamiento para la unidad '{$unidad->user->name}'.");
+            if ($sent) {
+                return back()->with('success', "Se ha enviado una nueva renotificación de forma síncrona a la unidad '{$unidad->user->name}'.");
+            }
+
+            return back()->with('error', "El envío falló de forma síncrona. Se ha archivado la renotificación en 'Correos Fallidos' para su posterior gestión.");
         })->name('auditor.unidades.renotificar');
     });
 
@@ -236,15 +245,24 @@ Route::middleware(['auth'])->group(function () {
         })->name('director.dashboard');
 
         // Acción de renotificación regional asíncrona
+        // Acción de renotificación regional asíncrona
         Route::post('/director/unidades/{unidad}/renotificar', function (Unidad $unidad) {
             $region = Region::where('user_id', Auth::id())->first();
             if (! $region || $unidad->region_id !== $region->id) {
                 abort(403, 'No tiene permisos para renotificar unidades fuera de su jurisdicción.');
             }
 
-            Mail::to($unidad->user->email)->queue(new NuevasActividadesPendientes($unidad));
+            $sent = MailService::sendSafe(
+                $unidad->user->email,
+                new NuevasActividadesPendientes($unidad),
+                ['unidad_id' => $unidad->id]
+            );
 
-            return back()->with('success', "Se ha enviado una nueva renotificación de forma asíncrona a la unidad '{$unidad->user->name}'.");
+            if ($sent) {
+                return back()->with('success', "Se ha enviado una nueva renotificación de forma síncrona a la unidad '{$unidad->user->name}'.");
+            }
+
+            return back()->with('error', "El envío síncrono falló. Se ha archivado la renotificación en 'Correos Fallidos' para posterior gestión administrativa.");
         })->name('director.unidades.renotificar');
     });
 

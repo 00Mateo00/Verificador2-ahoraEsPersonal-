@@ -8,11 +8,11 @@ use App\Models\CargaExcel;
 use App\Models\Unidad;
 use App\Services\ExcelImporterService;
 use App\Services\ExcelService;
+use App\Services\MailService;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
-use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
 use Livewire\Component;
 use Livewire\WithFileUploads;
@@ -349,7 +349,11 @@ class ImportActividadesForm extends Component
             foreach ($unidadesAgrupadas as $correoDestinatario => $grupoUnidades) {
                 // Seleccionar la primera unidad del grupo como representante para la construcción de la plantilla
                 $unidadRepresentante = $grupoUnidades->first();
-                Mail::to($correoDestinatario)->queue(new NuevasActividadesPendientes($unidadRepresentante));
+                MailService::sendSafe(
+                    $correoDestinatario,
+                    new NuevasActividadesPendientes($unidadRepresentante),
+                    ['unidad_id' => $unidadRepresentante->id]
+                );
             }
 
             // Limpieza inmediata de la caché de importación para liberar memoria del servidor
