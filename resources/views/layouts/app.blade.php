@@ -86,6 +86,15 @@
                     </li>
                     @endif
 
+                    <!-- Correos Fallidos compartidos para Admin y Auditor -->
+                    @if(Auth::user()->rol === 'admin' || Auth::user()->rol === 'auditor')
+                    <li>
+                        <a href="{{ route('auditor.correos-fallidos') }}" class="{{ request()->routeIs('auditor.correos-fallidos') ? 'active' : '' }}">
+                            Correos Fallidos
+                        </a>
+                    </li>
+                    @endif
+
                     <!-- Enlaces dinámicos centralizados por Rol -->
                     @if(Auth::user()->rol === 'admin' || Auth::user()->rol === 'cargador')
                     <li>

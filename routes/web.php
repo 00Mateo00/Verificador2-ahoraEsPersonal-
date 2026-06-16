@@ -49,6 +49,11 @@ Route::middleware(['auth'])->group(function () {
         ->middleware('role:admin,director,auditor,cargador,unidad')
         ->name('actividades.historial');
 
+    // Módulo de Correos Fallidos compartido para Auditor y Administrador
+    Route::get('/correos-fallidos', function () {
+        return view('auditor.failed-mails');
+    })->middleware('role:admin,auditor')->name('auditor.correos-fallidos');
+
     // Rutas exclusivas del Auditor (Dashboard con estadísticas de solo lectura)
     Route::middleware(['role:auditor'])->group(function () {
         Route::get('/auditor/dashboard', function () {
