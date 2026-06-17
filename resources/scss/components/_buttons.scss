@@ -1,0 +1,20 @@
+.btn-primary-caj{
+    background:
+        linear-gradient(
+            135deg,
+            #0f69c4,
+            #003366
+        );
+    color:#fff;
+    border:none;
+    height:54px;
+    border-radius:14px;
+    font-weight:700;
+    font-size:1rem;
+    transition:all .25s ease;
+}
+
+.btn-primary-caj:hover{
+    transform:translateY(-2px);
+    box-shadow:0 10px 25px rgba(15,105,196,.25);
+}

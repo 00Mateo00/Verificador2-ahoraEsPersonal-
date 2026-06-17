@@ -5,7 +5,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ingresar - Verificador de Actividades</title>
-    <link rel="stylesheet" href="{{ asset('assets/css/style.css') }}">
+
+    @vite([
+        'resources/scss/app.scss',
+        'resources/js/app.js'
+    ])
 </head>
 
 <body class="login-layout-body">

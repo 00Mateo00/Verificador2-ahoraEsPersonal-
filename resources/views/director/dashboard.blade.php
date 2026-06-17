@@ -1,9 +1,9 @@
 @extends('layouts.app')
 
-@section('title', 'Dashboard Regional - Intranet CAJBIOBIO')
+@section('title', 'Dashboard Regional - Sistema de Gestion Verificador')
 
 @section('content')
-<div class="panel-header-section" style="margin-bottom: 25px;">
+<div class="dashboard-page-header">
     <h2>Dashboard de Dirección Regional</h2>
     <p style="margin: 5px 0 0; color: #64748b; font-size: 0.95rem;">
         Consola de supervisión territorial para la región de <strong>{{ $region->region_nombre ?? 'Jurisdicción Asignada' }}</strong>.
@@ -12,53 +12,51 @@
 </div>
 
 <!-- Tarjeta Informativa de Rol -->
-<div style="background-color: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px; padding: 20px; margin-bottom: 25px; display: flex; align-items: flex-start; gap: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.01);">
+<div class="dashboard-alert-card">
     <span style="font-size: 1.5rem; line-height: 1;">🗺️</span>
     <div>
         <strong style="color: #166534; font-size: 1rem; display: block; margin-bottom: 4px;">Control de Operación Regional</strong>
-        <p style="color: #15803d; font-size: 0.85rem; margin: 0; line-height: 1.5;">
+        <p>
             Supervise el avance en la subida de verificadores de las unidades operativas a su cargo para el mes corriente. Use la renotificación dinámica para recordar firmas rezagadas.
         </p>
     </div>
 </div>
 
 <!-- Tarjetas de Indicadores Consolidados -->
-<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; margin-bottom: 35px;">
-    
+<div class="dashboard-kpi-grid">
     <!-- Total Actividades -->
-    <div style="background-color: #ffffff; border: 1px solid rgba(226, 232, 240, 0.8); border-radius: 8px; padding: 20px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.02);">
-        <span style="font-size: 0.75rem; text-transform: uppercase; color: #64748b; font-weight: 700; letter-spacing: 0.5px;">Actividades Totales</span>
-        <h2 style="font-size: 2.2rem; color: #0d1b2a; margin: 10px 0 0; font-weight: 800;">{{ $totalActividades }}</h2>
-        <p style="margin: 5px 0 0; font-size: 0.8rem; color: #94a3b8;">Asignadas este mes</p>
+    <div class="dashboard-kpi-card">
+        <span class="dashboard-kpi-label">Actividades Totales</span>
+        <div class="dashboard-kpi-value">{{ $totalActividades }}</div>
+        <div class="dashboard-kpi-text">Asignadas este mes</div>
     </div>
 
     <!-- Pendientes -->
-    <div style="background-color: #ffffff; border: 1px solid rgba(226, 232, 240, 0.8); border-radius: 8px; padding: 20px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.02);">
-        <span style="font-size: 0.75rem; text-transform: uppercase; color: #ef3340; font-weight: 700; letter-spacing: 0.5px;">Pendientes de Firma</span>
-        <h2 style="font-size: 2.2rem; color: #ef3340; margin: 10px 0 0; font-weight: 800;">{{ $totalCargadas }}</h2>
-        <p style="margin: 5px 0 0; font-size: 0.8rem; color: #fca5a5;">Faltan respaldos</p>
+    <div class="dashboard-kpi-card kpi-red">
+        <span class="dashboard-kpi-label">Pendientes de Firma</span>
+        <div class="dashboard-kpi-value">{{ $totalCargadas }}</div>
+        <div class="dashboard-kpi-text">Faltan respaldos</div>
     </div>
 
     <!-- Verificadas -->
-    <div style="background-color: #ffffff; border: 1px solid rgba(226, 232, 240, 0.8); border-radius: 8px; padding: 20px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.02);">
-        <span style="font-size: 0.75rem; text-transform: uppercase; color: #2b8a3e; font-weight: 700; letter-spacing: 0.5px;">Verificadas con Éxito</span>
-        <h2 style="font-size: 2.2rem; color: #2b8a3e; margin: 10px 0 0; font-weight: 800;">{{ $totalVerificadas }}</h2>
-        <p style="margin: 5px 0 0; font-size: 0.8rem; color: #86efac;">Verificadores archivados</p>
+    <div class="dashboard-kpi-card kpi-green">
+        <span class="dashboard-kpi-label">Verificadas con Éxito</span>
+        <div class="dashboard-kpi-value">{{ $totalVerificadas }}</div>
+        <div class="dashboard-kpi-text">Verificadores archivados</div>
     </div>
 
     <!-- Tasa de Avance -->
-    <div style="background-color: #ffffff; border: 1px solid rgba(226, 232, 240, 0.8); border-radius: 8px; padding: 20px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.02);">
-        <span style="font-size: 0.75rem; text-transform: uppercase; color: #0F69C4; font-weight: 700; letter-spacing: 0.5px;">Porcentaje de Avance</span>
-        <h2 style="font-size: 2.2rem; color: #0F69C4; margin: 10px 0 0; font-weight: 800;">{{ $porcentajeVerificacion }}%</h2>
-        <div style="margin-top: 8px; width: 100%; height: 6px; background-color: #e2e8f0; border-radius: 3px; overflow: hidden;">
-            <div style="width: {{ $porcentajeVerificacion }}%; height: 100%; background-color: #0F69C4;"></div>
+    <div class="dashboard-kpi-card kpi-blue">
+        <span class="dashboard-kpi-label">Porcentaje de Avance</span>
+        <div class="dashboard-kpi-value">{{ $porcentajeVerificacion }}%</div>
+        <div class="dashboard-progress-bar">
+            <div class="dashboard-progress-fill" style="width: {{ $porcentajeVerificacion }}%;"></div>
         </div>
     </div>
-
 </div>
 
 <!-- 📢 Unidades Pendientes de Verificación (Exclusivo de su Región) -->
-<div style="background-color: #ffffff; border: 1px solid rgba(226, 232, 240, 0.8); border-radius: 8px; padding: 25px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.02); margin-bottom: 35px;">
+<div class="dashboard-card">
     <h3 style="margin-top: 0; margin-bottom: 12px; font-size: 1.1rem; color: #0d1b2a; font-weight: 700; border-bottom: 2px solid #f1f5f9; padding-bottom: 12px;">
         📢 Unidades Pendientes de Verificación ({{ $unidadesPendientes->count() }})
     </h3>
@@ -95,7 +93,7 @@
 </div>
 
 <!-- 📋 Listado de Actividades del Periodo Actual -->
-<div style="background-color: #ffffff; border: 1px solid rgba(226, 232, 240, 0.8); border-radius: 8px; padding: 25px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.02); margin-bottom: 30px;">
+<div class="dashboard-card">
     <h3 style="margin-top: 0; margin-bottom: 20px; font-size: 1.15rem; color: #0d1b2a; font-weight: 700; border-bottom: 2px solid #f1f5f9; padding-bottom: 12px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
         <span>📋 Listado de Actividades Registradas</span>
         <span style="font-size: 0.8rem; color: #64748b; font-weight: 500;">Filtro: Mes Estadístico Actual</span>
