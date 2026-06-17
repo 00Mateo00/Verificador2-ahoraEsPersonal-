@@ -43,7 +43,48 @@ Route::get('/dashboard', function () {
 })->name('dashboard');
 
 Route::middleware(['auth'])->group(function () {
-    // Solicitud de renovación sin fricción iniciada desde el banner de advertencia
+    // Pantalla especial de bloqueo de seguridad para usuarios con contraseña expirada
+    Route::get('/password/expired', function (PasswordPolicyService $policyService) {
+        $user = Auth::user();
+
+        // Defensa: Si la contraseña no está vencida, denegar acceso a esta vista
+        if (! $policyService->isExpired($user)) {
+            return redirect()->route('home');
+        }
+
+        // Despachar de forma automática el correo de renovación al cargar la pantalla por primera vez
+        $failedMail = $policyService->getFailedRenewalMail($user);
+        $hasActiveToken = $policyService->hasActiveToken($user->email);
+
+        if (! $failedMail && ! $hasActiveToken) {
+            $token = $policyService->generateRenewalToken($user);
+            $url = url(route('password.reset', [
+                'token' => $token,
+                'email' => $user->email,
+            ], false));
+
+            $expirationString = $policyService->getExpirationDate($user)->format('d-m-Y');
+
+            MailService::sendSafe(
+                $user->email,
+                new PasswordRenewalMail($user, $url, $expirationString),
+                [
+                    'user_id' => $user->id,
+                    'url' => $url,
+                    'expiration_string' => $expirationString,
+                ]
+            );
+        }
+
+        $expirationDate = $policyService->getExpirationDate($user)->format('d-m-Y');
+
+        return view('auth.password-expired', [
+            'user' => $user,
+            'expirationDate' => $expirationDate,
+        ]);
+    })->name('password.expired');
+
+    // Solicitud de renovación sin fricción iniciada desde el banner de advertencia o la pantalla de expiración
     Route::post('/password/request-renewal', function (Request $request, PasswordPolicyService $policyService) {
         $user = Auth::user();
 
