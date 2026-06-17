@@ -1,0 +1,52 @@
+.header-nav-caj{
+    background:linear-gradient(
+        135deg,
+        #003366 0%,
+        #004080 100%
+    );
+    color:#ffffff;
+    min-height:90px;
+    display:flex;
+    align-items:center;
+    padding:18px 60px;
+    border-bottom:2px solid #c8102e;
+    box-shadow:0 2px 12px rgba(0,0,0,.08);
+}
+.header-brand-sgv{
+    display:flex;
+    align-items:center;
+    gap:14px;
+}
+.header-brand-icon{
+    width:52px;
+    height:52px;
+    border-radius:10px;
+    background:rgba(255,255,255,.10);
+    border:1px solid rgba(255,255,255,.15);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:1rem;
+    font-weight:700;
+    letter-spacing:.5px;
+}
+.header-brand-text h1{
+    margin:0;
+    color:#fff;
+    font-size:1.35rem;
+    font-weight:700;
+    letter-spacing:.2px;
+}
+
+.header-brand-text span{
+    display:block;
+    margin-top:4px;
+    color:rgba(255,255,255,.80);
+    font-size:.88rem;
+}
+
+.logo-text-caj {
+    font-size: 1.15rem;
+    letter-spacing: 0.5px;
+    font-family: var(--font-sans);
+}

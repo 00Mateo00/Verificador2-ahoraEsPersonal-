@@ -1,0 +1,111 @@
+.login-layout-body{
+    background:
+        radial-gradient(
+            circle at top left,
+            #dbeafe,
+            transparent 40%
+        ),
+        radial-gradient(
+            circle at bottom right,
+            #bfdbfe,
+            transparent 35%
+        ),
+        linear-gradient(
+            135deg,
+            #fbfafc,
+            #eef4ff
+        );
+    min-height:100vh;
+    display:flex;
+    flex-direction:column;
+}
+
+.login-main-container{
+    flex:1;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    padding:40px 20px;
+}
+
+.login-grid-wrapper{
+    display:grid;
+    grid-template-columns:1.1fr 0.9fr;
+    gap:60px;
+    max-width:1310px;
+    width:100%;
+    align-items:center;
+}
+
+.login-welcome-column{
+   text-align:left; 
+}
+
+.welcome-badge{
+    display:inline-block;
+    background:rgba(15,105,196,.08);
+    color:#0f69c4;
+    padding:8px 14px;
+    border-radius:999px;
+    font-size:.85rem;
+    font-weight:600;
+    margin-bottom:18px;
+}
+
+.welcome-title{
+    margin-bottom:18px;
+}
+
+.welcome-description{
+    max-width:580px;
+    font-size:1.05rem;
+    line-height:1.8;
+    color:#475569;
+    margin-bottom:30px;
+}
+
+.login-container-card-caj{
+    background:rgba(255,255,255,0.95);
+    border-radius:24px;
+    padding:42px;
+    border:1px solid rgba(226,232,240,.8);
+    box-shadow:0 25px 60px rgba(15, 23, 42,.12);
+    backdrop-filter:blur(10px);
+}
+
+.login-card-header h2{
+    color:#0d1b2a;
+    font-size:1.7rem;
+    font-weight:700;
+    margin:0;
+}
+
+.login-card-header p{
+    color:#64748b;
+    font-size:0.95rem;
+    margin-top:6px;
+    margin-bottom:30px;
+}
+
+.login-security-note{
+    text-align:center;
+    margin-top:14px;
+    color:#64748b;
+    font-size:0.80rem;
+}
+.password-wrapper{
+    position:relative;
+}
+.password-toggle{
+    position:absolute;
+    right:12px;
+    top:50%;
+    transform:translateY(-50%);
+    background:none;
+    border:none;
+    color:#0F69C4;
+    font-size:0.85rem;
+    font-weight:600;
+    cursor:pointer;
+    padding:4px;
+}

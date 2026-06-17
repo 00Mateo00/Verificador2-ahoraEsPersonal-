@@ -1,0 +1,15 @@
+@import 'abstracts/variables';
+
+@import 'base/global';
+
+@import 'layout/header';
+@import 'layout/sidebar';
+@import 'layout/footer';
+@import 'layout/dashboard';
+
+@import 'components/buttons';
+@import 'components/forms';
+@import 'components/alerts';
+@import 'components/tables';
+
+@import 'pages/login';

@@ -5,7 +5,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ingresar - Verificador de Actividades</title>
-    <link rel="stylesheet" href="{{ asset('assets/css/style.css') }}">
+
+    @vite([
+        'resources/scss/app.scss',
+        'resources/js/app.js'
+    ])
 </head>
 
 <body class="login-layout-body">
@@ -45,9 +49,9 @@
                         Funcionalidades principales
                     </div>
                     <div><strong>01.</strong>&nbsp; Registro de Actividades</div>
-            <div><strong>02.</strong>&nbsp; Gestión Documental</div>
-            <div><strong>03.</strong>&nbsp; Seguimiento Institucional</div>
-            <div><strong>04.</strong>&nbsp; Notificaciones Automáticas</div>
+                    <div><strong>02.</strong>&nbsp; Gestión Documental</div>
+                    <div><strong>03.</strong>&nbsp; Seguimiento Institucional</div>
+                    <div><strong>04.</strong>&nbsp; Notificaciones Automáticas</div>
                 </div>
             </div>
 

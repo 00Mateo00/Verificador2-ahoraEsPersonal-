@@ -3,9 +3,10 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>@yield('title', 'Intranet CAJBIOBIO')</title>
-    <link rel="stylesheet" href="{{ asset('assets/css/style.css') }}">
+    <meta name="viewport" content="width=devide-width, initial-scale=1.0">
+    <title>@yield('title', 'Sistema Verificado')</title>
+
+    @vite(['resources/scss/app.scss', 'resources/js/app.js'])
     @stack('styles')
 </head>
 
@@ -41,7 +42,7 @@
     <main class="layout-dashboard-main">
         <aside>
             <div class="menu-sidebar-left">
-                <div style="padding: 10px 24px; font-size: 0.8rem; text-transform: uppercase; font-weight: 700; color: #0d1b2a; opacity: 0.7; letter-spacing: 0.5px;">
+                <div style="sidebar-title">
                     @if(Auth::user()->rol === 'admin')
                     Panel Central
                     @elseif(Auth::user()->rol === 'cargador')

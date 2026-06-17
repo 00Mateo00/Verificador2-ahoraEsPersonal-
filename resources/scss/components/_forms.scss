@@ -1,0 +1,29 @@
+.form-group-item-caj{
+    margin-bottom:20px;
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+}
+
+.form-group-item-caj label{
+    color:#334155;
+    font-weight:600;
+    font-size:0.9rem;
+}
+
+.form-input-control-caj{
+    width:100%;
+    box-sizing:border-box;
+    padding:12px 16px;
+    border:1px solid #cbd5e1;
+    border-radius:6px;
+    font-size:0.95rem;
+    color:#334155;
+    transition:border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.form-input-control-caj:focus{
+    outline:none;
+    border-color:#0F69C4;
+    box-shadow:0 0 0 3px rgba(15, 105, 196, 0.15);
+}
