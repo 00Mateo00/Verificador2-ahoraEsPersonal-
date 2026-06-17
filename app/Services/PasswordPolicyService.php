@@ -24,12 +24,12 @@ class PasswordPolicyService
             return false;
         }
 
-        $changedAt = $user->password_changed_at ?: $user->created_at;
-        if (! $changedAt) {
-            return false;
+        // Primer inicio de sesión histórico: si nunca ha cambiado su contraseña (es null), forzar cambio inmediato
+        if (is_null($user->password_changed_at)) {
+            return true;
         }
 
-        return Carbon::parse($changedAt)->addDays(self::DAYS_EXPIRE)->isPast();
+        return Carbon::parse($user->password_changed_at)->addDays(self::DAYS_EXPIRE)->isPast();
     }
 
     /**
@@ -45,8 +45,7 @@ class PasswordPolicyService
             return false;
         }
 
-        $changedAt = $user->password_changed_at ?: $user->created_at;
-        if (! $changedAt) {
+        if (is_null($user->password_changed_at)) {
             return false;
         }
 
@@ -60,12 +59,11 @@ class PasswordPolicyService
      */
     public function getDaysUntilExpiration(User $user): int
     {
-        $changedAt = $user->password_changed_at ?: $user->created_at;
-        if (! $changedAt) {
-            return self::DAYS_EXPIRE;
+        if (is_null($user->password_changed_at)) {
+            return 0;
         }
 
-        $expirationDate = Carbon::parse($changedAt)->addDays(self::DAYS_EXPIRE);
+        $expirationDate = Carbon::parse($user->password_changed_at)->addDays(self::DAYS_EXPIRE);
 
         return (int) now()->startOfDay()->diffInDays($expirationDate->startOfDay(), false);
     }

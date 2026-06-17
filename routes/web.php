@@ -119,9 +119,12 @@ Route::post('/password/request-renewal', function (Request $request, PasswordPol
 
     // 3. De lo contrario, iniciar una petición limpia de renovación
     $token = $policyService->generateRenewalToken($user);
+    $reason = is_null($user->password_changed_at) ? 'first_login' : 'renewal';
+
     $url = url(route('password.reset', [
         'token' => $token,
         'email' => $user->email,
+        'reason' => $reason,
     ], false));
 
     $expirationString = $policyService->getExpirationDate($user)->format('d-m-Y');

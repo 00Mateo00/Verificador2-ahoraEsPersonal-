@@ -28,6 +28,16 @@ class EnforcePasswordRenewal
 
         $user = Auth::user();
 
+        // Si el usuario está autenticado e intenta acceder al formulario de restablecimiento de contraseña,
+        // forzamos su cierre de sesión para que el middleware 'guest' de Fortify no rebote la petición.
+        if ($request->routeIs('password.reset')) {
+            Auth::logout();
+            $request->session()->invalidate();
+            $request->session()->regenerateToken();
+
+            return redirect()->to($request->fullUrl());
+        }
+
         // 1. Evitar bucles de redirección en rutas de autenticación, la pantalla especial de expiración, el restablecimiento de contraseñas y reenvíos
         if ($request->routeIs('login', 'logout', 'password.expired', 'password.request-renewal', 'password.reset', 'password.update', 'verification.*')) {
             return $next($request);
@@ -37,7 +47,24 @@ class EnforcePasswordRenewal
             return $next($request);
         }
 
-        // 3. Contraseña vencida (> 90 días): Almacenar datos en sesión, forzar deslogueo y redirección
+        // 3. Primer inicio de sesión histórico: si nunca ha cambiado su contraseña (es null), forzar redirección inmediata al formulario
+        if (is_null($user->password_changed_at)) {
+            $token = $this->policyService->generateRenewalToken($user);
+            $email = $user->email;
+
+            // Forzar cierre de sesión síncrono para que el formulario cargue sin colisión de sesión activa de Fortify
+            Auth::logout();
+            $request->session()->invalidate();
+            $request->session()->regenerateToken();
+
+            return redirect()->route('password.reset', [
+                'token' => $token,
+                'email' => $email,
+                'reason' => 'first_login',
+            ]);
+        }
+
+        // 4. Contraseña vencida (> 90 días): Almacenar datos en sesión, forzar deslogueo y redirección
         if ($this->policyService->isExpired($user)) {
             $email = $user->email;
             $name = $user->name;
