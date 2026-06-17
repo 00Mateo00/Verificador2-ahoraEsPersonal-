@@ -107,13 +107,13 @@ class PasswordPolicyService
     }
 
     /**
-     * Recupera el último log de correo de renovación fallido (PENDING) si se creó hace menos de 60 minutos.
+     * Recupera el último log de correo de renovación fallido (PENDING o FAILED) si se creó hace menos de 60 minutos.
      */
     public function getFailedRenewalMail(User $user): ?MailLog
     {
         $failedMail = MailLog::where('user_id', $user->id)
             ->where('mailable_class', PasswordRenewalMail::class)
-            ->where('status', 'PENDING')
+            ->whereIn('status', ['PENDING', 'FAILED'])
             ->latest()
             ->first();
 

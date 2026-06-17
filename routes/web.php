@@ -51,10 +51,22 @@ Route::middleware(['auth'])->group(function () {
             return back()->with('error', 'Los administradores no requieren renovación de contraseña.');
         }
 
+        // 1. Evaluar si existe un registro de correo fallido (PENDING/FAILED) para reintentar síncronamente
+        $failedMail = $policyService->getFailedRenewalMail($user);
+        if ($failedMail) {
+            if ($failedMail->sendSynchronously()) {
+                return back()->with('success', 'Se ha reintentado enviar el enlace seguro de renovación a su correo electrónico institucional.');
+            }
+
+            return back()->with('error', 'El reenvío del correo falló. Por favor intente nuevamente más tarde.');
+        }
+
+        // 2. Si ya existe un token de renovación activo (y no se registra ningún fallo en el envío)
         if ($policyService->hasActiveToken($user->email)) {
             return back()->with('success', 'Revisa tu correo electrónico. Ya existe un enlace de renovación activo.');
         }
 
+        // 3. Flujo normal de generación y despacho del enlace de renovación
         $token = $policyService->generateRenewalToken($user);
         $url = url(route('password.reset', [
             'token' => $token,
@@ -66,7 +78,11 @@ Route::middleware(['auth'])->group(function () {
         $sent = MailService::sendSafe(
             $user->email,
             new PasswordRenewalMail($user, $url, $expirationString),
-            ['user_id' => $user->id]
+            [
+                'user_id' => $user->id,
+                'url' => $url,
+                'expiration_string' => $expirationString,
+            ]
         );
 
         if ($sent) {
