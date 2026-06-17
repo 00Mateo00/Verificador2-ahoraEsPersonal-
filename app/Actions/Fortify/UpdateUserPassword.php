@@ -26,7 +26,12 @@ class UpdateUserPassword implements UpdatesUserPasswords
             'password' => $this->passwordRules(),
         ], [
             'current_password.current_password' => __('The provided password does not match your current password.'),
-        ])->validateWithBag('updatePassword');
+        ])->after(function ($validator) use ($user, $input) {
+            // Evitar reutilización de la contraseña actual
+            if (isset($input['password']) && Hash::check($input['password'], $user->password)) {
+                $validator->errors()->add('password', 'La nueva contraseña no puede ser idéntica a su contraseña actual.');
+            }
+        })->validateWithBag('updatePassword');
 
         $user->forceFill([
             'password' => Hash::make($input['password']),

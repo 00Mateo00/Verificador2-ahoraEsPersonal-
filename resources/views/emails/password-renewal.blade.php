@@ -74,7 +74,11 @@
         <p>
             Le informamos que se ha iniciado un proceso de <strong>renovación obligatoria de contraseña</strong> para su cuenta de acceso de la Intranet institucional de la Corporación de Asistencia Judicial de la Región del Biobío.
         </p>
-
+        <div class="button-wrapper">
+            <a href="{{ $url }}" class="button">
+                CREAR NUEVA CONTRASEÑA
+            </a>
+        </div>
         <p>
             Por políticas de seguridad interna, todas las unidades operativas y de control deben renovar sus contraseñas de acceso de forma periódica cada 90 días para garantizar la confidencialidad de la información gestionada.
         </p>
@@ -83,11 +87,7 @@
             Su contraseña actual expirará (o ha expirado ya) el día <strong>{{ $expirationDateString }}</strong>. Posterior a esta fecha, no podrá acceder al sistema de verificación de actividades sin realizar previamente el cambio correspondiente.
         </p>
 
-        <div class="button-wrapper">
-            <a href="{{ $url }}" class="button">
-                CREAR NUEVA CONTRASEÑA
-            </a>
-        </div>
+
 
         <p>
             <em>Nota importante:</em> Este enlace es seguro, de un solo uso y expirará automáticamente en un lapso de 60 minutos de haber sido solicitado. Este correo forma parte de una política de actualización periódica obligatoria y es distinto a una solicitud de recuperación de credenciales olvidadas.

@@ -2,12 +2,10 @@
 
 namespace App\Http\Middleware;
 
+use App\Services\PasswordPolicyService;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use App\Services\PasswordPolicyService;
-use App\Mail\PasswordRenewalMail;
-use App\Services\MailService;
 use Symfony\Component\HttpFoundation\Response;
 
 class EnforcePasswordRenewal
@@ -24,55 +22,65 @@ class EnforcePasswordRenewal
      */
     public function handle(Request $request, Closure $next): Response
     {
-        if (!Auth::check()) {
+        if (! Auth::check()) {
             return $next($request);
         }
 
         $user = Auth::user();
 
-        // 1. Evitar bucles de redirección en rutas de autenticación y recursos clave
-        if ($request->routeIs('login', 'logout', 'password.*', 'verification.*')) {
-            return $next($request);
+        // Si el usuario está autenticado e intenta acceder al formulario de restablecimiento de contraseña,
+        // forzamos su cierre de sesión para que el middleware 'guest' de Fortify no rebote la petición.
+        if ($request->routeIs('password.reset')) {
+            Auth::logout();
+            $request->session()->invalidate();
+            $request->session()->regenerateToken();
+
+            return redirect()->to($request->fullUrl());
         }
 
+        // 1. Evitar bucles de redirección en rutas de autenticación, la pantalla especial de expiración, el restablecimiento de contraseñas y reenvíos
+        if ($request->routeIs('login', 'logout', 'password.expired', 'password.request-renewal', 'password.reset', 'password.update', 'verification.*')) {
+            return $next($request);
+        }
         // 2. Administradores exentos de expiración
         if ($user->rol === 'admin') {
             return $next($request);
         }
 
-        // 3. Contraseña vencida (> 90 días): Cierre síncrono, despacho de correo y bloqueo
-        if ($this->policyService->isExpired($user)) {
-            $failedMail = $this->policyService->getFailedRenewalMail($user);
+        // 3. Primer inicio de sesión histórico: si nunca ha cambiado su contraseña (es null), forzar redirección inmediata al formulario
+        if (is_null($user->password_changed_at)) {
+            $token = $this->policyService->generateRenewalToken($user);
+            $email = $user->email;
 
-            if ($failedMail) {
-                // Si existe un correo de renovación previo fallido síncronamente que siga vigente, lo reintentamos
-                $failedMail->sendSynchronously();
-            } elseif (!$this->policyService->hasActiveToken($user->email)) {
-                // Si no hay intentos fallidos ni tokens activos, generamos uno nuevo de forma limpia
-                $token = $this->policyService->generateRenewalToken($user);
-                $url = url(route('password.reset', [
-                    'token' => $token,
-                    'email' => $user->email,
-                ], false));
-
-                $expirationString = $this->policyService->getExpirationDate($user)->format('d-m-Y');
-
-                MailService::sendSafe(
-                    $user->email,
-                    new PasswordRenewalMail($user, $url, $expirationString),
-                    [
-                        'user_id' => $user->id,
-                        'url' => $url,
-                        'expiration_string' => $expirationString
-                    ]
-                );
-            }
-
+            // Forzar cierre de sesión síncrono para que el formulario cargue sin colisión de sesión activa de Fortify
             Auth::logout();
             $request->session()->invalidate();
             $request->session()->regenerateToken();
 
-            return redirect()->route('login')->with('error', 'Su contraseña ha expirado debido a nuestra política de seguridad de 90 días. Se ha enviado automáticamente un enlace seguro de renovación a su correo electrónico institucional.');
+            return redirect()->route('password.reset', [
+                'token' => $token,
+                'email' => $email,
+                'reason' => 'first_login',
+            ]);
+        }
+
+        // 4. Contraseña vencida (> 90 días): Almacenar datos en sesión, forzar deslogueo y redirección
+        if ($this->policyService->isExpired($user)) {
+            $email = $user->email;
+            $name = $user->name;
+
+            // Forzar cierre de sesión síncrono para prevenir que el middleware 'guest' de Fortify bloquee /reset-password
+            Auth::logout();
+            $request->session()->invalidate();
+            $request->session()->regenerateToken();
+
+            // Preservar el contexto de forma segura para la siguiente petición de renderizado de fallback
+            session([
+                'expired_user_email' => $email,
+                'expired_user_name' => $name,
+            ]);
+
+            return redirect()->route('password.expired');
         }
 
         // 4. Ventana preventiva de advertencia (últimos 7 días antes de expirar)
