@@ -42,7 +42,13 @@ class EnforcePasswordRenewal
 
         // 3. Contraseña vencida (> 90 días): Cierre síncrono, despacho de correo y bloqueo
         if ($this->policyService->isExpired($user)) {
-            if (!$this->policyService->hasActiveToken($user->email)) {
+            $failedMail = $this->policyService->getFailedRenewalMail($user);
+
+            if ($failedMail) {
+                // Si existe un correo de renovación previo fallido síncronamente que siga vigente, lo reintentamos
+                $failedMail->sendSynchronously();
+            } elseif (!$this->policyService->hasActiveToken($user->email)) {
+                // Si no hay intentos fallidos ni tokens activos, generamos uno nuevo de forma limpia
                 $token = $this->policyService->generateRenewalToken($user);
                 $url = url(route('password.reset', [
                     'token' => $token,
@@ -54,7 +60,11 @@ class EnforcePasswordRenewal
                 MailService::sendSafe(
                     $user->email,
                     new PasswordRenewalMail($user, $url, $expirationString),
-                    ['user_id' => $user->id]
+                    [
+                        'user_id' => $user->id,
+                        'url' => $url,
+                        'expiration_string' => $expirationString
+                    ]
                 );
             }
 

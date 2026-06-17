@@ -2,8 +2,12 @@
 
 namespace App\Models;
 
+use App\Mail\ActividadRegistrada;
+use App\Mail\NuevasActividadesPendientes;
+use App\Mail\PasswordRenewalMail;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Facades\Mail;
 
 class MailLog extends Model
 {
@@ -40,11 +44,11 @@ class MailLog extends Model
     {
         $class = $this->mailable_class;
 
-        if ($class === \App\Mail\NuevasActividadesPendientes::class) {
+        if ($class === NuevasActividadesPendientes::class) {
             return 'Aviso de Actividades Pendientes';
         }
 
-        if ($class === \App\Mail\ActividadRegistrada::class) {
+        if ($class === ActividadRegistrada::class) {
             return 'Registro de Actividad';
         }
 
@@ -62,36 +66,45 @@ class MailLog extends Model
     {
         try {
             $class = $this->mailable_class;
-            if (!class_exists($class)) {
+            if (! class_exists($class)) {
                 throw new \Exception("Clase mailable no encontrada: {$class}");
             }
 
             $mailable = null;
-            if ($class === \App\Mail\NuevasActividadesPendientes::class) {
+            if ($class === NuevasActividadesPendientes::class) {
                 $unidadId = $this->payload['unidad_id'] ?? null;
-                $unidad = \App\Models\Unidad::find($unidadId);
-                if (!$unidad) {
+                $unidad = Unidad::find($unidadId);
+                if (! $unidad) {
                     throw new \Exception("Unidad #{$unidadId} no encontrada para reconstruir correo.");
                 }
-                $mailable = new \App\Mail\NuevasActividadesPendientes($unidad);
-            } elseif ($class === \App\Mail\ActividadRegistrada::class) {
+                $mailable = new NuevasActividadesPendientes($unidad);
+            } elseif ($class === ActividadRegistrada::class) {
                 $actividadId = $this->payload['actividad_id'] ?? null;
-                $actividad = \App\Models\Actividad::find($actividadId);
-                if (!$actividad) {
+                $actividad = Actividad::find($actividadId);
+                if (! $actividad) {
                     throw new \Exception("Actividad #{$actividadId} no encontrada para reconstruir correo.");
                 }
-                $mailable = new \App\Mail\ActividadRegistrada($actividad);
+                $mailable = new ActividadRegistrada($actividad);
+            } elseif ($class === PasswordRenewalMail::class) {
+                $userId = $this->payload['user_id'] ?? null;
+                $user = User::find($userId);
+                if (! $user) {
+                    throw new \Exception("Usuario #{$userId} no encontrado para reconstruir correo de renovación.");
+                }
+                $url = $this->payload['url'] ?? '';
+                $expirationString = $this->payload['expiration_string'] ?? '';
+                $mailable = new PasswordRenewalMail($user, $url, $expirationString);
             } else {
                 throw new \Exception("Mailable no soportado para reconstrucción: {$class}");
             }
 
-            \Illuminate\Support\Facades\Mail::to($this->recipient)->send($mailable);
-            
+            Mail::to($this->recipient)->send($mailable);
             $this->update([
                 'status' => 'SENT',
                 'attempts' => $this->attempts + 1,
                 'error_message' => null,
             ]);
+
             return true;
         } catch (\Throwable $e) {
             $this->update([
@@ -99,6 +112,7 @@ class MailLog extends Model
                 'attempts' => $this->attempts + 1,
                 'error_message' => $e->getMessage(),
             ]);
+
             return false;
         }
     }

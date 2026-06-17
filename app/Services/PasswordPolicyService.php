@@ -2,6 +2,8 @@
 
 namespace App\Services;
 
+use App\Mail\PasswordRenewalMail;
+use App\Models\MailLog;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -10,6 +12,7 @@ use Illuminate\Support\Facades\Password;
 class PasswordPolicyService
 {
     private const DAYS_EXPIRE = 90;
+
     private const WARNING_DAYS = 7;
 
     /**
@@ -22,7 +25,7 @@ class PasswordPolicyService
         }
 
         $changedAt = $user->password_changed_at ?: $user->created_at;
-        if (!$changedAt) {
+        if (! $changedAt) {
             return false;
         }
 
@@ -43,7 +46,7 @@ class PasswordPolicyService
         }
 
         $changedAt = $user->password_changed_at ?: $user->created_at;
-        if (!$changedAt) {
+        if (! $changedAt) {
             return false;
         }
 
@@ -58,11 +61,12 @@ class PasswordPolicyService
     public function getDaysUntilExpiration(User $user): int
     {
         $changedAt = $user->password_changed_at ?: $user->created_at;
-        if (!$changedAt) {
+        if (! $changedAt) {
             return self::DAYS_EXPIRE;
         }
 
         $expirationDate = Carbon::parse($changedAt)->addDays(self::DAYS_EXPIRE);
+
         return (int) now()->startOfDay()->diffInDays($expirationDate->startOfDay(), false);
     }
 
@@ -72,6 +76,7 @@ class PasswordPolicyService
     public function getExpirationDate(User $user): Carbon
     {
         $changedAt = $user->password_changed_at ?: $user->created_at;
+
         return Carbon::parse($changedAt)->addDays(self::DAYS_EXPIRE);
     }
 
@@ -99,5 +104,26 @@ class PasswordPolicyService
     public function generateRenewalToken(User $user): string
     {
         return Password::broker()->createToken($user);
+    }
+
+    /**
+     * Recupera el último log de correo de renovación fallido (PENDING) si se creó hace menos de 60 minutos.
+     */
+    public function getFailedRenewalMail(User $user): ?MailLog
+    {
+        $failedMail = MailLog::where('user_id', $user->id)
+            ->where('mailable_class', PasswordRenewalMail::class)
+            ->where('status', 'PENDING')
+            ->latest()
+            ->first();
+
+        if ($failedMail) {
+            // Verificar que el correo fallido tenga menos de 60 minutos de antigüedad (vigencia del enlace de la URL)
+            if ($failedMail->created_at->addMinutes(60)->isFuture()) {
+                return $failedMail;
+            }
+        }
+
+        return null;
     }
 }
