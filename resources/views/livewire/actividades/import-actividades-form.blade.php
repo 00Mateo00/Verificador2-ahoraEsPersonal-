@@ -133,58 +133,128 @@
             </p>
         </div>
 
-        <p style="color: #475569; font-size: 0.9rem; margin-bottom: 25px;">
-            A continuación se presenta una muestra representativa con los primeros 10 registros contenidos en el archivo Excel correspondientes al período seleccionado. Verifique que las columnas se correspondan con los datos esperados de actividades antes de persistir los datos.
-        </p>
-
-        <!-- Bloque Dinámico de Advertencias (Warnings Panel) -->
-        @if(!empty($warnings))
-        <div style="background-color: #fffbeb; border: 1px solid #fef3c7; border-radius: 8px; padding: 20px; margin-bottom: 25px; box-shadow: 0 1px 3px rgba(0,0,0,0.02);">
-            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px;">
-                <span style="font-size: 1.25rem;">⚠️</span>
-                <strong style="color: #92400e; font-size: 1rem;">Advertencias de consistencia de datos detectadas ({{ count($warnings) }})</strong>
+        @if($todoDuplicado)
+            <!-- Alerta Crítica de Duplicación Total de Lote -->
+            <div style="background-color: #fff1f2; border: 1px solid #fecdd3; border-radius: 8px; padding: 20px; margin-bottom: 25px; box-shadow: 0 1px 3px rgba(0,0,0,0.02);">
+                <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
+                    <span style="font-size: 1.5rem;">🛑</span>
+                    <strong style="color: #9f1239; font-size: 1.1rem;">Ya cargaste este contenido exacto anteriormente</strong>
+                </div>
+                <p style="color: #be123c; font-size: 0.9rem; margin: 0 0 15px 0; line-height: 1.5;">
+                    Todas las actividades de la planilla cargada correspondientes al período seleccionado ya se encuentran registradas y vigentes en el sistema. A continuación puede visualizar y contrastar la planilla contra la información actual del programa.
+                </p>
             </div>
-            <p style="color: #b45309; font-size: 0.85rem; margin: 0 0 12px 0;">
-                Se detectaron inconsistencias menores en la planilla. Las filas afectadas se omitirán automáticamente del proceso final de inserción masiva para resguardar la integridad estructural de la base de datos, mientras que el resto de las filas elegibles se importará normalmente.
+
+            <!-- UI de Comparación Lado a Lado (Side-by-Side) -->
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 25px;">
+                <!-- Columna Izquierda: Planilla Cargada -->
+                <div style="background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 15px; box-shadow: 0 1px 3px rgba(0,0,0,0.01);">
+                    <h4 style="margin-top: 0; color: #0f69c4; font-size: 0.95rem; text-transform: uppercase; font-weight: 700; border-bottom: 2px solid #e2e8f0; padding-bottom: 12px; margin-bottom: 15px;">📥 Planilla Cargada</h4>
+                    <div style="overflow-x: auto;">
+                        <table class="table-custom-data" style="width: 100%;">
+                            <thead>
+                                <tr>
+                                    <th style="padding: 10px; font-size: 0.8rem; background-color: #f8fafc;">COD</th>
+                                    <th style="padding: 10px; font-size: 0.8rem; background-color: #f8fafc;">Unidad</th>
+                                    <th style="padding: 10px; font-size: 0.8rem; background-color: #f8fafc;">Actividad</th>
+                                    <th style="padding: 10px; font-size: 0.8rem; background-color: #f8fafc;">Fecha</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach($existingRowsComparison as $pair)
+                                <tr style="border-bottom: 1px solid #f1f5f9;">
+                                    <td style="padding: 8px; font-size: 0.78rem; font-weight: bold; color: #334155;">{{ $pair['cargada']['COD'] ?? 'N/A' }}</td>
+                                    <td style="padding: 8px; font-size: 0.78rem; color: #475569;">{{ \Illuminate\Support\Str::limit($pair['cargada']['UNIDAD'] ?? 'N/A', 15) }}</td>
+                                    <td style="padding: 8px; font-size: 0.78rem; color: #475569;">{{ \Illuminate\Support\Str::limit($pair['cargada']['TIPO_MODIFICADO'] ?? 'N/A', 18) }}</td>
+                                    <td style="padding: 8px; font-size: 0.78rem; color: #475569;">{{ $pair['cargada']['FECHA'] ?? 'N/A' }}</td>
+                                </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Columna Derecha: Sistema Real -->
+                <div style="background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 15px; box-shadow: 0 1px 3px rgba(0,0,0,0.01);">
+                    <h4 style="margin-top: 0; color: #2b8a3e; font-size: 0.95rem; text-transform: uppercase; font-weight: 700; border-bottom: 2px solid #e2e8f0; padding-bottom: 12px; margin-bottom: 15px;">✅ Registros en Plataforma</h4>
+                    <div style="overflow-x: auto;">
+                        <table style="width: 100%; border-collapse: collapse; font-size: 0.78rem; text-align: left;">
+                            <thead>
+                                <tr style="background-color: #f8fafc; border-bottom: 1px solid #cbd5e1;">
+                                    <th style="padding: 10px; font-size: 0.8rem; background-color: #f8fafc;">COD</th>
+                                    <th style="padding: 10px; font-size: 0.8rem; background-color: #f8fafc;">Unidad</th>
+                                    <th style="padding: 10px; font-size: 0.8rem; background-color: #f8fafc;">Actividad</th>
+                                    <th style="padding: 10px; font-size: 0.8rem; background-color: #f8fafc;">Fecha</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach($existingRowsComparison as $pair)
+                                <tr style="border-bottom: 1px solid #f1f5f9; background-color: rgba(43, 138, 62, 0.02);">
+                                    <td style="padding: 8px; font-size: 0.78rem; font-weight: bold; color: #2b8a3e;">{{ $pair['existente']['COD'] ?? 'N/A' }}</td>
+                                    <td style="padding: 8px; font-size: 0.78rem; color: #475569;">{{ \Illuminate\Support\Str::limit($pair['existente']['UNIDAD'] ?? 'N/A', 15) }}</td>
+                                    <td style="padding: 8px; font-size: 0.78rem; color: #475569;">{{ \Illuminate\Support\Str::limit($pair['existente']['TIPO_ACTIVIDAD'] ?? 'N/A', 18) }}</td>
+                                    <td style="padding: 8px; font-size: 0.78rem; color: #475569;">{{ $pair['existente']['FECHA'] ?? 'N/A' }}</td>
+                                </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        @else
+            <p style="color: #475569; font-size: 0.9rem; margin-bottom: 25px;">
+                A continuación se presenta una muestra de los registros contenidos en el archivo Excel correspondientes al período seleccionado. Verifique que las columnas se correspondan con los datos esperados de actividades antes de persistir los datos.
             </p>
-            <div style="max-height: 180px; overflow-y: auto; background-color: #ffffff; border: 1px solid #fde68a; border-radius: 6px; padding: 12px; box-shadow: inset 0 1px 2px rgba(0,0,0,0.01);">
-                <ul style="margin: 0; padding-left: 20px; font-size: 0.85rem; color: #78350f; display: flex; flex-direction: column; gap: 6px;">
-                    @foreach($warnings as $warning)
-                    <li>{{ $warning }}</li>
-                    @endforeach
-                </ul>
-            </div>
-        </div>
-        @endif
 
-        <div style="overflow-x: auto; border: 1px solid rgba(226, 232, 240, 0.8); border-radius: 8px; margin-bottom: 25px; background: #ffffff;">
-            <table class="table-custom-data" style="width: 100%; border-collapse: collapse; min-width: 800px;">
-                <thead>
-                    <tr>
-                        <th style="padding: 12px 16px; background-color: #f1f5f9; text-align: left; font-size: 0.8rem; font-weight: 700; color: #475569;">MODALIDAD</th>
-                        <th style="padding: 12px 16px; background-color: #f1f5f9; text-align: left; font-size: 0.8rem; font-weight: 700; color: #475569;">TIPO ACTIVIDAD</th>
-                        <th style="padding: 12px 16px; background-color: #f1f5f9; text-align: left; font-size: 0.8rem; font-weight: 700; color: #475569;">SUB TIPO ACTIVIDAD</th>
-                        <th style="padding: 12px 16px; background-color: #f1f5f9; text-align: left; font-size: 0.8rem; font-weight: 700; color: #475569;">COD</th>
-                        <th style="padding: 12px 16px; background-color: #f1f5f9; text-align: left; font-size: 0.8rem; font-weight: 700; color: #475569;">FECHA</th>
-                        <th style="padding: 12px 16px; background-color: #f1f5f9; text-align: left; font-size: 0.8rem; font-weight: 700; color: #475569;">UNIDAD</th>
-                        <th style="padding: 12px 16px; background-color: #f1f5f9; text-align: left; font-size: 0.8rem; font-weight: 700; color: #475569;">FUNCIONARIO</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach($previewRows as $row)
-                    <tr style="border-bottom: 1px solid #e2e8f0;">
-                        <td style="padding: 12px 16px; font-size: 0.85rem; color: #334155;">{{ $row['MODALIDAD_MODIFICADO'] ?? 'N/A' }}</td>
-                        <td style="padding: 12px 16px; font-size: 0.85rem; color: #334155;">{{ $row['TIPO_MODIFICADO'] ?? 'N/A' }}</td>
-                        <td style="padding: 12px 16px; font-size: 0.85rem; color: #334155;">{{ $row['SUB_TIPO_MODIFICADO'] ?? 'N/A' }}</td>
-                        <td style="padding: 12px 16px; font-size: 0.85rem; color: #334155;">{{ $row['COD'] ?? 'N/A' }}</td>
-                        <td style="padding: 12px 16px; font-size: 0.85rem; color: #334155;">{{ $row['FECHA'] ?? 'N/A' }}</td>
-                        <td style="padding: 12px 16px; font-size: 0.85rem; color: #334155; font-weight: 600;">{{ $row['UNIDAD'] ?? 'N/A' }}</td>
-                        <td style="padding: 12px 16px; font-size: 0.85rem; color: #334155;">{{ $row['FUNCIONARIO'] ?? 'N/A' }}</td>
-                    </tr>
-                    @endforeach
-                </tbody>
-            </table>
-        </div>
+            <!-- Bloque Dinámico de Advertencias (Warnings Panel) -->
+            @if(!empty($warnings))
+            <div style="background-color: #fffbeb; border: 1px solid #fef3c7; border-radius: 8px; padding: 20px; margin-bottom: 25px; box-shadow: 0 1px 3px rgba(0,0,0,0.02);">
+                <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px;">
+                    <span style="font-size: 1.25rem;">⚠️</span>
+                    <strong style="color: #92400e; font-size: 1rem;">Advertencias de consistencia de datos detectadas ({{ count($warnings) }})</strong>
+                </div>
+                <p style="color: #b45309; font-size: 0.85rem; margin: 0 0 12px 0;">
+                    Se detectaron inconsistencias menores en la planilla. Las filas afectadas se omitirán automáticamente del proceso final de inserción masiva para resguardar la integridad estructural de la base de datos, mientras que el resto de las filas elegibles se importará normalmente.
+                </p>
+                <div style="max-height: 180px; overflow-y: auto; background-color: #ffffff; border: 1px solid #fde68a; border-radius: 6px; padding: 12px; box-shadow: inset 0 1px 2px rgba(0,0,0,0.01);">
+                    <ul style="margin: 0; padding-left: 20px; font-size: 0.85rem; color: #78350f; display: flex; flex-direction: column; gap: 6px;">
+                        @foreach($warnings as $warning)
+                        <li>{{ $warning }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+            </div>
+            @endif
+
+            <div style="overflow-x: auto; border: 1px solid rgba(226, 232, 240, 0.8); border-radius: 8px; margin-bottom: 25px; background: #ffffff;">
+                <table class="table-custom-data" style="width: 100%; border-collapse: collapse; min-width: 800px;">
+                    <thead>
+                        <tr>
+                            <th style="padding: 12px 16px; background-color: #f1f5f9; text-align: left; font-size: 0.8rem; font-weight: 700; color: #475569;">MODALIDAD</th>
+                            <th style="padding: 12px 16px; background-color: #f1f5f9; text-align: left; font-size: 0.8rem; font-weight: 700; color: #475569;">TIPO ACTIVIDAD</th>
+                            <th style="padding: 12px 16px; background-color: #f1f5f9; text-align: left; font-size: 0.8rem; font-weight: 700; color: #475569;">SUB TIPO ACTIVIDAD</th>
+                            <th style="padding: 12px 16px; background-color: #f1f5f9; text-align: left; font-size: 0.8rem; font-weight: 700; color: #475569;">COD</th>
+                            <th style="padding: 12px 16px; background-color: #f1f5f9; text-align: left; font-size: 0.8rem; font-weight: 700; color: #475569;">FECHA</th>
+                            <th style="padding: 12px 16px; background-color: #f1f5f9; text-align: left; font-size: 0.8rem; font-weight: 700; color: #475569;">UNIDAD</th>
+                            <th style="padding: 12px 16px; background-color: #f1f5f9; text-align: left; font-size: 0.8rem; font-weight: 700; color: #475569;">FUNCIONARIO</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach($previewRows as $row)
+                        <tr style="border-bottom: 1px solid #e2e8f0;">
+                            <td style="padding: 12px 16px; font-size: 0.85rem; color: #334155;">{{ $row['MODALIDAD_MODIFICADO'] ?? 'N/A' }}</td>
+                            <td style="padding: 12px 16px; font-size: 0.85rem; color: #334155;">{{ $row['TIPO_MODIFICADO'] ?? 'N/A' }}</td>
+                            <td style="padding: 12px 16px; font-size: 0.85rem; color: #334155;">{{ $row['SUB_TIPO_MODIFICADO'] ?? 'N/A' }}</td>
+                            <td style="padding: 12px 16px; font-size: 0.85rem; color: #334155;">{{ $row['COD'] ?? 'N/A' }}</td>
+                            <td style="padding: 12px 16px; font-size: 0.85rem; color: #334155;">{{ $row['FECHA'] ?? 'N/A' }}</td>
+                            <td style="padding: 12px 16px; font-size: 0.85rem; color: #334155; font-weight: 600;">{{ $row['UNIDAD'] ?? 'N/A' }}</td>
+                            <td style="padding: 12px 16px; font-size: 0.85rem; color: #334155;">{{ $row['FUNCIONARIO'] ?? 'N/A' }}</td>
+                        </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+        @endif
 
         <div style="display: flex; gap: 15px; justify-content: flex-end; border-top: 1px solid #dee2e6; padding-top: 20px;">
             <button type="button" 
@@ -200,6 +270,7 @@
                     class="btn-primary-caj" 
                     style="padding: 12px 24px; background-color: #2b8a3e;"
                     wire:loading.attr="disabled"
+                    @if($todoDuplicado) disabled @endif
                     wire:target="startCountdown, resetForm">
                 <span wire:loading.remove wire:target="startCountdown">Iniciar Confirmación e Importación</span>
                 <span wire:loading wire:target="startCountdown">Preparando Confirmación...</span>

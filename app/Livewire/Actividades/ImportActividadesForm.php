@@ -42,6 +42,10 @@ class ImportActividadesForm extends Component
 
     public array $periodosDisponibles = [];
 
+    public bool $todoDuplicado = false;
+
+    public array $existingRowsComparison = [];
+
     // Datos de la carga
     public array $headers = [];
 
@@ -142,32 +146,39 @@ class ImportActividadesForm extends Component
 
         $allRows = $cachedData['allRows'] ?? [];
         $this->warnings = [];
+        $this->todoDuplicado = false;
+        $this->existingRowsComparison = [];
         $mapaNormalizado = $this->obtenerMapaUnidadesNormalizado();
 
-        // Consultar preventivamente colisiones de código de actividad COD en un único viaje redondo a BD (O(1))
-        $incomingCods = array_filter(array_map(fn ($row) => trim((string) ($row['COD'] ?? '')), $allRows));
-        $existingCods = Actividad::query()->whereIn('COD', $incomingCods)->pluck('COD')->toArray();
-        $existingCodsMap = array_flip($existingCods);
-
-        $validRows = [];
-
-        foreach ($allRows as $index => $row) {
-            $rowNum = $index + 2; // Fila Excel física
-            $rowErrors = [];
-
-            // 1. Filtrar en memoria únicamente las actividades del Mes y Año Estadístico seleccionado
+        // Filtrar las filas pertenecientes al periodo seleccionado
+        $periodRows = [];
+        foreach ($allRows as $row) {
             $rowMes = isset($row['MES']) ? (int) $row['MES'] : null;
             $rowAno = isset($row['AÑO']) ? (int) $row['AÑO'] : null;
-
-            if ($rowMes !== $this->mesEstadistico || $rowAno !== $this->anoEstadistico) {
-                continue; // Omitir de forma silenciosa ya que no pertenecen al M.E. actual
+            if ($rowMes === $this->mesEstadistico && $rowAno === $this->anoEstadistico) {
+                $periodRows[] = $row;
             }
+        }
+
+        // Consultar preventivamente colisiones de código de actividad COD en un único viaje redondo a BD (O(1))
+        $incomingCods = array_filter(array_map(fn ($row) => trim((string) ($row['COD'] ?? '')), $periodRows));
+        $existingActividades = Actividad::query()
+            ->whereIn('COD', $incomingCods)
+            ->get()
+            ->keyBy('COD');
+
+        $validRows = [];
+        $duplicateCount = 0;
+
+        foreach ($periodRows as $index => $row) {
+            $rowNum = $index + 2; // Fila Excel física
+            $rowErrors = [];
 
             // Identificador único corporativo (COD) para rotular las advertencias
             $codRaw = trim((string) ($row['COD'] ?? ''));
             $rowLabel = $codRaw !== '' ? "Actividad [{$codRaw}]" : "Fila #{$rowNum} (Sin COD)";
 
-            // 2. Validar campos obligatorios inferidos de la migración
+            // 1. Validar campos obligatorios inferidos de la migración
             foreach (self::MANDATORY_FIELDS as $field) {
                 if (! isset($row[$field]) || trim((string) $row[$field]) === '') {
                     $rowErrors[] = "Falta el campo obligatorio requerido '{$field}'";
@@ -175,8 +186,9 @@ class ImportActividadesForm extends Component
             }
 
             // Validar colisiones del identificador único COD en base de datos
-            if ($codRaw !== '' && isset($existingCodsMap[$codRaw])) {
+            if ($codRaw !== '' && $existingActividades->has($codRaw)) {
                 $rowErrors[] = 'El código ya se encuentra registrado y persistido en la plataforma';
+                $duplicateCount++;
             }
 
             // Validar correspondencia territorial de la unidad
@@ -199,6 +211,32 @@ class ImportActividadesForm extends Component
             }
         }
 
+        // Si existen filas y la cantidad de duplicados es idéntica al total de filas del período
+        if (count($periodRows) > 0 && $duplicateCount === count($periodRows)) {
+            $this->todoDuplicado = true;
+
+            // Ordenar filas cargadas por COD para coincidencia exacta
+            usort($periodRows, fn ($a, $b) => strcmp($a['COD'] ?? '', $b['COD'] ?? ''));
+
+            $this->existingRowsComparison = [];
+            foreach ($periodRows as $row) {
+                $cod = trim((string) ($row['COD'] ?? ''));
+                $dbRow = $existingActividades->get($cod);
+                $this->existingRowsComparison[] = [
+                    'cargada' => $row,
+                    'existente' => $dbRow ? [
+                        'MODALIDAD' => $dbRow->MODALIDAD,
+                        'TIPO_ACTIVIDAD' => $dbRow->TIPO_ACTIVIDAD,
+                        'SUB_TIPO_ACTIVIDAD' => $dbRow->SUB_TIPO_ACTIVIDAD,
+                        'COD' => $dbRow->COD,
+                        'FECHA' => $dbRow->FECHA ? $dbRow->FECHA->format('Y-m-d') : null,
+                        'UNIDAD' => $dbRow->UNIDAD,
+                        'FUNCIONARIO' => $dbRow->FUNCIONARIO,
+                    ] : null,
+                ];
+            }
+        }
+
         // Excluir filas con advertencias de la previsualización y el conteo total
         $this->totalRows = count($validRows);
         $this->previewRows = array_slice($validRows, 0, 10);
@@ -215,23 +253,6 @@ class ImportActividadesForm extends Component
         $path = $this->excelFile->store('temp-imports');
         $this->tempFilePath = Storage::path($path);
         $this->originalFileName = $this->excelFile->getClientOriginalName();
-
-        // Calcular huella digital única (SHA-256) del contenido del archivo
-        $this->fileHash = hash_file('sha256', $this->tempFilePath);
-
-        // Validar duplicados únicamente si la planilla previa está activa ("PROCESADA")
-        $hashDuplicado = CargaExcel::query()
-            ->where('hash_archivo', $this->fileHash)
-            ->where('estado', 'PROCESADA')
-            ->exists();
-
-        if ($hashDuplicado) {
-            $this->cleanupTempFile();
-            $this->excelFile = null;
-            session()->flash('error', 'Esta planilla (o una con exactamente el mismo contenido) ya ha sido procesada de manera exitosa anteriormente.');
-
-            return;
-        }
 
         try {
             // Importar y validar cabeceras estructuradas utilizando el pipeline unificado del servicio
@@ -287,7 +308,6 @@ class ImportActividadesForm extends Component
             Cache::put($cacheKey, [
                 'headers' => $data['headers'],
                 'allRows' => $allRows,
-                'hash' => $this->fileHash,
                 'periodosDisponibles' => $this->periodosDisponibles,
             ], 1200); // Duración de 20 minutos
 
@@ -387,13 +407,12 @@ class ImportActividadesForm extends Component
                 $validRows[] = $row;
             }
 
-            DB::transaction(function () use ($validRows, $finalHash, &$unidadesAfectadas) {
+            DB::transaction(function () use ($validRows, &$unidadesAfectadas) {
 
                 // Registrar lote de control Excel
                 $carga = CargaExcel::create([
                     'user_id' => Auth::id(),
                     'nombre_archivo' => $this->originalFileName,
-                    'hash_archivo' => $finalHash,
                     'total_filas' => $this->totalRows,
                     'estado' => 'PROCESADA',
                 ]);
