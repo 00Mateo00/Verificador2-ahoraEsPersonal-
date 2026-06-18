@@ -78,7 +78,7 @@
         <div class="button-wrapper">
             <a href="{{ $url }}" class="button">
                 RESTABLECER CONTRASEÑA
-            </p>
+            </a>
         </div>
 
         <p>

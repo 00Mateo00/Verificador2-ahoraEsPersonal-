@@ -29,6 +29,9 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        // Forzar el nombre institucional a nivel de configuración en tiempo de ejecución
+        config(['app.name' => 'Intranet CAJBIOBIO']);
+
         $this->configureDefaults();
         $this->registerAuditorPolicies();
         $this->configurePasswordResetEmail();
