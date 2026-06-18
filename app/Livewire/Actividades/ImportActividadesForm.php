@@ -160,7 +160,7 @@ class ImportActividadesForm extends Component
             }
         }
 
-        // Consultar preventivamente colisiones de código de actividad COD en un único viaje redondo a BD (O(1))
+        // Consultar colisiones de código de actividad COD en un único viaje redondo a BD
         $incomingCods = array_filter(array_map(fn ($row) => trim((string) ($row['COD'] ?? '')), $periodRows));
         $existingActividades = Actividad::query()
             ->whereIn('COD', $incomingCods)
@@ -168,7 +168,7 @@ class ImportActividadesForm extends Component
             ->keyBy('COD');
 
         $validRows = [];
-        $duplicateCount = 0;
+        $duplicateCods = [];
 
         foreach ($periodRows as $index => $row) {
             $rowNum = $index + 2; // Fila Excel física
@@ -178,17 +178,18 @@ class ImportActividadesForm extends Component
             $codRaw = trim((string) ($row['COD'] ?? ''));
             $rowLabel = $codRaw !== '' ? "Actividad [{$codRaw}]" : "Fila #{$rowNum} (Sin COD)";
 
-            // 1. Validar campos obligatorios inferidos de la migración
+            // 1. Validar campos obligatorios
             foreach (self::MANDATORY_FIELDS as $field) {
                 if (! isset($row[$field]) || trim((string) $row[$field]) === '') {
                     $rowErrors[] = "Falta el campo obligatorio requerido '{$field}'";
                 }
             }
 
-            // Validar colisiones del identificador único COD en base de datos
+            // Almacenar duplicidad para agrupamiento posterior
+            $isDuplicate = false;
             if ($codRaw !== '' && $existingActividades->has($codRaw)) {
-                $rowErrors[] = 'El código ya se encuentra registrado y persistido en la plataforma';
-                $duplicateCount++;
+                $duplicateCods[] = $codRaw;
+                $isDuplicate = true;
             }
 
             // Validar correspondencia territorial de la unidad
@@ -203,16 +204,34 @@ class ImportActividadesForm extends Component
                 $rowErrors[] = "La unidad '{$unidadNombreRaw}' no coincide con ningún registro del catálogo del sistema";
             }
 
-            // Consolidar errores de la fila en un único bloque agrupado si existen
+            // Consolidar errores de estructura (excluyendo COD para agruparlo al final)
             if (! empty($rowErrors)) {
                 $this->warnings[] = "{$rowLabel}: ".implode(', ', $rowErrors).'.';
+            } elseif ($isDuplicate) {
+                // Omitir inserción silenciosamente por duplicidad
             } else {
                 $validRows[] = $row;
             }
         }
 
-        // Si existen filas y la cantidad de duplicados es idéntica al total de filas del período
-        if (count($periodRows) > 0 && $duplicateCount === count($periodRows)) {
+        $duplicateCount = count($duplicateCods);
+        $totalPeriodRows = count($periodRows);
+
+        // Agrupar mensajes de advertencia de duplicados según especificaciones
+        if ($duplicateCount === 1) {
+            $cod1 = $duplicateCods[0];
+            $this->warnings[] = "Actividad [{$cod1}]: El código ya se encuentra registrado y persistido en la plataforma.";
+        } elseif ($duplicateCount > 1) {
+            $codsList = implode(', ', $duplicateCods);
+            if ($duplicateCount === $totalPeriodRows) {
+                $this->warnings[] = "Todos los códigos ya se encuentran registrados y persistidos en la plataforma: [{$codsList}]";
+            } else {
+                $this->warnings[] = "Los siguientes códigos ya se encuentran registrados y persistidos en la plataforma: [{$codsList}]";
+            }
+        }
+
+        // Si todos los códigos a cargar ya existen en la base de datos
+        if ($totalPeriodRows > 0 && $duplicateCount === $totalPeriodRows) {
             $this->todoDuplicado = true;
 
             // Ordenar filas cargadas por COD para coincidencia exacta
