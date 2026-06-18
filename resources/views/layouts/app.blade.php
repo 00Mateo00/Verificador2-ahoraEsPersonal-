@@ -42,7 +42,7 @@
     <main class="layout-dashboard-main">
         <aside>
             <div class="menu-sidebar-left">
-                <div style="sidebar-title">
+                <div class="sidebar-title">
                     @if(Auth::user()->rol === 'admin')
                     Panel Central
                     @elseif(Auth::user()->rol === 'cargador')

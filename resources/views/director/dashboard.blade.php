@@ -89,9 +89,9 @@
 
 <!-- Tarjeta Informativa de Rol -->
 <div class="dashboard-alert-card">
-    <span style="font-size: 1.5rem; line-height: 1;">🗺️</span>
+    <span>🗺️</span>
     <div>
-        <strong style="color: #166534; font-size: 1rem; display: block; margin-bottom: 4px;">Control de Operación Regional</strong>
+        <strong>Control de Operación Regional</strong>
         <p>
             Supervise el avance en la subida de verificadores de las unidades operativas a su cargo. Utilice los filtros superiores para segmentar estadísticas de forma mensual, anual o histórica.
         </p>
@@ -134,7 +134,7 @@
 </div>
 
 <!-- 🗺️ Avance Individual de Unidades Operativas (Exclusivo de su Región) -->
-<div style="background-color: #ffffff; border: 1px solid rgba(226, 232, 240, 0.8); border-radius: 8px; padding: 25px; margin-bottom: 35px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.02);">
+<div class="dashboard-card">
     <h3 style="margin-top: 0; margin-bottom: 20px; font-size: 1.15rem; color: #0d1b2a; font-weight: 700; border-bottom: 2px solid #f1f5f9; padding-bottom: 12px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
         <span>🗺️ Avance Individual de Unidades Asignadas</span>
         <span style="font-size: 0.8rem; color: #64748b; font-weight: 500;">Ordenado por menor porcentaje de avance</span>
