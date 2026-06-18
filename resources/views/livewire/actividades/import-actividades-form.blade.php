@@ -27,33 +27,7 @@
             Cargue el archivo Excel (.xlsx) estructurado bajo las cabeceras institucionales requeridas para poblar automáticamente el verificador de actividades.
         </p>
 
-        <!-- Selector del Periodo del Mes Estadístico (M.E.) -->
-        @php
-            $maxMonth = ($anoEstadistico == (int)date('Y')) ? (int)date('m') : 12;
-            $meses = [
-                1 => 'Enero', 2 => 'Febrero', 3 => 'Marzo', 4 => 'Abril',
-                5 => 'Mayo', 6 => 'Junio', 7 => 'Julio', 8 => 'Agosto',
-                9 => 'Septiembre', 10 => 'Octubre', 11 => 'Noviembre', 12 => 'Diciembre'
-            ];
-        @endphp
-        <div style="background-color: #f1f5f9; border: 1px solid #cbd5e1; padding: 20px; border-radius: 8px; margin-bottom: 20px; display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
-            <div>
-                <label for="mesEstadistico" style="font-size: 0.85rem; font-weight: 700; color: #334155; display: block; margin-bottom: 6px;">Mes Estadístico (M.E.) de Carga</label>
-                <select wire:model.live="mesEstadistico" id="mesEstadistico" class="form-select-control" style="width: 100%; box-sizing: border-box; padding: 10px 14px; border: 1px solid #cbd5e1; border-radius: 6px; background-color: #ffffff; font-size: 0.95rem;">
-                    @for($num = $maxMonth; $num >= 1; $num--)
-                        <option value="{{ $num }}">{{ $meses[$num] }}</option>
-                    @endfor
-                </select>
-            </div>
-            <div>
-                <label for="anoEstadistico" style="font-size: 0.85rem; font-weight: 700; color: #334155; display: block; margin-bottom: 6px;">Año Estadístico</label>
-                <select wire:model.live="anoEstadistico" id="anoEstadistico" class="form-select-control" style="width: 100%; box-sizing: border-box; padding: 10px 14px; border: 1px solid #cbd5e1; border-radius: 6px; background-color: #ffffff; font-size: 0.95rem;">
-                    @for($y = date('Y'); $y >= 2020; $y--)
-                        <option value="{{ $y }}">{{ $y }}</option>
-                    @endfor
-                </select>
-            </div>
-        </div>
+        
 
         <!-- 1. Estado: Subiendo archivo (Centralizado con barra de progreso) -->
         <div x-show="isUploading" style="background-color: #f8fafc; border: 2px dashed #2b8a3e; border-radius: 8px; padding: 50px; text-align: center; box-shadow: inset 0 2px 4px rgba(0,0,0,0.01);" x-cloak>
@@ -146,8 +120,21 @@
             </span>
         </div>
 
+        <!-- Selector Dinámico de Período según contenido del Excel -->
+        <div style="background-color: #f1f5f9; border: 1px solid #cbd5e1; padding: 20px; border-radius: 8px; margin-bottom: 25px;">
+            <label for="periodoSeleccionado" style="font-size: 0.85rem; font-weight: 700; color: #334155; display: block; margin-bottom: 6px;">Seleccionar Período a Importar</label>
+            <select wire:model.live="periodoSeleccionado" id="periodoSeleccionado" class="form-select-control" style="width: 100%; box-sizing: border-box; padding: 10px 14px; border: 1px solid #cbd5e1; border-radius: 6px; background-color: #ffffff; font-size: 0.95rem;">
+                @foreach($periodosDisponibles as $key => $label)
+                    <option value="{{ $key }}">{{ $label }}</option>
+                @endforeach
+            </select>
+            <p style="margin: 8px 0 0; font-size: 0.8rem; color: #64748b; line-height: 1.4;">
+                * Se muestran únicamente los períodos detectados de forma automática en el archivo Excel cargado. Al cambiar el período, la muestra y las advertencias se actualizarán de forma inmediata.
+            </p>
+        </div>
+
         <p style="color: #475569; font-size: 0.9rem; margin-bottom: 25px;">
-            A continuación se presenta una muestra representativa con los primeros 10 registros contenidos en el archivo Excel. Verifique que las columnas se correspondan con los datos esperados de actividades antes de persistir los datos.
+            A continuación se presenta una muestra representativa con los primeros 10 registros contenidos en el archivo Excel correspondientes al período seleccionado. Verifique que las columnas se correspondan con los datos esperados de actividades antes de persistir los datos.
         </p>
 
         <!-- Bloque Dinámico de Advertencias (Warnings Panel) -->

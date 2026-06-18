@@ -23,6 +23,12 @@ class ImportActividadesForm extends Component
 
     private const MANDATORY_FIELDS = Actividad::MANDATORY_FIELDS_TO_CREATE_ACTIVIDAD;
 
+    private const NOMBRES_MESES = [
+        1 => 'Enero', 2 => 'Febrero', 3 => 'Marzo', 4 => 'Abril',
+        5 => 'Mayo', 6 => 'Junio', 7 => 'Julio', 8 => 'Agosto',
+        9 => 'Septiembre', 10 => 'Octubre', 11 => 'Noviembre', 12 => 'Diciembre',
+    ];
+
     public $excelFile;
 
     public int $step = 1; // 1: Subida, 2: Previsualización, 3: Cuenta regresiva, 4: Procesando/Enviando, 5: Éxito
@@ -31,6 +37,10 @@ class ImportActividadesForm extends Component
     public int $mesEstadistico;
 
     public int $anoEstadistico;
+
+    public string $periodoSeleccionado = '';
+
+    public array $periodosDisponibles = [];
 
     // Datos de la carga
     public array $headers = [];
@@ -54,21 +64,20 @@ class ImportActividadesForm extends Component
 
     public function mount()
     {
-        // Preselección dinámica por defecto del Mes Estadístico y Año actual
         $this->mesEstadistico = (int) date('m');
         $this->anoEstadistico = (int) date('Y');
     }
 
     /**
-     * Asegura de manera reactiva que no se seleccionen meses futuros si el año se cambia al actual.
+     * Reacts to changes in the selected period and updates statistics.
      */
-    public function updatedAnoEstadistico($value)
+    public function updatedPeriodoSeleccionado($value)
     {
-        $currentYear = (int) date('Y');
-        $currentMonth = (int) date('m');
-
-        if ((int) $value === $currentYear && $this->mesEstadistico > $currentMonth) {
-            $this->mesEstadistico = $currentMonth;
+        if ($value) {
+            [$mes, $ano] = explode('_', $value);
+            $this->mesEstadistico = (int) $mes;
+            $this->anoEstadistico = (int) $ano;
+            $this->recalcularPeriodo();
         }
     }
 
@@ -123,6 +132,78 @@ class ImportActividadesForm extends Component
         ];
     }
 
+    public function recalcularPeriodo()
+    {
+        $cacheKey = 'excel_import_'.Auth::id();
+        $cachedData = Cache::get($cacheKey);
+        if (! $cachedData) {
+            return;
+        }
+
+        $allRows = $cachedData['allRows'] ?? [];
+        $this->warnings = [];
+        $mapaNormalizado = $this->obtenerMapaUnidadesNormalizado();
+
+        // Consultar preventivamente colisiones de código de actividad COD en un único viaje redondo a BD (O(1))
+        $incomingCods = array_filter(array_map(fn ($row) => trim((string) ($row['COD'] ?? '')), $allRows));
+        $existingCods = Actividad::query()->whereIn('COD', $incomingCods)->pluck('COD')->toArray();
+        $existingCodsMap = array_flip($existingCods);
+
+        $validRows = [];
+
+        foreach ($allRows as $index => $row) {
+            $rowNum = $index + 2; // Fila Excel física
+            $rowErrors = [];
+
+            // 1. Filtrar en memoria únicamente las actividades del Mes y Año Estadístico seleccionado
+            $rowMes = isset($row['MES']) ? (int) $row['MES'] : null;
+            $rowAno = isset($row['AÑO']) ? (int) $row['AÑO'] : null;
+
+            if ($rowMes !== $this->mesEstadistico || $rowAno !== $this->anoEstadistico) {
+                continue; // Omitir de forma silenciosa ya que no pertenecen al M.E. actual
+            }
+
+            // Identificador único corporativo (COD) para rotular las advertencias
+            $codRaw = trim((string) ($row['COD'] ?? ''));
+            $rowLabel = $codRaw !== '' ? "Actividad [{$codRaw}]" : "Fila #{$rowNum} (Sin COD)";
+
+            // 2. Validar campos obligatorios inferidos de la migración
+            foreach (self::MANDATORY_FIELDS as $field) {
+                if (! isset($row[$field]) || trim((string) $row[$field]) === '') {
+                    $rowErrors[] = "Falta el campo obligatorio requerido '{$field}'";
+                }
+            }
+
+            // Validar colisiones del identificador único COD en base de datos
+            if ($codRaw !== '' && isset($existingCodsMap[$codRaw])) {
+                $rowErrors[] = 'El código ya se encuentra registrado y persistido en la plataforma';
+            }
+
+            // Validar correspondencia territorial de la unidad
+            $unidadNombreRaw = trim($row['UNIDAD'] ?? '');
+            $unidadIdAsignada = $this->resolverUnidadId(
+                $unidadNombreRaw,
+                $mapaNormalizado
+            );
+            if ($unidadNombreRaw === '') {
+                $rowErrors[] = "El campo 'UNIDAD' se encuentra vacío";
+            } elseif ($unidadIdAsignada === null) {
+                $rowErrors[] = "La unidad '{$unidadNombreRaw}' no coincide con ningún registro del catálogo del sistema";
+            }
+
+            // Consolidar errores de la fila en un único bloque agrupado si existen
+            if (! empty($rowErrors)) {
+                $this->warnings[] = "{$rowLabel}: ".implode(', ', $rowErrors).'.';
+            } else {
+                $validRows[] = $row;
+            }
+        }
+
+        // Excluir filas con advertencias de la previsualización y el conteo total
+        $this->totalRows = count($validRows);
+        $this->previewRows = array_slice($validRows, 0, 10);
+    }
+
     public function uploadFile(ExcelImporterService $importer)
     {
         // Defensa en profundidad: Bloquear mutación si el rol del usuario es auditor
@@ -161,73 +242,58 @@ class ImportActividadesForm extends Component
             $this->headers = $data['headers'];
             $allRows = $data['rows'];
 
-            // Ejecutar análisis de advertencias en memoria O(1) con normalización
-            $this->warnings = [];
-            $mapaNormalizado = $this->obtenerMapaUnidadesNormalizado();
-
-            // Consultar preventivamente colisiones de código de actividad COD en un único viaje redondo a BD (O(1))
-            $incomingCods = array_filter(array_map(fn ($row) => trim((string) ($row['COD'] ?? '')), $allRows));
-            $existingCods = Actividad::query()->whereIn('COD', $incomingCods)->pluck('COD')->toArray();
-            $existingCodsMap = array_flip($existingCods);
-
-            $validRows = [];
-
-            foreach ($allRows as $index => $row) {
-                $rowNum = $index + 2; // Fila Excel física
-                $rowErrors = [];
-
-                // 1. Filtrar en memoria únicamente las actividades del Mes y Año Estadístico seleccionado
+            // Extraer períodos únicos directamente de las columnas MES y AÑO del Excel
+            $periods = [];
+            foreach ($allRows as $row) {
                 $rowMes = isset($row['MES']) ? (int) $row['MES'] : null;
                 $rowAno = isset($row['AÑO']) ? (int) $row['AÑO'] : null;
-
-                if ($rowMes !== $this->mesEstadistico || $rowAno !== $this->anoEstadistico) {
-                    continue; // Omitir de forma silenciosa ya que no pertenecen al M.E. actual
-                }
-
-                // Identificador único corporativo (COD) para rotular las advertencias
-                $codRaw = trim((string) ($row['COD'] ?? ''));
-                $rowLabel = $codRaw !== '' ? "Actividad [{$codRaw}]" : "Fila #{$rowNum} (Sin COD)";
-
-                // 2. Validar campos obligatorios inferidos de la migración
-                foreach (self::MANDATORY_FIELDS as $field) {
-                    if (! isset($row[$field]) || trim((string) $row[$field]) === '') {
-                        $rowErrors[] = "Falta el campo obligatorio requerido '{$field}'";
-                    }
-                }
-
-                // Validar colisiones del identificador único COD en base de datos
-                if ($codRaw !== '' && isset($existingCodsMap[$codRaw])) {
-                    $rowErrors[] = 'El código ya se encuentra registrado y persistido en la plataforma';
-                }
-
-                // Validar correspondencia territorial de la unidad
-                $unidadNombreRaw = trim($row['UNIDAD'] ?? '');
-                $unidadIdAsignada = $this->resolverUnidadId(
-                    $unidadNombreRaw,
-                    $mapaNormalizado
-                );
-                if ($unidadNombreRaw === '') {
-                    $rowErrors[] = "El campo 'UNIDAD' se encuentra vacío";
-                } elseif ($unidadIdAsignada === null) {
-                    $rowErrors[] = "La unidad '{$unidadNombreRaw}' no coincide con ningún registro del catálogo del sistema";
-                }
-
-                // Consolidar errores de la fila en un único bloque agrupado si existen
-                if (! empty($rowErrors)) {
-                    $this->warnings[] = "{$rowLabel}: ".implode(', ', $rowErrors).'.';
-                } else {
-                    $validRows[] = $row;
+                if ($rowMes && $rowAno && $rowMes >= 1 && $rowMes <= 12) {
+                    $key = "{$rowMes}_{$rowAno}";
+                    $periods[$key] = [
+                        'mes' => $rowMes,
+                        'ano' => $rowAno,
+                    ];
                 }
             }
 
-            // Excluir filas con advertencias de la previsualización y el conteo total
-            $this->totalRows = count($validRows);
-            $this->previewRows = array_slice($validRows, 0, 10);
+            if (empty($periods)) {
+                throw new \Exception('No se encontraron períodos válidos (MES y AÑO) en el archivo Excel.');
+            }
+
+            // Ordenar períodos únicos para encontrar el más reciente (Año descendente, Mes descendente)
+            uasort($periods, function ($a, $b) {
+                if ($a['ano'] === $b['ano']) {
+                    return $b['mes'] <=> $a['mes'];
+                }
+
+                return $b['ano'] <=> $a['ano'];
+            });
+
+            // Construir catálogo de opciones de período disponibles para el selector
+            $this->periodosDisponibles = [];
+            foreach ($periods as $key => $p) {
+                $mesName = self::NOMBRES_MESES[$p['mes']] ?? 'Desconocido';
+                $this->periodosDisponibles[$key] = "{$mesName} {$p['ano']}";
+            }
+
+            // Auto-seleccionar el período más reciente por defecto
+            $keys = array_keys($this->periodosDisponibles);
+            $this->periodoSeleccionado = $keys[0];
+            [$mes, $ano] = explode('_', $this->periodoSeleccionado);
+            $this->mesEstadistico = (int) $mes;
+            $this->anoEstadistico = (int) $ano;
+
+            // Almacenar todos los datos completos en caché para filtrado reactivo posterior
             Cache::put($cacheKey, [
                 'headers' => $data['headers'],
-                'rows' => $validRows,
+                'allRows' => $allRows,
                 'hash' => $this->fileHash,
+                'periodosDisponibles' => $this->periodosDisponibles,
             ], 1200); // Duración de 20 minutos
+
+            // Recalcular datos para el período auto-seleccionado
+            $this->recalcularPeriodo();
+
             $this->step = 2;
         } catch (\Exception $e) {
             $this->cleanupTempFile();
@@ -271,13 +337,57 @@ class ImportActividadesForm extends Component
                 return redirect()->route('actividades.importar');
             }
 
-            $allRows = $data['rows'];
+            $allRows = $data['allRows'] ?? [];
             $finalHash = $data['hash'] ?? $this->fileHash;
 
             // Colección para registrar los IDs únicos de las unidades que reciben actividades en este lote
             $unidadesAfectadas = [];
 
-            DB::transaction(function () use ($allRows, $finalHash, &$unidadesAfectadas) {
+            // Filtrar en el servidor las filas válidas correspondientes al periodo seleccionado
+            $validRows = [];
+            $mapaNormalizado = $this->obtenerMapaUnidadesNormalizado();
+
+            $incomingCods = array_filter(array_map(fn ($row) => trim((string) ($row['COD'] ?? '')), $allRows));
+            $existingCods = Actividad::query()->whereIn('COD', $incomingCods)->pluck('COD')->toArray();
+            $existingCodsMap = array_flip($existingCods);
+
+            foreach ($allRows as $row) {
+                $rowMes = isset($row['MES']) ? (int) $row['MES'] : null;
+                $rowAno = isset($row['AÑO']) ? (int) $row['AÑO'] : null;
+
+                if ($rowMes !== $this->mesEstadistico || $rowAno !== $this->anoEstadistico) {
+                    continue;
+                }
+
+                // Validar campos obligatorios
+                $hasError = false;
+                foreach (self::MANDATORY_FIELDS as $field) {
+                    if (! isset($row[$field]) || trim((string) $row[$field]) === '') {
+                        $hasError = true;
+                        break;
+                    }
+                }
+                if ($hasError) {
+                    continue;
+                }
+
+                // Validar colisión de COD
+                $codRaw = trim((string) ($row['COD'] ?? ''));
+                if ($codRaw !== '' && isset($existingCodsMap[$codRaw])) {
+                    continue;
+                }
+
+                // Validar correspondencia territorial de la unidad
+                $unidadNombreRaw = trim($row['UNIDAD'] ?? '');
+                $unidadIdAsignada = $this->resolverUnidadId($unidadNombreRaw, $mapaNormalizado);
+                if ($unidadIdAsignada === null) {
+                    continue;
+                }
+
+                $validRows[] = $row;
+            }
+
+            DB::transaction(function () use ($validRows, $finalHash, &$unidadesAfectadas) {
 
                 // Registrar lote de control Excel
                 $carga = CargaExcel::create([
@@ -293,17 +403,13 @@ class ImportActividadesForm extends Component
 
                 $actividadesParaInsertar = [];
 
-                // Tabla de redirecciones territoriales dinámicas en memoria (normalizadas)
-
-                foreach ($allRows as $row) {
+                foreach ($validRows as $row) {
                     $unidadNombreRaw = trim($row['UNIDAD'] ?? '');
-                    // Redirección dinámica si corresponde a Los Ángeles
                     $unidadIdAsignada = $this->resolverUnidadId(
                         $unidadNombreRaw,
                         $mapaNormalizado
                     );
 
-                    // Omitir inserción de registros huérfanos para proteger restricciones "NOT NULL" de la BD
                     if (! $unidadIdAsignada) {
                         continue;
                     }
@@ -375,7 +481,7 @@ class ImportActividadesForm extends Component
         $cacheKey = 'excel_import_'.Auth::id();
         Cache::forget($cacheKey);
 
-        $this->reset(['excelFile', 'step', 'headers', 'previewRows', 'warnings', 'totalRows', 'tempFilePath', 'originalFileName', 'countdown', 'isCountingDown']);
+        $this->reset(['excelFile', 'step', 'headers', 'previewRows', 'warnings', 'totalRows', 'tempFilePath', 'originalFileName', 'countdown', 'isCountingDown', 'periodoSeleccionado', 'periodosDisponibles']);
     }
 
     private function cleanupTempFile()
