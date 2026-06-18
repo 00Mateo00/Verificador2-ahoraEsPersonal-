@@ -13,9 +13,9 @@
 
 <!-- Tarjeta Informativa de Rol -->
 <div class="dashboard-alert-card">
-    <span style="font-size: 1.5rem; line-height: 1;">🗺️</span>
+    <span>🗺️</span>
     <div>
-        <strong style="color: #166534; font-size: 1rem; display: block; margin-bottom: 4px;">Control de Operación Regional</strong>
+        <strong>Control de Operación Regional</strong>
         <p>
             Supervise el avance en la subida de verificadores de las unidades operativas a su cargo para el mes corriente. Use la renotificación dinámica para recordar firmas rezagadas.
         </p>
@@ -93,7 +93,7 @@
 </div>
 
 <!-- 📋 Listado de Actividades del Periodo Actual -->
-<div class="dashboard-card">
+<!--<div class="dashboard-card">
     <h3 style="margin-top: 0; margin-bottom: 20px; font-size: 1.15rem; color: #0d1b2a; font-weight: 700; border-bottom: 2px solid #f1f5f9; padding-bottom: 12px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
         <span>📋 Listado de Actividades Registradas</span>
         <span style="font-size: 0.8rem; color: #64748b; font-weight: 500;">Filtro: Mes Estadístico Actual</span>
@@ -157,9 +157,9 @@
     </div>
 
     <!-- Paginación -->
-    <div style="margin-top: 25px;">
-        {{ $actividades->links() }}
+    <!--<div class="dashboard-pagination">
+        {{ $actividades->links('pagination::bootstrap-5') }}
     </div>
     @endif
-</div>
+</div>--!>
 @endsection
