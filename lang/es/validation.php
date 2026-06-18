@@ -139,7 +139,7 @@ return [
     |
     | Las siguientes líneas de idioma se utilizan para intercambiar los marcadores
     | de posición de los atributos con algo más amigable para el lector, como
-    | "Dirección de Correo Electrónico" en lugar de "email".
+    | "Correo Electrónico" en lugar de "email".
     |
     */
 
@@ -152,7 +152,7 @@ return [
         'verificador.*' => 'archivo verificador',
         'nuevosVerificadores' => 'archivos adjuntos',
         'nuevosVerificadores.*' => 'archivo adjunto',
-        'excelFile' => 'archivo de planilla',
+        'excelFile' => 'planilla excel',
     ],
 
 ];

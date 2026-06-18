@@ -83,7 +83,7 @@ class AppServiceProvider extends ServiceProvider
         );
 
         Password::defaults(function () {
-            $rule = Password::min(config('password_policy.min_length', 12));
+            $rule = Password::min(config('password_policy.min_length', 8));
 
             if (config('password_policy.require_mixed_case', true)) {
                 $rule->mixedCase();

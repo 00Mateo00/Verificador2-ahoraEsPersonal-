@@ -11,7 +11,7 @@ return [
     |
     */
 
-    'min_length' => (int) env('PASSWORD_POLICY_MIN_LENGTH', 12),
+    'min_length' => (int) env('PASSWORD_POLICY_MIN_LENGTH', 8),
 
     'require_mixed_case' => (bool) env('PASSWORD_POLICY_REQUIRE_MIXED_CASE', true),
 
