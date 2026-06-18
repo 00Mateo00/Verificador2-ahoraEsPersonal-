@@ -72,18 +72,24 @@
         <!-- 2. Estado: Sin archivo seleccionado e inactivo (No cargando) -->
         <div x-show="!$wire.excelFile && !isUploading">
             <div class="drag-drop-file-zone"
-                x-data="{ isDragging: false }"
-                x-on:dragover.prevent="isDragging = true"
-                x-on:dragleave.prevent="isDragging = false"
-                x-on:drop.prevent="isDragging = false; $wire.upload('excelFile', $event.dataTransfer.files[0])"
+                x-data="{ isDragging: false, dragCounter: 0 }"
+                x-on:dragenter.prevent.stop="dragCounter++; isDragging = true"
+                x-on:dragover.prevent.stop=""
+                x-on:dragleave.prevent.stop="dragCounter--; if (dragCounter <= 0) { isDragging = false; dragCounter = 0; }"
+                x-on:drop.prevent.stop="dragCounter = 0; isDragging = false; if ($event.dataTransfer.files.length) { $wire.upload('excelFile', $event.dataTransfer.files[0]) }"
                 onclick="document.getElementById('excelFile').click()"
+                :style="isDragging 
+                    ? 'padding: 40px; border: 2px dashed #2b8a3e; border-radius: 8px; text-align: center; cursor: pointer; background-color: #ebfbee; transition: all 0.2s ease; transform: scale(1.01);' 
+                    : 'padding: 40px; border: 2px dashed #b5c7e0; border-radius: 8px; text-align: center; cursor: pointer; background-color: #f8fafc; transition: all 0.2s ease;'"
                 style="padding: 40px; border: 2px dashed #b5c7e0; border-radius: 8px; text-align: center; cursor: pointer; background-color: #f8fafc; transition: all 0.2s ease;">
 
-                <div style="font-size: 3rem; margin-bottom: 15px; color: #0F69C4;">📥</div>
-                <p style="margin: 0; font-weight: 600; font-size: 1.05rem; color: #0F69C4;">
+                <div style="pointer-events: none; font-size: 3rem; margin-bottom: 15px;" :style="isDragging ? 'color: #2b8a3e;' : 'color: #0F69C4;'">
+                    <span x-text="isDragging ? '🟢' : '📥'"></span>
+                </div>
+                <p style="pointer-events: none; margin: 0; font-weight: 600; font-size: 1.05rem;" :style="isDragging ? 'color: #2b8a3e;' : 'color: #0F69C4;'" x-text="isDragging ? '¡Suelta la planilla aquí para iniciar la subida!' : 'Arrastre su archivo Excel aquí o haga clic para buscar en su equipo'">
                     Arrastre su archivo Excel aquí o haga clic para buscar en su equipo
                 </p>
-                <p style="margin: 5px 0 0; font-size: 0.8rem; color: #64748b;">
+                <p style="pointer-events: none; margin: 5px 0 0; font-size: 0.8rem; color: #64748b;">
                     Formatos permitidos: .xlsx, .xls (Máx. 10MB)
                 </p>
             </div>
@@ -215,7 +221,7 @@
     </div>
     @endif
 
-    <!-- PASO 3: CUENTA REGRESIVA (CANCELACIÓN ACTIVA) -->
+   <!-- PASO 3: CUENTA REGRESIVA DE ENVÍO -->
     @if($step === 3)
     <div x-data="{ 
             timeLeft: 10, 
@@ -227,7 +233,7 @@
                         this.timeLeft--;
                     } else {
                         clearInterval(this.timerInterval);
-                        $wire.processImport();
+                        $wire.set('step', 4); // Transicionar directamente al Paso 4 (Procesamiento/Envío)
                     }
                 }, 1000);
             },
@@ -258,8 +264,47 @@
     </div>
     @endif
 
-    <!-- PASO 4: ÉXITO -->
+    <!-- PASO 4: PROCESAMIENTO ACTIVO Y ENVÍO DE CORREOS -->
     @if($step === 4)
+    <div x-data x-init="$wire.processImport()" style="text-align: center; padding: 40px 0;">
+        <div style="max-width: 550px; margin: 0 auto; text-align: left; background-color: #f8fafc; border: 1px solid #cbd5e1; border-radius: 12px; padding: 35px; box-shadow: 0 10px 25px rgba(0,0,0,0.02);">
+            <div style="text-align: center; margin-bottom: 30px;">
+                <div class="animate-spin" style="font-size: 3.5rem; display: inline-block; margin-bottom: 12px;">⏳</div>
+                <h3 style="color: #0F69C4; font-size: 1.5rem; margin: 0; font-weight: 700;">Enviando correos y Procesando registros</h3>
+                <p style="color: #64748b; font-size: 0.88rem; margin-top: 6px;">El servidor se encuentra despachando los correos electrónicos y registrando las actividades. Por favor, no cierre esta pestaña.</p>
+            </div>
+
+            <div style="display: flex; flex-direction: column; gap: 20px;">
+                
+                <!-- Tarea 1: Validación previa -->
+                <div style="display: flex; align-items: center; gap: 15px;">
+                    <div style="width: 24px; height: 24px; border-radius: 50%; background-color: #2b8a3e; color: #ffffff; display: flex; align-items: center; justify-content: center; font-size: 0.85rem; font-weight: bold;">
+                        <span>✓</span>
+                    </div>
+                    <div style="flex: 1;">
+                        <strong style="font-size: 0.95rem; color: #0d1b2a;">Validando información</strong>
+                        <p style="font-size: 0.8rem; margin: 2px 0 0; color: #475569;">Estructura de la planilla Excel analizada con éxito.</p>
+                    </div>
+                </div>
+
+                <!-- Tarea 2: Procesar registros -->
+                <div style="display: flex; align-items: center; gap: 15px;">
+                    <div class="animate-pulse" style="width: 24px; height: 24px; border-radius: 50%; background-color: #d97706; color: #ffffff; display: flex; align-items: center; justify-content: center; font-size: 0.85rem; font-weight: bold;">
+                        <span>⏳</span>
+                    </div>
+                    <div style="flex: 1;">
+                        <strong style="font-size: 0.95rem; color: #0d1b2a;">Procesando registros y Despachando notificaciones automáticas</strong>
+                        <p style="font-size: 0.8rem; margin: 2px 0 0; color: #475569;">Escribiendo de forma masiva actividades y Enviando recordatorios a unidades...</p>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+    @endif
+
+    <!-- PASO 5: ÉXITO -->
+    @if($step === 5)
     <div style="text-align: center; padding: 40px 0;">
         <div style="font-size: 4rem; margin-bottom: 20px;">🎉</div>
         <h3 style="color: #2b8a3e; font-size: 1.8rem; margin-bottom: 10px; font-weight: 700;">Planilla Importada con Éxito</h3>

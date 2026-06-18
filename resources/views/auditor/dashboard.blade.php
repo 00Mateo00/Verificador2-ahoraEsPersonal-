@@ -209,7 +209,7 @@
                     </span>
                 </div>
                 <div>
-                    <form action="{{ route('auditor.unidades.renotificar', $up->id) }}" method="POST">
+                    <form action="{{ route('auditor.unidades.renotificar', $up->id) }}" method="POST" onsubmit="this.querySelector('button').disabled = true; this.querySelector('button').innerHTML = 'Enviando... ⏳';">
                         @csrf
                         <button type="submit" class="btn-acc" style="padding: 8px 14px; font-size: 0.8rem; font-weight: 700; border-color: #0F69C4; color: #0F69C4 !important; background-color: rgba(15, 105, 196, 0.02); border-radius: 4px; cursor: pointer;">
                             Renotificar ✉️

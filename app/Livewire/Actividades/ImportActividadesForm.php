@@ -25,7 +25,7 @@ class ImportActividadesForm extends Component
 
     public $excelFile;
 
-    public int $step = 1; // 1: Subida, 2: Previsualización, 3: Cuenta regresiva (Confirmación), 4: Éxito
+    public int $step = 1; // 1: Subida, 2: Previsualización, 3: Cuenta regresiva, 4: Procesando/Enviando, 5: Éxito
 
     // Control de Mes Estadístico (M.E.)
     public int $mesEstadistico;
@@ -361,7 +361,7 @@ class ImportActividadesForm extends Component
             Cache::forget($cacheKey);
 
             $this->cleanupTempFile();
-            $this->step = 4;
+            $this->step = 5; // Avanzar al paso de éxito (Paso 5)
             session()->flash('success', "¡Excelente! Se han importado exitosamente {$this->totalRows} actividades e iniciado las colas de notificación.");
         } catch (\Exception $e) {
             session()->flash('error', 'Fallo al persistir registros en base de datos: '.$e->getMessage());

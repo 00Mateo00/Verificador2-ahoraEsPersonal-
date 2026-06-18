@@ -203,9 +203,11 @@
                                             <button type="button" 
                                                     wire:click="resendIndividual({{ $mail->id }})" 
                                                     class="btn-acc" 
-                                                    style="padding: 6px 12px; font-size: 0.8rem; font-weight: 700; border-color: #0F69C4; color: #0F69C4 !important; background-color: rgba(15, 105, 196, 0.02); border-radius: 4px;"
-                                                    wire:loading.attr="disabled">
-                                                Reintentar ✉️
+                                                    style="padding: 6px 12px; font-size: 0.8rem; font-weight: 700; border-color: #0F69C4; color: #0F69C4 !important; background-color: rgba(15, 105, 196, 0.02); border-radius: 4px; display: inline-flex; align-items: center; gap: 4px;"
+                                                    wire:loading.attr="disabled"
+                                                    wire:target="resendIndividual({{ $mail->id }})">
+                                                <span wire:loading.remove wire:target="resendIndividual({{ $mail->id }})">Reintentar ✉️</span>
+                                                <span wire:loading wire:target="resendIndividual({{ $mail->id }})">Enviando... ⏳</span>
                                             </button>
                                         @endif
 
