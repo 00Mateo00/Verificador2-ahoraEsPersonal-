@@ -21,7 +21,7 @@ return new class extends Migration
             $table->rememberToken();
             $table->timestamps();
             $table->string('rol')->default('usuario');
-            $table->boolean('estado')->default(true);
+            $table->boolean('activo')->default(true);
 
         });
 

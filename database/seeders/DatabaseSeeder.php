@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\DB;
 class DatabaseSeeder extends Seeder
 {
     use WithoutModelEvents;
+
     /**
      * Seed the application's database with core types and Excel units.
      */
@@ -19,34 +20,34 @@ class DatabaseSeeder extends Seeder
         $regiones = [
             [
                 8,
-                "Biobio",
-                "micorreo+biobio@gmail.com"
+                'Biobio',
+                'micorreo+biobio@gmail.com',
             ],
             [
                 9,
-                "Araucanía",
-                "micorreo+araucania@gmail.com"
+                'Araucanía',
+                'micorreo+araucania@gmail.com',
             ],
             [
                 10,
-                "Los Lagos",
-                "micorreo+loslagos@gmail.com"
+                'Los Lagos',
+                'micorreo+loslagos@gmail.com',
             ],
             [
                 11,
-                "Aysén",
-                "micorreo+aysen@gmail.com"
+                'Aysén',
+                'micorreo+aysen@gmail.com',
             ],
             [
                 14,
-                "Los Ríos",
-                "micorreo+losrios@gmail.com"
+                'Los Ríos',
+                'micorreo+losrios@gmail.com',
             ],
             [
                 16,
-                "Ñuble",
-                "micorreo+nuble@gmail.com"
-            ]
+                'Ñuble',
+                'micorreo+nuble@gmail.com',
+            ],
         ];
 
         foreach ($regiones as $r) {
@@ -55,7 +56,6 @@ class DatabaseSeeder extends Seeder
             $correo = $r[2];
 
             $director = User::factory()->create([
-                'estado' => 1,
                 'name' => "Director Regional {$nombre}",
                 'email' => $correo,
                 'rol' => 'director',
@@ -70,13 +70,10 @@ class DatabaseSeeder extends Seeder
             );
         }
 
-
-        /* 
+        /*
         * FORMATO DE UNIDADES: [[ID, NOMBRE, CORREO], ...]
         */
         $unidades = require 'unidades.php';
-
-
 
         foreach ($unidades as $u) {
             $id = $u[0];
@@ -85,23 +82,20 @@ class DatabaseSeeder extends Seeder
             $region_id = $u[3] ?? null;
 
             $userId = User::factory()->create([
-                'estado' => 1,
                 'name' => $nombre,
                 'email' => $correo,
                 'rol' => 'unidad',
             ])->id;
 
-            
             DB::table('unidad')->updateOrInsert(
                 ['id' => $id],
                 [
                     'region_id' => $region_id,
-                    'user_id' => $userId
+                    'user_id' => $userId,
                 ]
             );
 
         }
-
 
         $usuariosPersonas = [
             ['nombre' => 'admin_caj', 'correo' => 'admin@cajbiobio.cl', 'rol' => 'admin'],
@@ -116,10 +110,9 @@ class DatabaseSeeder extends Seeder
         foreach ($usuariosPersonas as $u) {
             User::factory()->create(
                 [
-                    'estado' => 1,
                     'name' => $u['nombre'],
                     'email' => $u['correo'],
-                    'rol' => $u['rol']
+                    'rol' => $u['rol'],
                 ]
 
             );

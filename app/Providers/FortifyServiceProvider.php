@@ -76,7 +76,7 @@ class FortifyServiceProvider extends ServiceProvider
                         }
 
                         // Bloquear sesión si la cuenta está deshabilitada administrativamente
-                        if (!$user->estado) {
+                        if (!$user->activo) {
                             \Illuminate\Support\Facades\Auth::logout();
                             $request->session()->invalidate();
                             $request->session()->regenerateToken();

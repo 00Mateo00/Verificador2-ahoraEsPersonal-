@@ -21,7 +21,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
     'email',
     'password',
     'rol',
-    'estado',
+    'activo',
     'password_changed_at',
 ])]
 #[Hidden(['password', 'two_factor_secret', 'two_factor_recovery_codes', 'remember_token'])]

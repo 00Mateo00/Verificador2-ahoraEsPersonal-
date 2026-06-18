@@ -13,6 +13,8 @@ use App\Services\MailService;
 use App\Services\PasswordPolicyService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -508,7 +510,7 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/admin/actividades', [ActividadController::class, 'historial'])->name('admin.actividades');
 
         // Vista de Unidades en el menú lateral: Listado de usuarios del sistema
-        Route::get('/admin/unidades', function () {
+        Route::get('/admin/usuarios', function () {
             $search = request('search');
             $usuarios = User::query()
                 ->when($search, function ($query) use ($search) {
@@ -519,8 +521,100 @@ Route::middleware(['auth'])->group(function () {
                 ->orderBy('name', 'asc')
                 ->paginate(15);
 
-            return view('admin.edicion', compact('usuarios', 'search'));
-        })->name('admin.unidades');
+            $regiones = Region::all();
+
+            return view('admin.edicion', compact('usuarios', 'search', 'regiones'));
+        })->name('admin.usuarios');
+
+        // Creación de Región (Incluye creación automática de Director Regional)
+        Route::post('/admin/crear-region', function (Request $request) {
+            if (! session('modo_edicion')) {
+                abort(403, 'Acción bloqueada. Debe activar el Modo Edición.');
+            }
+
+            $request->validate([
+                'region_nombre' => 'required|string|max:50',
+                'director_nombre' => 'required|string|max:255',
+                'director_email' => 'required|email|unique:users,email',
+                'region_id' => 'nullable|integer|unique:region,id',
+            ]);
+
+            DB::transaction(function () use ($request) {
+                $user = User::create([
+                    'name' => $request->director_nombre,
+                    'email' => $request->director_email,
+                    'password' => Hash::make('password'),
+                    'rol' => 'director',
+                    'activo' => true,
+                    'password_changed_at' => null,
+                ]);
+
+                Region::create([
+                    'id' => $request->region_id ?: null,
+                    'region_nombre' => $request->region_nombre,
+                    'user_id' => $user->id,
+                ]);
+            });
+
+            return back()->with('success', "La Región '{$request->region_nombre}' y su Director Regional han sido creados con éxito.");
+        })->name('admin.crear-region');
+
+        // Creación de Unidad Operativa (Incluye creación automática de Operador de Unidad)
+        Route::post('/admin/crear-unidad', function (Request $request) {
+            if (! session('modo_edicion')) {
+                abort(403, 'Acción bloqueada. Debe activar el Modo Edición.');
+            }
+
+            $request->validate([
+                'unidad_nombre' => 'required|string|max:255',
+                'unidad_email' => 'required|email|unique:users,email',
+                'region_id' => 'required|exists:region,id',
+                'unidad_id' => 'nullable|integer|unique:unidad,id',
+            ]);
+
+            DB::transaction(function () use ($request) {
+                $user = User::create([
+                    'name' => $request->unidad_nombre,
+                    'email' => $request->unidad_email,
+                    'password' => Hash::make('password'),
+                    'rol' => 'unidad',
+                    'activo' => true,
+                    'password_changed_at' => null,
+                ]);
+
+                Unidad::create([
+                    'id' => $request->unidad_id ?: null,
+                    'region_id' => $request->region_id,
+                    'user_id' => $user->id,
+                ]);
+            });
+
+            return back()->with('success', "La Unidad '{$request->unidad_nombre}' y su Operador han sido creados con éxito.");
+        })->name('admin.crear-unidad');
+
+        // Creación de Usuario de Sistema (Admin, Auditor o Cargador)
+        Route::post('/admin/crear-usuario', function (Request $request) {
+            if (! session('modo_edicion')) {
+                abort(403, 'Acción bloqueada. Debe activar el Modo Edición.');
+            }
+
+            $request->validate([
+                'name' => 'required|string|max:255',
+                'email' => 'required|email|unique:users,email',
+                'rol' => 'required|in:admin,auditor,cargador',
+            ]);
+
+            User::create([
+                'name' => $request->name,
+                'email' => $request->email,
+                'password' => Hash::make('password'),
+                'rol' => $request->rol,
+                'activo' => true,
+                'password_changed_at' => null,
+            ]);
+
+            return back()->with('success', "Usuario '{$request->name}' con rol '{$request->rol}' creado con éxito.");
+        })->name('admin.crear-usuario');
 
         Route::get('/admin/edicion', function () {
             session([
@@ -554,10 +648,10 @@ Route::middleware(['auth'])->group(function () {
             }
 
             $user->update([
-                'estado' => ! $user->estado,
+                'activo' => ! $user->activo,
             ]);
 
-            $statusText = $user->estado ? 'habilitada' : 'deshabilitada';
+            $statusText = $user->activo ? 'habilitada' : 'deshabilitada';
 
             return back()->with('success', "La cuenta de {$user->name} ha sido {$statusText} con éxito.");
         })->name('admin.usuarios.toggle');

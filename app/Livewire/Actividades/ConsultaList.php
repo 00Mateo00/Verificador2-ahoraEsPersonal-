@@ -170,6 +170,22 @@ class ConsultaList extends Component
     }
 
     /**
+     * Desactivar una actividad de forma permanente (Solo Administradores en Modo Edición).
+     */
+    public function desactivarActividad($actividadId)
+    {
+        if (Auth::user()->rol !== 'admin' || ! session('modo_edicion')) {
+            abort(403, 'No autorizado para realizar esta acción.');
+        }
+
+        $actividad = Actividad::find($actividadId);
+        if ($actividad) {
+            $actividad->update(['activo' => false]);
+            session()->flash('success', 'La actividad ha sido desactivada del sistema con éxito.');
+        }
+    }
+
+    /**
      * Adjuntar un nuevo archivo verificador a una actividad (Solo Administradores en Modo Edición).
      */
     public function adjuntarVerificadorAdministrativo($actividadId)

@@ -81,8 +81,8 @@
                     <!-- Secciones exclusivas de Administración -->
                     @if(Auth::user()->rol === 'admin')
                     <li>
-                        <a href="{{ route('admin.unidades') }}" class="{{ request()->routeIs('admin.unidades') ? 'active' : '' }}">
-                            Unidades
+                        <a href="{{ route('admin.usuarios') }}" class="{{ request()->routeIs('admin.usuarios') ? 'active' : '' }}">
+                            Usuarios
                         </a>
                     </li>
                     @endif

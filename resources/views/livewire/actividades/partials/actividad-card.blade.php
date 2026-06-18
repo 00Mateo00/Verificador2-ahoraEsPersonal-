@@ -105,30 +105,45 @@
 
                 <!-- Formulario Administrativo para Adjuntar Nuevos Verificadores -->
                 @if(Auth::user()->rol === 'admin' && session('modo_edicion'))
-                    <div style="margin-top: 20px; background-color: rgba(15, 105, 196, 0.02); border-radius: 8px; padding: 20px; border: 1px dashed #0F69C4;">
-                        <strong style="font-size: 0.8rem; color: #0F69C4; text-transform: uppercase; display: block; margin-bottom: 8px;">📥 Subida Administrativa de Verificadores (Modo Edición)</strong>
-                        <div style="display: flex; gap: 15px; align-items: flex-end; flex-wrap: wrap;">
-                            <div style="flex: 1; min-width: 250px;">
-                                <input type="file" wire:model="nuevosVerificadores" multiple accept=".pdf,.doc,.docx,.png,.jpg,.jpeg" style="font-size: 0.85rem; color: #475569;">
-                                @error('nuevosVerificadores') <span style="color: #ef3340; font-size: 0.8rem; display: block; margin-top: 5px;">⚠️ {{ $message }}</span> @enderror
-                                @error('nuevosVerificadores.*') <span style="color: #ef3340; font-size: 0.8rem; display: block; margin-top: 5px;">⚠️ {{ $message }}</span> @enderror
-                            </div>
-                            <button type="button" 
-                                    wire:click="adjuntarVerificadorAdministrativo({{ $act->actividad_id }})" 
-                                    class="btn-primary-caj" 
-                                    style="padding: 10px 20px; font-size: 0.85rem;"
-                                    wire:loading.attr="disabled"
-                                    wire:target="nuevosVerificadores">
-                                Adjuntar Respaldos
-                            </button>
+                    <div style="margin-top: 20px; background-color: rgba(15, 105, 196, 0.02); border: 1px dashed #0F69C4; padding: 20px; border-radius: 8px; display: grid; grid-template-columns: 1fr auto; gap: 20px; align-items: center; flex-wrap: wrap;">
+                        <div>
+                            <label for="nuevosVerificadores-{{ $act->actividad_id }}" style="font-size: 0.85rem; font-weight: 700; color: #334155; display: block; margin-bottom: 6px;">
+                                Adjuntar archivos respaldatorios adicionales administrativamente
+                            </label>
+                            <input type="file" 
+                                    wire:model="nuevosVerificadores" 
+                                    id="nuevosVerificadores-{{ $act->actividad_id }}" 
+                                    multiple 
+                                    accept=".pdf,.doc,.docx,.png,.jpg,.jpeg"
+                                    style="font-size: 0.85rem; color: #475569;">
+                            @error('nuevosVerificadores') <span style="color: #ef3340; font-size: 0.8rem; display: block; margin-top: 5px;">⚠️ {{ $message }}</span> @enderror
+                            @error('nuevosVerificadores.*') <span style="color: #ef3340; font-size: 0.8rem; display: block; margin-top: 5px;">⚠️ {{ $message }}</span> @enderror
                         </div>
-                        <div wire:loading wire:target="nuevosVerificadores" style="color: #0F69C4; font-size: 0.8rem; font-weight: 600; margin-top: 8px;">
-                            ⏳ Cargando archivos temporales al servidor, por favor espere...
-                        </div>
+                        <button type="button" 
+                                wire:click="adjuntarVerificadorAdministrativo({{ $act->actividad_id }})" 
+                                class="btn-primary-caj" 
+                                style="padding: 10px 20px; font-size: 0.85rem;"
+                                wire:loading.attr="disabled"
+                                wire:target="nuevosVerificadores">
+                            Adjuntar Respaldos
+                        </button>
+                    </div>
+                    <div wire:loading wire:target="nuevosVerificadores" style="color: #0F69C4; font-size: 0.8rem; font-weight: 600; margin-top: 8px;">
+                        ⏳ Cargando archivos temporales al servidor, por favor espere...
+                    </div>
+
+                    <!-- Botón Administrativo para Desactivar Actividad -->
+                    <div style="margin-top: 20px; border-top: 1px dashed #cbd5e1; padding-top: 15px; display: flex; justify-content: flex-end;">
+                        <button type="button" 
+                                wire:click="desactivarActividad({{ $act->actividad_id }})" 
+                                wire:confirm="¿Está seguro de que desea desactivar de forma permanente esta actividad del sistema?"
+                                class="btn-acc" 
+                                style="border-color: #ef3340; color: #ef3340 !important; background-color: rgba(239, 51, 64, 0.02); font-weight: 700; padding: 8px 16px; font-size: 0.8rem; border-radius: 4px; cursor: pointer;">
+                            Desactivar Actividad 🛑
+                        </button>
                     </div>
                 @endif
             </div>
         @endif
-
     </div>
 </div>

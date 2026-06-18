@@ -25,7 +25,7 @@ class EnsureUserHasRole
         $user = Auth::user();
 
         // Bloquear cuentas deshabilitadas administrativamente
-        if (!$user->estado) {
+        if (!$user->activo) {
             Auth::logout();
             $request->session()->invalidate();
             $request->session()->regenerateToken();
