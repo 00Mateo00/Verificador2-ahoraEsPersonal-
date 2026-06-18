@@ -301,47 +301,115 @@ Route::middleware(['auth'])->group(function () {
     // Rutas exclusivas del Director Regional
     Route::middleware(['role:director'])->group(function () {
         Route::get('/director/dashboard', function () {
+            // Control dinámico de vistas y filtros temporales para el Director
+            $view = request('view', 'mes'); // 'mes', 'ano' o 'global'
+
             $currentMonth = (int) date('m');
             $currentYear = (int) date('Y');
+
+            $selectedMonth = (int) request('mes', $currentMonth);
+            $selectedYear = (int) request('ano', $currentYear);
 
             // Encontrar la región del director autenticado
             $region = Region::where('user_id', Auth::id())->first();
             $unidadIds = $region ? $region->unidades->pluck('id')->toArray() : [];
 
-            // Estadísticas del mes estadístico actual restringidas a las unidades de su región
-            $totalCargadas = Actividad::where('estado', 'CARGADA')
-                ->whereIn('unidad_id_asignada', $unidadIds)
-                ->where('MES', $currentMonth)
-                ->where('AÑO', $currentYear)
-                ->count();
+            // 1. Estadísticas operacionales restringidas de acuerdo a la vista y selectores
+            $queryCargadas = Actividad::where('estado', 'CARGADA')->whereIn('unidad_id_asignada', $unidadIds);
+            $queryVerificadas = Actividad::where('estado', 'VERIFICADA')->whereIn('unidad_id_asignada', $unidadIds);
 
-            $totalVerificadas = Actividad::where('estado', 'VERIFICADA')
-                ->whereIn('unidad_id_asignada', $unidadIds)
-                ->where('MES', $currentMonth)
-                ->where('AÑO', $currentYear)
-                ->count();
+            if ($view !== 'global') {
+                $queryCargadas->where('AÑO', $selectedYear);
+                $queryVerificadas->where('AÑO', $selectedYear);
 
+                if ($view === 'mes') {
+                    $queryCargadas->where('MES', $selectedMonth);
+                    $queryVerificadas->where('MES', $selectedMonth);
+                }
+            }
+
+            $totalCargadas = $queryCargadas->count();
+            $totalVerificadas = $queryVerificadas->count();
             $totalActividades = $totalCargadas + $totalVerificadas;
             $porcentajeVerificacion = $totalActividades > 0 ? round(($totalVerificadas / $totalActividades) * 100, 1) : 0;
 
-            // Lista de actividades vigentes de sus unidades para el mes actual
-            $actividades = Actividad::with(['archivos', 'unidadAsignada'])
-                ->whereIn('unidad_id_asignada', $unidadIds)
-                ->where('MES', $currentMonth)
-                ->where('AÑO', $currentYear)
-                ->orderBy('FECHA', 'desc')
-                ->paginate(15);
-
-            // Unidades con firmas pendientes en su región únicamente
-            $unidadesPendientes = Unidad::query()
+            // 2. Catálogo de unidades asignadas ordenadas por menor avance a mayor avance (Excluyendo unidades sin actividades)
+            $unidadesEstadisticas = Unidad::query()
                 ->with(['user'])
                 ->where('region_id', $region?->id)
-                ->whereHas('actividadesAsignadas', function ($q) use ($currentMonth, $currentYear) {
-                    $q->where('estado', 'CARGADA')
-                        ->where('MES', $currentMonth)
-                        ->where('AÑO', $currentYear);
+                ->get()
+                ->map(function ($unidad) use ($selectedYear, $selectedMonth, $view) {
+                    $cargadas = Actividad::where('unidad_id_asignada', $unidad->id)
+                        ->where('estado', 'CARGADA')
+                        ->when($view !== 'global', function ($q) use ($selectedYear) {
+                            $q->where('AÑO', $selectedYear);
+                        })
+                        ->when($view === 'mes', function ($q) use ($selectedMonth) {
+                            $q->where('MES', $selectedMonth);
+                        })
+                        ->count();
+
+                    $verificadas = Actividad::where('unidad_id_asignada', $unidad->id)
+                        ->where('estado', 'VERIFICADA')
+                        ->when($view !== 'global', function ($q) use ($selectedYear) {
+                            $q->where('AÑO', $selectedYear);
+                        })
+                        ->when($view === 'mes', function ($q) use ($selectedMonth) {
+                            $q->where('MES', $selectedMonth);
+                        })
+                        ->count();
+
+                    $total = $cargadas + $verificadas;
+
+                    if ($total === 0) {
+                        return null;
+                    }
+
+                    $avance = $verificadas === 0 ? 0 : round(($verificadas / $total) * 100, 1);
+
+                    // Recuperar únicamente las actividades verificadas con archivos asociados que corresponden al periodo actual
+                    $actividadesVerificadas = Actividad::with(['archivos'])
+                        ->where('unidad_id_asignada', $unidad->id)
+                        ->where('estado', 'VERIFICADA')
+                        ->when($view !== 'global', function ($q) use ($selectedYear) {
+                            $q->where('AÑO', $selectedYear);
+                        })
+                        ->when($view === 'mes', function ($q) use ($selectedMonth) {
+                            $q->where('MES', $selectedMonth);
+                        })
+                        ->orderBy('FECHA', 'desc')
+                        ->get();
+
+                    return [
+                        'id' => $unidad->id,
+                        'nombre' => $unidad->user->name ?? 'Unidad sin nombre',
+                        'email' => $unidad->user->email ?? '',
+                        'cargadas' => $cargadas,
+                        'verificadas' => $verificadas,
+                        'total' => $total,
+                        'avance' => $avance,
+                        'actividades_verificadas' => $actividadesVerificadas,
+                    ];
                 })
-                ->get();
+                ->filter() // Filtrar nulos (unidades con 0 actividades totales en el periodo)
+                ->sortBy('avance')
+                ->values();
+
+            // 3. Lista de actividades vigentes de sus unidades para el periodo seleccionado
+            $queryActividades = Actividad::with(['archivos', 'unidadAsignada'])
+                ->whereIn('unidad_id_asignada', $unidadIds)
+                ->where('activo', true);
+
+            if ($view !== 'global') {
+                $queryActividades->where('AÑO', $selectedYear);
+
+                if ($view === 'mes') {
+                    $queryActividades->where('MES', $selectedMonth);
+                }
+            }
+
+            $actividades = $queryActividades->orderBy('FECHA', 'desc')
+                ->paginate(15);
 
             return view('director.dashboard', compact(
                 'region',
@@ -349,14 +417,16 @@ Route::middleware(['auth'])->group(function () {
                 'totalVerificadas',
                 'totalActividades',
                 'porcentajeVerificacion',
+                'unidadesEstadisticas',
                 'actividades',
-                'unidadesPendientes',
+                'view',
                 'currentMonth',
-                'currentYear'
+                'currentYear',
+                'selectedMonth',
+                'selectedYear'
             ));
         })->name('director.dashboard');
 
-        // Acción de renotificación regional asíncrona
         // Acción de renotificación regional asíncrona
         Route::post('/director/unidades/{unidad}/renotificar', function (Unidad $unidad) {
             $region = Region::where('user_id', Auth::id())->first();
@@ -378,7 +448,7 @@ Route::middleware(['auth'])->group(function () {
         })->name('director.unidades.renotificar');
     });
 
-    // / Rutas exclusivas de Administración
+    //  Rutas exclusivas de Administración
     Route::middleware(['role:admin'])->group(function () {
         Route::get('/admin/dashboard', function () {
             // Métricas operacionales consolidadas

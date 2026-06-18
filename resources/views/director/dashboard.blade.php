@@ -3,13 +3,89 @@
 @section('title', 'Dashboard Regional - Sistema de Gestion Verificador')
 
 @section('content')
+<div x-data="{ showModal: false, activeUnit: null }">
 <div class="dashboard-page-header">
     <h2>Dashboard de Dirección Regional</h2>
     <p style="margin: 5px 0 0; color: #64748b; font-size: 0.95rem;">
         Consola de supervisión territorial para la región de <strong>{{ $region->region_nombre ?? 'Jurisdicción Asignada' }}</strong>.
-        Vista del periodo estadístico: <strong>{{ date('m') }}/{{ date('Y') }} (Mes Actual)</strong>.
+        Vista del periodo estadístico: <strong>
+            @if($view === 'mes')
+                {{ $selectedMonth }}/{{ $selectedYear }} (Mes Seleccionado)
+            @elseif($view === 'ano')
+                Año {{ $selectedYear }}
+            @else
+                Histórico Global
+            @endif
+        </strong>.
     </p>
 </div>
+
+<!-- Control de Vistas Periodificadas (Pestañas/Tabs) -->
+<div style="display: flex; gap: 12px; margin-bottom: 25px; border-bottom: 1px solid #cbd5e1; padding-bottom: 15px; flex-wrap: wrap;">
+    <a href="{{ route('director.dashboard', ['view' => 'mes', 'mes' => $selectedMonth, 'ano' => $selectedYear]) }}" 
+       style="padding: 10px 20px; font-size: 0.85rem; font-weight: 700; border-radius: 6px; text-decoration: none; transition: all 0.2s ease;
+              @if($view === 'mes') background-color: #0F69C4; color: #ffffff !important; @else background-color: #ffffff; color: #475569 !important; border: 1px solid #cbd5e1; @endif">
+        📅 Visualizar Este Mes
+    </a>
+    <a href="{{ route('director.dashboard', ['view' => 'ano', 'ano' => $selectedYear]) }}" 
+       style="padding: 10px 20px; font-size: 0.85rem; font-weight: 700; border-radius: 6px; text-decoration: none; transition: all 0.2s ease;
+              @if($view === 'ano') background-color: #0F69C4; color: #ffffff !important; @else background-color: #ffffff; color: #475569 !important; border: 1px solid #cbd5e1; @endif">
+        📆 Visualizar Todo el Año
+    </a>
+    <a href="{{ route('director.dashboard', ['view' => 'global']) }}" 
+       style="padding: 10px 20px; font-size: 0.85rem; font-weight: 700; border-radius: 6px; text-decoration: none; transition: all 0.2s ease;
+              @if($view === 'global') background-color: #0F69C4; color: #ffffff !important; @else background-color: #ffffff; color: #475569 !important; border: 1px solid #cbd5e1; @endif">
+        📊 Estadísticas Globales
+    </a>
+</div>
+
+<!-- Filtros de Selección de Periodo (Mes/Año) - Ocultos en Vista Global -->
+@if($view !== 'global')
+    @php
+        $maxMonth = ($selectedYear == $currentYear) ? $currentMonth : 12;
+        $meses = [
+            1 => 'Enero', 2 => 'Febrero', 3 => 'Marzo', 4 => 'Abril',
+            5 => 'Mayo', 6 => 'Junio', 7 => 'Julio', 8 => 'Agosto',
+            9 => 'Septiembre', 10 => 'Octubre', 11 => 'Noviembre', 12 => 'Diciembre'
+        ];
+    @endphp
+    <div style="background-color: #f1f5f9; border: 1px solid #cbd5e1; padding: 20px; border-radius: 8px; margin-bottom: 30px;">
+        <form action="{{ route('director.dashboard') }}" method="GET" style="display: flex; gap: 15px; align-items: flex-end; flex-wrap: wrap;">
+            <input type="hidden" name="view" value="{{ $view }}">
+            
+            @if($view === 'mes')
+            <div style="flex: 1; min-width: 150px;">
+                <label for="mes" style="font-size: 0.85rem; font-weight: 700; color: #334155; display: block; margin-bottom: 6px;">Seleccionar Mes Estadístico</label>
+                <select name="mes" id="mes" style="width: 100%; box-sizing: border-box; padding: 10px 14px; border: 1px solid #cbd5e1; border-radius: 6px; background-color: #ffffff; font-size: 0.95rem;">
+                    @for($m = $maxMonth; $m >= 1; $m--)
+                        <option value="{{ $m }}" @if($m === $selectedMonth) selected @endif>{{ $meses[$m] }}</option>
+                    @endfor
+                </select>
+            </div>
+            @endif
+
+            <div style="flex: 1; min-width: 150px;">
+                <label for="ano" style="font-size: 0.85rem; font-weight: 700; color: #334155; display: block; margin-bottom: 6px;">Seleccionar Año Estadístico</label>
+                <select name="ano" id="ano" style="width: 100%; box-sizing: border-box; padding: 10px 14px; border: 1px solid #cbd5e1; border-radius: 6px; background-color: #ffffff; font-size: 0.95rem;">
+                    @for($y = $currentYear; $y >= 2020; $y--)
+                        <option value="{{ $y }}" @if($y === $selectedYear) selected @endif>{{ $y }}</option>
+                    @endfor
+                </select>
+            </div>
+
+            <div style="display: flex; gap: 10px;">
+                <button type="submit" class="btn-primary-caj" style="padding: 10px 20px; font-size: 0.9rem;">
+                    Filtrar 🔍
+                </button>
+                @if($selectedMonth !== $currentMonth || $selectedYear !== $currentYear)
+                <a href="{{ route('director.dashboard', ['view' => $view, 'mes' => $currentMonth, 'ano' => $currentYear]) }}" class="btn-acc" style="text-align: center; padding: 10px 15px; text-decoration: none; border-color: #cbd5e1; font-weight: 600; font-size: 0.9rem; border-radius: 6px; display: inline-flex; align-items: center;">
+                    Volver al Periodo Actual 🔄
+                </a>
+                @endif
+            </div>
+        </form>
+    </div>
+@endif
 
 <!-- Tarjeta Informativa de Rol -->
 <div class="dashboard-alert-card">
@@ -17,7 +93,7 @@
     <div>
         <strong style="color: #166534; font-size: 1rem; display: block; margin-bottom: 4px;">Control de Operación Regional</strong>
         <p>
-            Supervise el avance en la subida de verificadores de las unidades operativas a su cargo para el mes corriente. Use la renotificación dinámica para recordar firmas rezagadas.
+            Supervise el avance en la subida de verificadores de las unidades operativas a su cargo. Utilice los filtros superiores para segmentar estadísticas de forma mensual, anual o histórica.
         </p>
     </div>
 </div>
@@ -28,7 +104,9 @@
     <div class="dashboard-kpi-card">
         <span class="dashboard-kpi-label">Actividades Totales</span>
         <div class="dashboard-kpi-value">{{ $totalActividades }}</div>
-        <div class="dashboard-kpi-text">Asignadas este mes</div>
+        <div class="dashboard-kpi-text">
+            @if($view === 'mes') Periodo de carga del mes @elseif($view === 'ano') Acumulado año {{ $selectedYear }} @else Total acumulado histórico @endif
+        </div>
     </div>
 
     <!-- Pendientes -->
@@ -55,111 +133,61 @@
     </div>
 </div>
 
-<!-- 📢 Unidades Pendientes de Verificación (Exclusivo de su Región) -->
-<div class="dashboard-card">
-    <h3 style="margin-top: 0; margin-bottom: 12px; font-size: 1.1rem; color: #0d1b2a; font-weight: 700; border-bottom: 2px solid #f1f5f9; padding-bottom: 12px;">
-        📢 Unidades Pendientes de Verificación ({{ $unidadesPendientes->count() }})
-    </h3>
-    <p style="color: #64748b; font-size: 0.85rem; line-height: 1.5; margin-bottom: 20px;">
-        Las siguientes unidades regionales asignadas a su dirección registran una o más actividades sin respaldos para el mes estadístico en curso. Presione el botón para despacharles una renotificación automática de carga.
-    </p>
-
-    @if($unidadesPendientes->isEmpty())
-    <div style="text-align: center; padding: 30px; color: #2b8a3e; background-color: rgba(43, 138, 62, 0.02); border: 1px dashed #2b8a3e; border-radius: 6px; font-size: 0.9rem; font-weight: 600;">
-        ✅ ¡Enhorabuena! Todas sus unidades operativas tienen sus verificadores al día en este periodo.
-    </div>
-    @else
-    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 15px; max-height: 250px; overflow-y: auto;">
-        @foreach($unidadesPendientes as $up)
-        <div style="background-color: #f8fafc; border: 1px solid #cbd5e1; border-radius: 6px; padding: 15px; display: flex; justify-content: space-between; align-items: center; gap: 15px;">
-            <div style="flex: 1;">
-                <strong style="color: #0d1b2a; font-size: 0.9rem; display: block;">{{ $up->user->name }}</strong>
-                <span style="font-size: 0.75rem; color: #64748b; display: block; margin-top: 2px;">
-                    Email: {{ $up->user->email }}
-                </span>
-            </div>
-            <div>
-                <form action="{{ route('director.unidades.renotificar', $up->id) }}" method="POST" onsubmit="this.querySelector('button').disabled = true; this.querySelector('button').innerHTML = 'Enviando... ⏳';">
-                    @csrf
-                    <button type="submit" class="btn-acc" style="padding: 8px 14px; font-size: 0.8rem; font-weight: 700; border-color: #0F69C4; color: #0F69C4 !important; background-color: rgba(15, 105, 196, 0.02); border-radius: 4px; cursor: pointer;">
-                        Renotificar ✉️
-                    </button>
-                </form>
-            </div>
-        </div>
-        @endforeach
-    </div>
-    @endif
-</div>
-
-<!-- 📋 Listado de Actividades del Periodo Actual -->
-<div class="dashboard-card">
+<!-- 🗺️ Avance Individual de Unidades Operativas (Exclusivo de su Región) -->
+<div style="background-color: #ffffff; border: 1px solid rgba(226, 232, 240, 0.8); border-radius: 8px; padding: 25px; margin-bottom: 35px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.02);">
     <h3 style="margin-top: 0; margin-bottom: 20px; font-size: 1.15rem; color: #0d1b2a; font-weight: 700; border-bottom: 2px solid #f1f5f9; padding-bottom: 12px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
-        <span>📋 Listado de Actividades Registradas</span>
-        <span style="font-size: 0.8rem; color: #64748b; font-weight: 500;">Filtro: Mes Estadístico Actual</span>
+        <span>🗺️ Avance Individual de Unidades Asignadas</span>
+        <span style="font-size: 0.8rem; color: #64748b; font-weight: 500;">Ordenado por menor porcentaje de avance</span>
     </h3>
-
-    @if($actividades->isEmpty())
-    <div style="text-align: center; padding: 30px; color: #94a3b8; font-size: 0.9rem;">
-        No se registran actividades para sus unidades en el mes corriente.
-    </div>
-    @else
+    
     <div style="overflow-x: auto;">
-        <table class="table-custom-data" style="width: 100%; border-collapse: collapse; min-width: 800px;">
+        <table class="table-custom-data" style="width: 100%; border-collapse: collapse; min-width: 700px;">
             <thead>
                 <tr>
-                    <th style="padding: 12px 16px; background-color: #f1f5f9; text-align: left; font-size: 0.8rem; font-weight: 700; color: #475569; width: 60px;">COD</th>
                     <th style="padding: 12px 16px; background-color: #f1f5f9; text-align: left; font-size: 0.8rem; font-weight: 700; color: #475569;">Unidad</th>
-                    <th style="padding: 12px 16px; background-color: #f1f5f9; text-align: left; font-size: 0.8rem; font-weight: 700; color: #475569;">Tipo de Actividad</th>
-                    <th style="padding: 12px 16px; background-color: #f1f5f9; text-align: center; font-size: 0.8rem; font-weight: 700; color: #475569; width: 120px;">Fecha</th>
-                    <th style="padding: 12px 16px; background-color: #f1f5f9; text-align: center; font-size: 0.8rem; font-weight: 700; color: #475569; width: 140px;">Estado</th>
-                    <th style="padding: 12px 16px; background-color: #f1f5f9; text-align: right; font-size: 0.8rem; font-weight: 700; color: #475569; width: 160px;">Verificadores</th>
+                    <th style="padding: 12px 16px; background-color: #f1f5f9; text-align: center; font-size: 0.8rem; font-weight: 700; color: #475569; width: 120px;">Pendientes</th>
+                    <th style="padding: 12px 16px; background-color: #f1f5f9; text-align: center; font-size: 0.8rem; font-weight: 700; color: #475569; width: 120px;">Verificadas</th>
+                    <th style="padding: 12px 16px; background-color: #f1f5f9; text-align: right; font-size: 0.8rem; font-weight: 700; color: #475569; width: 180px;">Progreso</th>
+                    <th style="padding: 12px 16px; background-color: #f1f5f9; text-align: right; font-size: 0.8rem; font-weight: 700; color: #475569; width: 160px;">Acciones</th>
                 </tr>
             </thead>
             <tbody>
-                @foreach($actividades as $act)
-                <tr style="border-bottom: 1px solid #e2e8f0;">
-                    <td style="padding: 14px 16px; font-size: 0.85rem; color: #64748b; font-family: monospace;">{{ $act->COD ?: 'N/A' }}</td>
-                    <td style="padding: 14px 16px; font-size: 0.9rem; font-weight: 600; color: #0d1b2a;">{{ $act->UNIDAD }}</td>
-                    <td style="padding: 14px 16px; font-size: 0.85rem; color: #475569;">
-                        <strong>{{ $act->TIPO_ACTIVIDAD }}</strong><br>
-                        <span style="font-size: 0.75rem; color: #94a3b8;">{{ $act->SUB_TIPO_ACTIVIDAD }}</span>
-                    </td>
-                    <td style="padding: 14px 16px; font-size: 0.85rem; color: #475569; text-align: center;">
-                        {{ $act->FECHA ? \Carbon\Carbon::parse($act->FECHA)->format('d-m-Y') : 'N/A' }}
-                    </td>
-                    <td style="padding: 14px 16px; text-align: center;">
-                        @if($act->estado === 'VERIFICADA')
-                        <span style="background-color: rgba(43, 138, 62, 0.08); color: #2b8a3e; padding: 3px 8px; border-radius: 4px; font-size: 0.72rem; font-weight: 700; text-transform: uppercase;">
-                            Verificada
-                        </span>
-                        @else
-                        <span style="background-color: rgba(239, 51, 64, 0.08); color: #ef3340; padding: 3px 8px; border-radius: 4px; font-size: 0.72rem; font-weight: 700; text-transform: uppercase;">
-                            Pendiente
-                        </span>
-                        @endif
-                    </td>
-                    <td style="padding: 14px 16px; text-align: right;">
-                        @if($act->archivos->isNotEmpty())
-                            @foreach($act->archivos as $archivo)
-                            <a href="{{ route('archivos.descargar', $archivo->archivo_id) }}" style="font-size: 0.8rem; font-weight: 700; color: #0F69C4; display: block; margin-bottom: 2px;">
-                                📥 Descargar {{ \Illuminate\Support\Str::limit($archivo->archivo_nombre, 12) }}
-                            </a>
-                            @endforeach
-                        @else
-                        <span style="font-size: 0.8rem; color: #94a3b8; font-style: italic;">Sin archivos</span>
-                        @endif
-                    </td>
-                </tr>
-                @endforeach
+               @foreach($unidadesEstadisticas as $stat)
+                    <tr style="border-bottom: 1px solid #e2e8f0;">
+                        <td style="padding: 14px 16px; font-weight: 700; color: #0F69C4; font-size: 0.9rem;">
+                            {{ $stat['nombre'] }}
+                            <span style="display: block; font-size: 0.75rem; color: #64748b; font-weight: normal; margin-top: 2px;">{{ $stat['email'] }}</span>
+                        </td>
+                        <td style="padding: 14px 16px; font-size: 0.85rem; color: #ef3340; text-align: center; font-weight: 600;">{{ $stat['cargadas'] }}</td>
+                        <td style="padding: 14px 16px; font-size: 0.85rem; color: #2b8a3e; text-align: center; font-weight: 600;">{{ $stat['verificadas'] }}</td>
+                        <td style="padding: 14px 16px; text-align: right;">
+                            <div style="display: flex; align-items: center; justify-content: flex-end; gap: 10px;">
+                                <span style="font-size: 0.8rem; font-weight: 700; color: #0d1b2a;">{{ $stat['avance'] }}%</span>
+                                <div style="width: 80px; height: 8px; background-color: #e2e8f0; border-radius: 4px; overflow: hidden; display: inline-block;">
+                                    <div style="width: {{ $stat['avance'] }}%; height: 100%; background-color: #2b8a3e;"></div>
+                                </div>
+                            </div>
+                        </td>
+                        <td style="padding: 14px 16px; text-align: right;">
+                            <div style="display: flex; gap: 8px; justify-content: flex-end; align-items: center;">
+                                @if($stat['avance'] < 100.0)
+                                    <form action="{{ route('director.unidades.renotificar', $stat['id']) }}" method="POST" onsubmit="this.querySelector('button').disabled = true; this.querySelector('button').innerHTML = 'Enviando... ⏳';">
+                                        @csrf
+                                        <button type="submit" class="btn-acc" style="padding: 6px 12px; font-size: 0.8rem; font-weight: 700; border-color: #0F69C4; color: #0F69C4 !important; background-color: rgba(15, 105, 196, 0.02); border-radius: 4px; cursor: pointer; height: auto;">
+                                            Renotificar ✉️
+                                        </button>
+                                    </form>
+                                
+                                @else
+                                    <p>al dia✅</p>
+
+                                @endif
+                            </div>
+                        </td>
+                    </tr>
+                    @endforeach
             </tbody>
         </table>
     </div>
-
-    <!-- Paginación -->
-    <div style="margin-top: 25px;">
-        {{ $actividades->links() }}
-    </div>
-    @endif
 </div>
 @endsection
