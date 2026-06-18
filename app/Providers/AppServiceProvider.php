@@ -82,14 +82,30 @@ class AppServiceProvider extends ServiceProvider
             app()->isProduction(),
         );
 
-        Password::defaults(fn (): ?Password => app()->isProduction()
-            ? Password::min(12)
-                ->mixedCase()
-                ->letters()
-                ->numbers()
-                ->symbols()
-                ->uncompromised()
-            : null,
-        );
+        Password::defaults(function () {
+            $rule = Password::min(config('password_policy.min_length', 12));
+
+            if (config('password_policy.require_mixed_case', true)) {
+                $rule->mixedCase();
+            }
+
+            if (config('password_policy.require_letters', true)) {
+                $rule->letters();
+            }
+
+            if (config('password_policy.require_numbers', true)) {
+                $rule->numbers();
+            }
+
+            if (config('password_policy.require_symbols', true)) {
+                $rule->symbols();
+            }
+
+            if (config('password_policy.check_uncompromised', true)) {
+                $rule->uncompromised();
+            }
+
+            return $rule;
+        });
     }
 }

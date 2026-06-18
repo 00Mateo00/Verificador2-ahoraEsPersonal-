@@ -57,7 +57,29 @@
 
                     <div class="form-group-item-caj">
                         <label for="password">Nueva Contraseña</label>
-                        <input type="password" id="password" name="password" class="form-input-control-caj" placeholder="Mínimo 8 caracteres" required autofocus autocomplete="new-password">
+                        <input type="password" 
+                               id="password" 
+                               name="password" 
+                               class="form-input-control-caj" 
+                               placeholder="Mínimo {{ config('password_policy.min_length', 12) }} caracteres" 
+                               minlength="{{ config('password_policy.min_length', 12) }}"
+                               required 
+                               autofocus 
+                               autocomplete="new-password">
+                        <span style="font-size: 0.78rem; color: #64748b; margin-top: 4px; display: block; line-height: 1.4;">
+                            Requisitos: Mínimo {{ config('password_policy.min_length', 12) }} caracteres
+                            @if(config('password_policy.require_letters', true) || config('password_policy.require_numbers', true) || config('password_policy.require_symbols', true))
+                                , incluyendo:
+                                @php
+                                    $reqs = [];
+                                    if(config('password_policy.require_letters', true)) $reqs[] = 'letras';
+                                    if(config('password_policy.require_mixed_case', true)) $reqs[] = 'mayúsculas y minúsculas';
+                                    if(config('password_policy.require_numbers', true)) $reqs[] = 'números';
+                                    if(config('password_policy.require_symbols', true)) $reqs[] = 'símbolos';
+                                    echo implode(', ', $reqs);
+                                @endphp
+                            @endif.
+                        </span>
                         @error('password')
                         <span style="color: #ef3340; font-size: 0.85rem; font-weight: 600; display: block; margin-top: 6px;">
                             ⚠️ {{ $message }}
