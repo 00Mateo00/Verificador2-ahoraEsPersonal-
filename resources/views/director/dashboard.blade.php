@@ -157,9 +157,9 @@
     </div>
 
     <!-- Paginación -->
-    <!--<div class="dashboard-pagination">
+    <div class="dashboard-pagination">
         {{ $actividades->links('pagination::bootstrap-5') }}
     </div>
     @endif
-</div>--!>
+</div>
 @endsection
