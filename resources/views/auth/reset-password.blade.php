@@ -6,6 +6,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Establecer Nueva Contraseña - Verificador de Actividades</title>
     <link rel="stylesheet" href="{{ asset('assets/css/style.css') }}">
+    <!-- Alpine.js inyectado de forma segura para dar soporte reactivo e interactivo en tiempo real -->
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <style>
+        [x-cloak] { display: none !important; }
+    </style>
 </head>
 
 <body class="login-layout-body">
@@ -39,7 +44,67 @@
                     @endif
                 </div>
 
-                <form class="login-form-body-caj" action="{{ route('password.update') }}" method="POST">
+                <form class="login-form-body-caj" 
+                      action="{{ route('password.update') }}" 
+                      method="POST"
+                      x-data="{
+                          password: '',
+                          submitted: @json($errors->has('password')),
+                          config: {
+                              minLength: @json(config('password_policy.min_length', 8)),
+                              requireMixedCase: @json(config('password_policy.require_mixed_case', true)),
+                              requireLetters: @json(config('password_policy.require_letters', true)),
+                              requireNumbers: @json(config('password_policy.require_numbers', true)),
+                              requireSymbols: @json(config('password_policy.require_symbols', true))
+                          },
+                          get rules() {
+                              let items = [];
+                              items.push({
+                                  id: 'length',
+                                  text: `Tener al menos ${this.config.minLength} caracteres`,
+                                  valid: this.password.length >= this.config.minLength
+                              });
+                              if (this.config.requireLetters) {
+                                  items.push({
+                                      id: 'letters',
+                                      text: 'Contener al menos una letra',
+                                      valid: /[a-zA-Z]/.test(this.password)
+                                  });
+                              }
+                              if (this.config.requireMixedCase) {
+                                  items.push({
+                                      id: 'mixed',
+                                      text: 'Contener mayúsculas y minúsculas',
+                                      valid: /[a-z]/.test(this.password) && /[A-Z]/.test(this.password)
+                                  });
+                              }
+                              if (this.config.requireNumbers) {
+                                  items.push({
+                                      id: 'numbers',
+                                      text: 'Contener al menos un número',
+                                      valid: /\d/.test(this.password)
+                                  });
+                              }
+                              if (this.config.requireSymbols) {
+                                  items.push({
+                                      id: 'symbols',
+                                      text: 'Contener al menos un carácter especial (ej: ! @ # $ % & *)',
+                                      valid: /[^a-zA-Z0-9]/.test(this.password)
+                                  });
+                              }
+                              return items;
+                          },
+                          get allValid() {
+                              return this.rules.every(r => r.valid);
+                          },
+                          handleSubmit(e) {
+                              this.submitted = true;
+                              if (!this.allValid) {
+                                  e.preventDefault();
+                              }
+                          }
+                      }"
+                      @submit="handleSubmit($event)">
                     @csrf
 
                     <!-- Token de Recuperación Proporcionado por Fortify -->
@@ -66,33 +131,60 @@
                         @enderror
                     </div>
 
+                    <!-- Mensaje de Error Consolidado y Dinámico (UX Faltante) -->
+                    <div x-show="submitted && !allValid" 
+                         style="background-color: #fff5f5; border: 1px solid #feb2b2; border-radius: 8px; padding: 15px; margin-bottom: 20px;" 
+                         x-cloak>
+                        <strong style="color: #c53030; font-size: 0.88rem; display: block; margin-bottom: 6px;">
+                            La contraseña debe cumplir los siguientes requisitos:
+                        </strong>
+                        <ul style="margin: 0; padding-left: 20px; font-size: 0.82rem; color: #9b2c2c; display: flex; flex-direction: column; gap: 4px;">
+                            <template x-for="rule in rules" :key="rule.id">
+                                <li x-show="!rule.valid" x-text="rule.text"></li>
+                            </template>
+                        </ul>
+                    </div>
+
                     <div class="form-group-item-caj">
                         <label for="password">Nueva Contraseña</label>
                         <input type="password" 
                                id="password" 
                                name="password" 
+                               x-model="password"
                                class="form-input-control-caj" 
-                               placeholder="Mínimo {{ config('password_policy.min_length', 12) }} caracteres" 
-                               minlength="{{ config('password_policy.min_length', 12) }}"
+                               :placeholder="'Mínimo ' + config.minLength + ' caracteres'" 
+                               :minlength="config.minLength"
                                required 
                                autofocus 
                                autocomplete="new-password">
-                        <span style="font-size: 0.78rem; color: #64748b; margin-top: 4px; display: block; line-height: 1.4;">
-                            Requisitos: Mínimo {{ config('password_policy.min_length', 12) }} caracteres
-                            @if(config('password_policy.require_letters', true) || config('password_policy.require_numbers', true) || config('password_policy.require_symbols', true))
-                                , incluyendo:
-                                @php
-                                    $reqs = [];
-                                    if(config('password_policy.require_letters', true)) $reqs[] = 'letras';
-                                    if(config('password_policy.require_mixed_case', true)) $reqs[] = 'mayúsculas y minúsculas';
-                                    if(config('password_policy.require_numbers', true)) $reqs[] = 'números';
-                                    if(config('password_policy.require_symbols', true)) $reqs[] = 'símbolos';
-                                    echo implode(', ', $reqs);
-                                @endphp
-                            @endif.
-                        </span>
+
+                        <!-- Checklist de validación en tiempo real -->
+                        <div style="margin-top: 12px; background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 15px;">
+                            <span style="font-size: 0.82rem; color: #475569; font-weight: 700; display: block; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px;">
+                                Checklist de Seguridad:
+                            </span>
+                            <ul style="list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 8px;">
+                                <template x-for="rule in rules" :key="rule.id">
+                                    <li style="font-size: 0.82rem; display: flex; align-items: center; gap: 10px; transition: all 0.2s ease;"
+                                        :style="rule.valid 
+                                            ? 'color: #2b8a3e;' 
+                                            : (submitted ? 'color: #ef3340;' : 'color: #64748b;')">
+                                        
+                                        <!-- Círculo indicador con estados: Válido (Verde), Inválido tras envío (Rojo) o Neutral (Gris) -->
+                                        <span style="display: inline-flex; align-items: center; justify-content: center; width: 18px; height: 18px; border-radius: 50%; font-size: 0.72rem; font-weight: bold; transition: all 0.2s ease;"
+                                              :style="rule.valid 
+                                                  ? 'background-color: rgba(43, 138, 62, 0.1); color: #2b8a3e;' 
+                                                  : (submitted ? 'background-color: rgba(239, 51, 64, 0.1); color: #ef3340;' : 'background-color: #e2e8f0; color: #64748b;')">
+                                            <span x-text="rule.valid ? '✓' : (submitted ? '✗' : '○')"></span>
+                                        </span>
+                                        <span x-text="rule.text" style="line-height: 1.2;"></span>
+                                    </li>
+                                </template>
+                            </ul>
+                        </div>
+
                         @error('password')
-                        <span style="color: #ef3340; font-size: 0.85rem; font-weight: 600; display: block; margin-top: 6px;">
+                        <span style="color: #ef3340; font-size: 0.85rem; font-weight: 600; display: block; margin-top: 8px;">
                             ⚠️ {{ $message }}
                         </span>
                         @enderror
