@@ -149,6 +149,14 @@ Route::post('/password/request-renewal', function (Request $request, PasswordPol
 })->name('password.request-renewal');
 
 Route::middleware(['auth'])->group(function () {
+    // Endpoint síncrono ligero para el Keep-Alive de sesión activa (Heartbeat)
+    Route::post('/session/keep-alive', function () {
+        return response()->json([
+            'status' => 'active',
+            'refreshed_at' => now()->toIso8601String(),
+        ]);
+    })->name('session.keep-alive');
+
     // Descarga segura de archivos verificadores (Almacenamiento Privado)
     Route::get('/archivos/{archivo}/descargar', [DescargaVerificadorController::class, 'descargar'])
         ->name('archivos.descargar');
