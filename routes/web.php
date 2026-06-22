@@ -1,5 +1,6 @@
 <?php
 
+use App\Enums\UserRole;
 use App\Http\Controllers\ActividadController;
 use App\Http\Controllers\DescargaVerificadorController;
 use App\Mail\NuevasActividadesPendientes;
@@ -20,17 +21,17 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', function () {
     if (Auth::check()) {
         $rol = Auth::user()->rol;
-        info("(routing info): Usuario autenticado con rol: $rol");
-        if ($rol === 'admin') {
+        info('(routing info): Usuario autenticado con rol: '.$rol->value);
+        if ($rol === UserRole::Admin) {
             return redirect()->route('admin.dashboard');
         }
-        if ($rol === 'auditor') {
+        if ($rol === UserRole::Auditor) {
             return redirect()->route('auditor.dashboard');
         }
-        if ($rol === 'cargador') {
+        if ($rol === UserRole::Cargador) {
             return redirect()->route('actividades.importar');
         }
-        if ($rol === 'unidad') {
+        if ($rol === UserRole::Unidad) {
             return redirect()->route('unidad.dashboard');
         }
 
@@ -289,7 +290,7 @@ Route::middleware(['auth'])->group(function () {
 
         // Acción síncrona/en colas de renotificación para el Auditor
         Route::post('/auditor/unidades/{unidad}/renotificar', function (Unidad $unidad) {
-            if (auth()->user()->rol !== 'auditor') {
+            if (auth()->user()->rol !== UserRole::Auditor) {
                 abort(403, 'Solo el rol de auditor puede despachar renotificaciones.');
             }
 

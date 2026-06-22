@@ -6,9 +6,11 @@ use App\Actions\Fortify\CreateNewUser;
 use App\Actions\Fortify\ResetUserPassword;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Str;
+use Laravel\Fortify\Contracts\LoginResponse;
 use Laravel\Fortify\Fortify;
 
 class FortifyServiceProvider extends ServiceProvider
@@ -44,11 +46,11 @@ class FortifyServiceProvider extends ServiceProvider
     /**
      * Configure Fortify views.
      */
-      private function configureViews(): void
+    private function configureViews(): void
     {
         // Enrutamiento de vistas de autenticación a plantillas existentes
         Fortify::loginView(fn () => view('auth.login'));
-        
+
         // Mapeo defensivo para evitar excepciones por desconfiguración de namespaces inexistentes (pages::)
         Fortify::verifyEmailView(fn () => view('auth.login'));
         Fortify::twoFactorChallengeView(fn () => view('auth.login'));
@@ -64,40 +66,42 @@ class FortifyServiceProvider extends ServiceProvider
     private function configureLoginResponse(): void
     {
         $this->app->singleton(
-            \Laravel\Fortify\Contracts\LoginResponse::class,
+            LoginResponse::class,
             function () {
-                return new class implements \Laravel\Fortify\Contracts\LoginResponse {
+                return new class implements LoginResponse
+                {
                     public function toResponse($request)
                     {
-                        $user = \Illuminate\Support\Facades\Auth::user();
+                        $user = Auth::user();
 
-                        if (!$user) {
+                        if (! $user) {
                             return redirect()->route('login');
                         }
 
                         // Bloquear sesión si la cuenta está deshabilitada administrativamente
-                        if (!$user->activo) {
-                            \Illuminate\Support\Facades\Auth::logout();
+                        if (! $user->activo) {
+                            Auth::logout();
                             $request->session()->invalidate();
                             $request->session()->regenerateToken();
+
                             return redirect()->route('login')->with('error', 'Su cuenta se encuentra deshabilitada.');
                         }
 
                         $rol = $user->rol;
 
-                        if ($rol === 'admin') {
+                        if ($rol === UserRole::Admin) {
                             return redirect()->route('admin.dashboard');
                         }
-                        if ($rol === 'auditor') {
+                        if ($rol === UserRole::Auditor) {
                             return redirect()->route('auditor.dashboard');
                         }
-                        if ($rol === 'cargador') {
+                        if ($rol === UserRole::Cargador) {
                             return redirect()->route('actividades.importar');
                         }
-                        if ($rol === 'unidad') {
+                        if ($rol === UserRole::Unidad) {
                             return redirect()->route('unidad.dashboard');
                         }
-                        if ($rol === 'director') {
+                        if ($rol === UserRole::Director) {
                             return redirect()->route('director.dashboard');
                         }
 
