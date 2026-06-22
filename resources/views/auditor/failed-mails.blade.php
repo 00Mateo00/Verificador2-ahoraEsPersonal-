@@ -21,27 +21,15 @@
 </div>
 
 <!-- Advertencia Informativa de Seguridad -->
-@if(Auth::user()->rol === 'admin')
+@if(Auth::user()->rol === \App\Enums\UserRole::Admin)
     @if(session('modo_edicion'))
-    <div style="background-color: #fff1f2; border: 1px solid #fecdd3; border-radius: 8px; padding: 20px; margin-bottom: 25px; display: flex; align-items: flex-start; gap: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.01);">
-        <span style="font-size: 1.5rem; line-height: 1;">⚠️</span>
-        <div>
-            <strong style="color: #9f1239; font-size: 1rem; display: block; margin-bottom: 4px;">Modo Edición Activado (Administrador)</strong>
-            <p style="color: #be123c; font-size: 0.85rem; margin: 0; line-height: 1.5;">
-                Se encuentra en modo interactivo de administración crítica. Puede eliminar registros de correos de forma permanente de la base de datos si así lo requiere.
-            </p>
-        </div>
-    </div>
+        <x-alert type="danger" title="Modo Edición Activado (Administrador)">
+            Se encuentra en modo interactivo de administración crítica. Puede eliminar registros de correos de forma permanente de la base de datos si así lo requiere.
+        </x-alert>
     @else
-    <div style="background-color: #eff6ff; border: 1px solid #bfdbfe; border-radius: 8px; padding: 20px; margin-bottom: 25px; display: flex; align-items: flex-start; gap: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.01);">
-        <span style="font-size: 1.5rem; line-height: 1;">🔒</span>
-        <div>
-            <strong style="color: #1e40af; font-size: 1rem; display: block; margin-bottom: 4px;">Modo Solo Lectura (Administrador)</strong>
-            <p style="color: #1e3a8a; font-size: 0.85rem; margin: 0; line-height: 1.5;">
-                Está visualizando el listado en modo seguro. Los controles de eliminación de registros están bloqueados. Habilite el "Modo Edición Crítica" desde el Dashboard Principal si requiere realizar limpiezas permanentes.
-            </p>
-        </div>
-    </div>
+        <x-alert type="info" title="Modo Solo Lectura (Administrador)">
+            Está visualizando el listado en modo seguro. Los controles de eliminación de registros están bloqueados. Habilite el "Modo Edición Crítica" desde el Dashboard Principal si requiere realizar limpiezas permanentes.
+        </x-alert>
     @endif
 @endif
 
