@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\MailStatus;
 use App\Mail\ActividadRegistrada;
 use App\Mail\NuevasActividadesPendientes;
 use App\Mail\PasswordRenewalMail;
@@ -28,6 +29,7 @@ class MailLog extends Model
     protected $casts = [
         'payload' => 'array',
         'attempts' => 'integer',
+        'status' => MailStatus::class,
     ];
 
     /**

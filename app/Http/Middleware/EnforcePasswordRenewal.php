@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Enums\UserRole;
 use App\Services\PasswordPolicyService;
 use Closure;
 use Illuminate\Http\Request;
@@ -42,8 +43,9 @@ class EnforcePasswordRenewal
         if ($request->routeIs('login', 'logout', 'password.expired', 'password.request-renewal', 'password.reset', 'password.update', 'verification.*')) {
             return $next($request);
         }
+
         // 2. Administradores exentos de expiración
-        if ($user->rol === 'admin') {
+        if ($user->rol === UserRole::Admin) {
             return $next($request);
         }
 
