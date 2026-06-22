@@ -12,11 +12,13 @@
     <!-- 3. Contenedor de Listado de Actividades -->
     <div id="actividades-container">
         @if ($actividades->isEmpty())
-        <div
-            style="background-color: #ffffff; border: 1px solid rgba(226, 232, 240, 0.8); border-radius: 8px; padding: 40px; text-align: center; color: #64748b;">
-            <span style="font-size: 1.5rem;">📁</span>
-            <p style="margin: 10px 0 0; font-weight: 500;">No se encontraron reportes con los criterios de búsqueda
-                seleccionados.</p>
+        <div class="dashoard-card empty-state-card">
+            <div class="empty-state-icon">📁</div>
+            <h3>No se encontraron actividades</h3>
+            <p>
+                No se encontraron reportes con los criterios de búsqueda
+                seleccionados.
+            </p>
         </div>
         @else
         @php $lastMonthYear = null; @endphp

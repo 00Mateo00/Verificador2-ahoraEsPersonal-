@@ -14,13 +14,14 @@
 
     <!-- Navegación Principal CAJBIOBIO (Sumamente limpia, alineada a dashboard.png) -->
     <header class="header-nav-caj">
-        <div class="header-logo-container-caj">
-            <span class="logo-text-caj">
-                <strong>Intranet CAJBIOBIO</strong> <span style="font-weight: 300; opacity: 0.8; margin-left: 10px; font-size: 0.95rem; border-left: 1px solid rgba(255,255,255,0.3); padding-left: 10px;">Verificador de Actividades</span>
-            </span>
-        </div>
+        <div class="header-inner-caj">
+            <div class="header-logo-container-caj">
+                <span class="logo-text-caj">
+                    <strong>Intranet CAJBIOBIO</strong> <span style="font-weight: 300; opacity: 0.8; margin-left: 10px; font-size: 0.95rem; border-left: 1px solid rgba(255,255,255,0.3); padding-left: 10px;">Verificador de Actividades</span>
+                </span>
+            </div>
 
-        <div style="display: flex; align-items: center; gap: 20px;">
+            <div style="display: flex; align-items: center; gap: 20px;">
             <div class="user-display-profile-badge" style="color: #ffffff; display: flex; align-items: center; gap: 8px; font-size: 0.9rem;">
                 <span style="width: 8px; height: 8px; background-color: #2b8a3e; border-radius: 50%; display: inline-block;"></span>
                 @if(Auth::user()->rol === 'admin')
@@ -35,6 +36,7 @@
                     Cerrar Sesión
                 </button>
             </form>
+            </div>
         </div>
     </header>
 
