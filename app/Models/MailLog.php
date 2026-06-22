@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Mail\ActividadRegistrada;
 use App\Mail\NuevasActividadesPendientes;
 use App\Mail\PasswordRenewalMail;
+use App\Services\MailErrorParserService;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Facades\Mail;
@@ -35,6 +36,14 @@ class MailLog extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class, 'user_id', 'id');
+    }
+
+    /**
+     * Accesor dinámico para obtener el mapeo de errores amigables según el fallo SMTP.
+     */
+    public function getFriendlyErrorAttribute(): array
+    {
+        return MailErrorParserService::parse($this->error_message);
     }
 
     /**

@@ -139,19 +139,43 @@
                                     @endif
                                 </td>
                                 @if($activeTab !== 'sent')
-                                    <td style="padding: 14px 16px; font-size: 0.8rem; color: #ef3340; max-width: 250px;">
+                                    <td style="padding: 14px 16px; font-size: 0.8rem; max-width: 320px; vertical-align: top;">
                                         @if($mail->error_message)
+                                            @php $err = $mail->friendly_error; @endphp
                                             <div x-data="{ open: false, errorText: @js($mail->error_message) }">
-                                                <span style="display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="{{ $mail->error_message }}">
-                                                    {{ \Illuminate\Support\Str::limit($mail->error_message, 35) }}
-                                                </span>
-                                                <button type="button" 
-                                                        @click="open = true" 
-                                                        style="background: none; border: none; color: #0F69C4; font-size: 0.72rem; font-weight: 700; cursor: pointer; padding: 2px 0 0; text-decoration: underline; display: block;">
-                                                    Mostrar más 🔍
-                                                </button>
+                                                <!-- Mensaje Legible Amigable (Para todos los roles) -->
+                                                <strong style="color: #ef3340; font-size: 0.85rem; display: block; margin-bottom: 2px;">
+                                                    {{ $err['title'] }}
+                                                </strong>
+                                                <p style="color: #475569; font-size: 0.8rem; margin: 0 0 6px 0; line-height: 1.3;">
+                                                    {{ $err['explanation'] }}
+                                                </p>
+                                                
+                                                <!-- Sugerencia Operacional -->
+                                                <p style="color: #2b8a3e; font-size: 0.75rem; margin: 0 0 8px 0; font-weight: 600;">
+                                                    💡 {{ $err['suggestion'] }}
+                                                </p>
 
-                                                <!-- Ventana Modal de Detalle de Error -->
+                                                <!-- Vista colapsada/truncada del error técnico original -->
+                                                <div style="background-color: #f8fafc; border: 1px solid #cbd5e1; border-radius: 4px; padding: 6px 10px; font-family: monospace; font-size: 0.72rem; color: #64748b; margin-bottom: 6px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                                                    {{ \Illuminate\Support\Str::limit($mail->error_message, 45) }}
+                                                </div>
+
+                                                <div style="display: flex; gap: 8px; align-items: center;">
+                                                    <button type="button" 
+                                                            @click="open = true" 
+                                                            style="background: none; border: none; color: #0F69C4; font-size: 0.72rem; font-weight: 700; cursor: pointer; padding: 0; text-decoration: underline;">
+                                                        Detalles del Error 🔍
+                                                    </button>
+                                                    <span style="color: #cbd5e1;">|</span>
+                                                    <button type="button" 
+                                                            @click="navigator.clipboard.writeText(errorText); alert('Mensaje técnico de error copiado al portapapeles')" 
+                                                            style="background: none; border: none; color: #475569; font-size: 0.72rem; font-weight: 700; cursor: pointer; padding: 0; text-decoration: underline;">
+                                                        📋 Copiar Error
+                                                    </button>
+                                                </div>
+
+                                                <!-- Ventana Modal de Detalle de Error Adaptada -->
                                                 <div x-show="open" 
                                                      x-transition 
                                                      style="position: fixed; inset: 0; background-color: rgba(13, 27, 42, 0.45); display: flex; align-items: center; justify-content: center; z-index: 9999; padding: 20px;"
@@ -165,9 +189,32 @@
                                                             <button type="button" @click="open = false" style="background: none; border: none; font-size: 1.25rem; color: #64748b; cursor: pointer; line-height: 1;">&times;</button>
                                                         </div>
 
-                                                        <!-- Detalle del Error (Monoespacio con Wrap Obligatorio) -->
-                                                        <div style="padding: 20px; flex: 1; overflow-y: auto; overflow-x: hidden; background-color: #f8fafc;">
-                                                            <pre style="margin: 0; white-space: pre-wrap; word-wrap: break-word; word-break: break-all; font-family: monospace; font-size: 0.82rem; background-color: #f1f5f9; padding: 20px; border-radius: 6px; border: 1px solid #cbd5e1; color: #ef3340; text-align: left; width: 100%; box-sizing: border-box;" x-text="errorText"></pre>
+                                                        <!-- Detalle del Error Diferenciado según el Rol del Usuario -->
+                                                        <div style="padding: 20px; flex: 1; overflow-y: auto; overflow-x: hidden; background-color: #f8fafc; text-align: left;">
+                                                            <!-- Sección General Comprensible -->
+                                                            <div style="background-color: #fff; border: 1px solid #cbd5e1; border-radius: 6px; padding: 18px; margin-bottom: 15px;">
+                                                                <h4 style="margin: 0 0 8px 0; color: #ef3340; font-size: 1rem;">{{ $err['title'] }}</h4>
+                                                                <p style="margin: 0 0 10px 0; font-size: 0.9rem; color: #334155; line-height: 1.5;">{{ $err['explanation'] }}</p>
+                                                                <strong style="display: block; font-size: 0.85rem; color: #2b8a3e;">Sugerencia de solución:</strong>
+                                                                <p style="margin: 4px 0 0 0; font-size: 0.85rem; color: #2b8a3e;">💡 {{ $err['suggestion'] }}</p>
+                                                            </div>
+
+                                                            <!-- Sección de Diagnóstico Técnico Avanzado (Seguridad por Rol) -->
+                                                            @if($isAdmin)
+                                                                <div style="margin-top: 20px;">
+                                                                    <span style="font-size: 0.8rem; font-weight: 700; color: #64748b; display: block; margin-bottom: 6px; text-transform: uppercase;">
+                                                                        Traza de Depuración Técnica (Exclusivo Administradores)
+                                                                    </span>
+                                                                    <pre style="margin: 0; white-space: pre-wrap; word-wrap: break-word; word-break: break-all; font-family: monospace; font-size: 0.82rem; background-color: #f1f5f9; padding: 20px; border-radius: 6px; border: 1px solid #cbd5e1; color: #ef3340; width: 100%; box-sizing: border-box;" x-text="errorText"></pre>
+                                                                </div>
+                                                            @else
+                                                                <div style="background-color: #fefbeb; border: 1px solid #fde68a; border-radius: 6px; padding: 15px; margin-top: 15px;">
+                                                                    <span style="font-size: 0.8rem; font-weight: 700; color: #b45309; display: block; margin-bottom: 4px;">Información Técnica Restringida</span>
+                                                                    <p style="margin: 0; font-size: 0.8rem; color: #78350f; line-height: 1.4;">
+                                                                        Como Auditor, usted visualiza la explicación simplificada recomendada. Puede copiar el bloque técnico adjunto usando el botón inferior para derivarlo con el equipo de soporte.
+                                                                    </p>
+                                                                </div>
+                                                            @endif
                                                         </div>
 
                                                         <!-- Pie con Botón de Copiado -->
@@ -176,7 +223,7 @@
                                                                     @click="navigator.clipboard.writeText(errorText); alert('Mensaje de error copiado al portapapeles')" 
                                                                     class="btn-primary-caj" 
                                                                     style="padding: 8px 16px; font-size: 0.8rem; background-color: #0F69C4;">
-                                                                📋 Copiar Mensaje
+                                                                📋 Copiar Mensaje Técnico
                                                             </button>
                                                             <button type="button" 
                                                                     @click="open = false" 
