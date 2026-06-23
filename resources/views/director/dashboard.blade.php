@@ -80,7 +80,7 @@
             </div>
 
             <div class="estadistica-actions">
-                <button type="submit" class="btn-primary-caj">
+                <button type="submit" class="btn-filter-dashboard">
                     Filtrar 🔍
                 </button>
                 @if($selectedMonth !== $currentMonth || $selectedYear !== $currentYear)

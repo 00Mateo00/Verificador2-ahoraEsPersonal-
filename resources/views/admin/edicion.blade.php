@@ -47,7 +47,7 @@
             <input type="text" name="search" id="search" value="{{ $search }}" class="form-input-control-caj" placeholder="Ej: Los Ángeles, Concepción, auditor, etc." style="width: 100%;">
         </div>
         <div style="display: flex; gap: 10px;">
-            <button type="submit" class="btn-primary-caj" style="padding: 12px 24px; font-size: 0.9rem;">
+            <button type="submit" class="btn-dashboard-primary" style="padding: 12px 24px; font-size: 0.9rem;">
                 🔍 Filtrar
             </button>
             @if($search)
@@ -263,7 +263,7 @@
     </div>
 
     <!-- Paginación de Usuarios -->
-    <div style="margin-top: 25px;">
+    <div class="dashboard-pagination">
         {{ $usuarios->links() }}
     </div>
 </div>
