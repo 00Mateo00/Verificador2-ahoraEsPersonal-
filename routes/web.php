@@ -17,6 +17,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\AuditorDashboardController;
 
 Route::get('/', function () {
     if (Auth::check()) {
@@ -174,140 +175,7 @@ Route::middleware(['auth'])->group(function () {
 
     // Rutas exclusivas del Auditor (Dashboard con estadísticas de solo lectura)
     Route::middleware(['role:auditor'])->group(function () {
-        Route::get('/auditor/dashboard', function () {
-            // Control dinámico de vistas y filtros temporales para el Auditor
-            $view = request('view', 'mes'); // 'mes', 'año' o 'global'
-
-            $currentMonth = (int) date('m');
-            $currentYear = (int) date('Y');
-
-            // Cargar mes y año seleccionados con autodetección por defecto del periodo actual
-            $selectedMonth = (int) request('mes', $currentMonth);
-            $selectedYear = (int) request('ano', $currentYear);
-
-            // 1. Métricas operacionales filtradas de acuerdo a la vista y selectores
-            $queryCargadas = Actividad::where('estado', 'CARGADA');
-            $queryVerificadas = Actividad::where('estado', 'VERIFICADA');
-
-            if ($view !== 'global') {
-                $queryCargadas->where('AÑO', $selectedYear);
-                $queryVerificadas->where('AÑO', $selectedYear);
-
-                if ($view === 'mes') {
-                    $queryCargadas->where('MES', $selectedMonth);
-                    $queryVerificadas->where('MES', $selectedMonth);
-                }
-            }
-
-            $totalCargadas = $queryCargadas->count();
-            $totalVerificadas = $queryVerificadas->count();
-            $totalActividades = $totalCargadas + $totalVerificadas;
-            $porcentajeVerificacion = $totalActividades > 0 ? round(($totalVerificadas / $totalActividades) * 100, 1) : 0;
-
-            $totalPlanillas = $view === 'global'
-                ? CargaExcel::count()
-                : CargaExcel::whereYear('created_at', $selectedYear)->count();
-
-            // 2. Estadísticas territoriales consolidadas por región (Eager Loading para prevenir N+1)
-            $regionesEstadisticas = Region::query()
-                ->with(['user', 'unidades' => function ($query) use ($selectedYear, $selectedMonth, $view) {
-                    $query->withCount([
-                        'actividadesAsignadas as cargadas_count' => function ($q) use ($selectedYear, $selectedMonth, $view) {
-                            $q->where('estado', 'CARGADA')
-                                ->when($view !== 'global', function ($subQ) use ($selectedYear) {
-                                    $subQ->where('AÑO', $selectedYear);
-                                })
-                                ->when($view === 'mes', function ($subQ) use ($selectedMonth) {
-                                    $subQ->where('MES', $selectedMonth);
-                                });
-                        },
-                        'actividadesAsignadas as verificadas_count' => function ($q) use ($selectedYear, $selectedMonth, $view) {
-                            $q->where('estado', 'VERIFICADA')
-                                ->when($view !== 'global', function ($subQ) use ($selectedYear) {
-                                    $subQ->where('AÑO', $selectedYear);
-                                })
-                                ->when($view === 'mes', function ($subQ) use ($selectedMonth) {
-                                    $subQ->where('MES', $selectedMonth);
-                                });
-                        },
-                    ]);
-                }])
-                ->get()
-                ->map(function ($region) {
-                    $cargadas = $region->unidades->sum('cargadas_count');
-                    $verificadas = $region->unidades->sum('verificadas_count');
-                    $total = $cargadas + $verificadas;
-
-                    return [
-                        'nombre' => $region->region_nombre,
-                        'director' => $region->user->name ?? 'Sin director',
-                        'unidades_count' => $region->unidades->count(),
-                        'cargadas' => $cargadas,
-                        'verificadas' => $verificadas,
-                        'total' => $total,
-                        'avance' => $total > 0 ? round(($verificadas / $total) * 100, 1) : 0,
-                    ];
-                });
-
-            // 3. Unidades con actividades pendientes para el reenvío de notificaciones (Solo en vistas mes/ano)
-            $unidadesPendientes = collect();
-            if ($view !== 'global') {
-                $unidadesPendientes = Unidad::query()
-                    ->with(['user', 'region'])
-                    ->whereHas('actividadesAsignadas', function ($q) use ($selectedYear, $selectedMonth, $view) {
-                        $q->where('estado', 'CARGADA')
-                            ->where('AÑO', $selectedYear)
-                            ->when($view === 'mes', function ($subQ) use ($selectedMonth) {
-                                $subQ->where('MES', $selectedMonth);
-                            });
-                    })
-                    ->get();
-            }
-
-            // Últimas planillas importadas en el sistema
-            $cargasRecientes = CargaExcel::query()
-                ->with('usuario')
-                ->latest()
-                ->take(5)
-                ->get();
-
-            return view('auditor.dashboard', compact(
-                'totalCargadas',
-                'totalVerificadas',
-                'totalActividades',
-                'porcentajeVerificacion',
-                'totalPlanillas',
-                'regionesEstadisticas',
-                'unidadesPendientes',
-                'cargasRecientes',
-                'view',
-                'currentMonth',
-                'currentYear',
-                'selectedMonth',
-                'selectedYear'
-            ));
-        })->name('auditor.dashboard');
-
-        // Acción síncrona/en colas de renotificación para el Auditor
-        Route::post('/auditor/unidades/{unidad}/renotificar', function (Unidad $unidad) {
-            if (auth()->user()->rol !== UserRole::Auditor) {
-                abort(403, 'Solo el rol de auditor puede despachar renotificaciones.');
-            }
-
-            // Intentar envío síncrono seguro
-            $sent = MailService::sendSafe(
-                $unidad->user->email,
-                new NuevasActividadesPendientes($unidad),
-                ['unidad_id' => $unidad->id]
-            );
-
-            if ($sent) {
-                return back()->with('success', "Se ha enviado una nueva renotificación de forma síncrona a la unidad '{$unidad->user->name}'.");
-            }
-
-            return back()->with('error', "El envío falló de forma síncrona. Se ha archivado la renotificación en 'Correos Fallidos' para su posterior gestión.");
-        })->name('auditor.unidades.renotificar');
-    });
+        Route::get('/auditor/dashboard', AuditorDashboardController::class)->name('auditor.dashboard');
 
     // Rutas exclusivas del Director Regional
     Route::middleware(['role:director'])->group(function () {
