@@ -36,13 +36,14 @@ class SendWeeklyPendingReminders extends Command
         $unidades = Unidad::query()
             ->whereHas('actividadesAsignadas', function ($query) use ($currentYear) {
                 $query->where('estado', 'CARGADA')
-                      ->where('AÑO', $currentYear);
+                    ->where('AÑO', $currentYear);
             })
             ->with(['user'])
             ->get();
 
         if ($unidades->isEmpty()) {
             $this->info("No se encontraron unidades operativas con actividades pendientes para el año {$currentYear}.");
+
             return self::SUCCESS;
         }
 
@@ -53,8 +54,9 @@ class SendWeeklyPendingReminders extends Command
         $failCount = 0;
 
         foreach ($unidades as $unidad) {
-            if (!$unidad->user || empty($unidad->user->email)) {
+            if (! $unidad->user || empty($unidad->user->email)) {
                 $this->warn("La unidad con ID #{$unidad->id} no cuenta con un operador de sistema asignado o carece de email.");
+
                 continue;
             }
 
@@ -63,6 +65,7 @@ class SendWeeklyPendingReminders extends Command
             // Evitar envíos múltiples a la misma casilla de correo si existieran cruces de datos en la ejecución actual
             if (in_array($email, $sentEmails, true)) {
                 $this->line("Omitiendo duplicado de recordatorio para: {$email}");
+
                 continue;
             }
 

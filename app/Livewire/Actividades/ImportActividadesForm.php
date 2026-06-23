@@ -8,7 +8,6 @@ use App\Services\ExcelImporterService;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Gate;
-use Illuminate\Support\Facades\Storage;
 use Livewire\Component;
 use Livewire\WithFileUploads;
 
@@ -221,9 +220,7 @@ class ImportActividadesForm extends Component
 
         $this->validate();
 
-        // Guardar archivo de forma segura en disco temporal
-        $path = $this->excelFile->store('temp-imports');
-        $this->tempFilePath = Storage::path($path);
+        $this->tempFilePath = $this->excelFile->getRealPath();
         $this->originalFileName = $this->excelFile->getClientOriginalName();
 
         try {
@@ -288,7 +285,6 @@ class ImportActividadesForm extends Component
 
             $this->step = 2;
         } catch (\Exception $e) {
-            $this->cleanupTempFile();
             $this->excelFile = null;
             session()->flash('error', 'Error en la validación del archivo: '.$e->getMessage());
         }
@@ -387,7 +383,6 @@ class ImportActividadesForm extends Component
             $cacheKey = 'excel_import_'.Auth::id();
             Cache::forget($cacheKey);
 
-            $this->cleanupTempFile();
             $this->step = 5; // Avanzar al paso de éxito (Paso 5)
             session()->flash('success', "¡Excelente! Se han importado exitosamente {$this->totalRows} actividades e iniciado las colas de notificación.");
         } catch (\Exception $e) {
@@ -403,13 +398,6 @@ class ImportActividadesForm extends Component
         Cache::forget($cacheKey);
 
         $this->reset(['excelFile', 'step', 'headers', 'previewRows', 'warnings', 'totalRows', 'tempFilePath', 'originalFileName', 'countdown', 'isCountingDown', 'periodoSeleccionado', 'periodosDisponibles']);
-    }
-
-    private function cleanupTempFile()
-    {
-        if (! empty($this->tempFilePath) && file_exists($this->tempFilePath)) {
-            @unlink($this->tempFilePath);
-        }
     }
 
     public function render()
