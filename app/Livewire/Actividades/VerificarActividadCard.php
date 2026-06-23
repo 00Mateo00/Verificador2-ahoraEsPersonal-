@@ -176,7 +176,7 @@ class VerificarActividadCard extends Component
                                wire:target="verificador">
                         
                         @error('verificador')
-                            <span   span style="color: #ef3340; font-size: 0.8rem; display: block; margin-top: 6px; font-weight: 600;">⚠️ {{ $message }}</span>
+                            <span style="color: #ef3340; font-size: 0.8rem; display: block; margin-top: 6px; font-weight: 600;">⚠️ {{ $message }}</span>
                         @enderror
                         @error('verificador.*')
                             <span style="color: #ef3340; font-size: 0.8rem; display: block; margin-top: 6px; font-weight: 600;">⚠️ {{ $message }}</span>

@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Enums\MailStatus;
 use App\Mail\ActividadRegistrada;
 use App\Mail\NuevasActividadesPendientes;
 use App\Mail\PasswordRenewalMail;
@@ -56,7 +57,7 @@ class MailService
 
             Mail::to($mailLog->recipient)->send($mailable);
             $mailLog->update([
-                'status' => UMailStatus::Sent,
+                'status' => MailStatus::Sent,
                 'attempts' => $mailLog->attempts + 1,
                 'error_message' => null,
             ]);
@@ -64,7 +65,7 @@ class MailService
             return true;
         } catch (Throwable $e) {
             $mailLog->update([
-                'status' => UMailStatus::Failed,
+                'status' => MailStatus::Failed,
                 'attempts' => $mailLog->attempts + 1,
                 'error_message' => $e->getMessage(),
             ]);
