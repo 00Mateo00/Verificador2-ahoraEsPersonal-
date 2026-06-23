@@ -76,43 +76,14 @@ class ConsultaList extends Component
         $this->resetPage();
     }
 
-    /**
-     * Aplica las restricciones de visibilidad de manera centralizada de acuerdo al rol del usuario.
-     */
-    private function applyRoleRestrictions($query, UserRole $userRol): void
-    {
-        if ($userRol === UserRole::Unidad) {
-            $unidad = Unidad::query()->where('user_id', Auth::id())->first();
-            $userUnidadId = $unidad ? $unidad->id : null;
-            $query->where('unidad_id_asignada', $userUnidadId);
-        } elseif ($userRol === UserRole::Director) {
-            $region = Region::query()->where('user_id', Auth::id())->first();
-            $regionId = $region ? $region->id : null;
-            $unidadIds = $regionId ? Unidad::query()->where('region_id', $regionId)->pluck('id')->toArray() : [];
-
-            if (! empty($this->unidad_filtro) && in_array($this->unidad_filtro, $unidadIds)) {
-                $query->where('unidad_id_asignada', $this->unidad_filtro);
-            } else {
-                $query->whereIn('unidad_id_asignada', $unidadIds);
-            }
-        } else {
-            // Admin, Auditor, Cargador (Acceso global)
-            if (! empty($this->unidad_filtro)) {
-                $query->where('unidad_id_asignada', $this->unidad_filtro);
-            }
-        }
-    }
-
     private function getFilteredActivitiesQuery()
     {
-        $userRol = Auth::user()->rol;
+        $user = Auth::user();
 
         $query = Actividad::query()
             ->where('activo', true)
-            ->where('estado', 'VERIFICADA');
-
-        // Limitación jerárquica por unidad de acuerdo al rol usando el helper centralizado
-        $this->applyRoleRestrictions($query, $userRol);
+            ->where('estado', 'VERIFICADA')
+            ->forUser($user, (int) $this->unidad_filtro ?: null);
 
         if (! empty($this->actividad_id)) {
             $query->where('actividad_id', $this->actividad_id);
@@ -255,14 +226,13 @@ class ConsultaList extends Component
         $totalResults = $query->count();
         $actividades = $query->paginate($perPage);
 
-        $userRol = Auth::user()->rol;
+        $user = Auth::user();
+        $userRol = $user->rol;
 
         $monthQuery = Actividad::query()
             ->where('activo', true)
-            ->where('estado', 'VERIFICADA');
-
-        // Aplicar restricciones de rol centralizadas
-        $this->applyRoleRestrictions($monthQuery, $userRol);
+            ->where('estado', 'VERIFICADA')
+            ->forUser($user, (int) $this->unidad_filtro ?: null);
 
         $monthCounts = $monthQuery->selectRaw("SUBSTRING_INDEX(FECHA, '-', -2) as ym, count(*) as total")
             ->groupBy('ym')
