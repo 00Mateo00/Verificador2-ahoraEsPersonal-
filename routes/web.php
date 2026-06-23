@@ -3,6 +3,7 @@
 use App\Enums\UserRole;
 use App\Http\Controllers\ActividadController;
 use App\Http\Controllers\AdminDashboardController;
+use App\Http\Controllers\AdminUserController;
 use App\Http\Controllers\AuditorDashboardController;
 use App\Http\Controllers\DescargaVerificadorController;
 use App\Http\Controllers\DirectorDashboardController;
@@ -10,12 +11,8 @@ use App\Http\Controllers\PasswordRenewalController;
 use App\Mail\NuevasActividadesPendientes;
 use App\Models\Region;
 use App\Models\Unidad;
-use App\Models\User;
 use App\Services\MailService;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -107,152 +104,18 @@ Route::middleware(['auth'])->group(function () {
 
         Route::get('/admin/actividades', [ActividadController::class, 'historial'])->name('admin.actividades');
 
-        // Vista de Unidades en el menú lateral: Listado de usuarios del sistema
-        Route::get('/admin/usuarios', function () {
-            $search = request('search');
-            $usuarios = User::query()
-                ->when($search, function ($query) use ($search) {
-                    $query->where('name', 'like', "%{$search}%")
-                        ->orWhere('email', 'like', "%{$search}%");
-                })
-                ->orderBy('rol', 'asc')
-                ->orderBy('name', 'asc')
-                ->paginate(15);
+        // Catálogo de usuarios
+        Route::get('/admin/usuarios', [AdminUserController::class, 'index'])->name('admin.usuarios');
 
-            $regiones = Region::all();
+        // Mutaciones de infraestructura y accesos
+        Route::post('/admin/crear-region', [AdminUserController::class, 'crearRegion'])->name('admin.crear-region');
+        Route::post('/admin/crear-unidad', [AdminUserController::class, 'crearUnidad'])->name('admin.crear-unidad');
+        Route::post('/admin/crear-usuario', [AdminUserController::class, 'crearUsuario'])->name('admin.crear-usuario');
 
-            return view('admin.edicion', compact('usuarios', 'search', 'regiones'));
-        })->name('admin.usuarios');
-
-        // Creación de Región (Incluye creación automática de Director Regional)
-        Route::post('/admin/crear-region', function (Request $request) {
-            if (! session('modo_edicion')) {
-                abort(403, 'Acción bloqueada. Debe activar el Modo Edición.');
-            }
-
-            $request->validate([
-                'region_nombre' => 'required|string|max:50',
-                'director_nombre' => 'required|string|max:255',
-                'director_email' => 'required|email|unique:users,email',
-                'region_id' => 'nullable|integer|unique:region,id',
-            ]);
-
-            DB::transaction(function () use ($request) {
-                $user = User::create([
-                    'name' => $request->director_nombre,
-                    'email' => $request->director_email,
-                    'password' => Hash::make('password'),
-                    'rol' => 'director',
-                    'activo' => true,
-                    'password_changed_at' => null,
-                ]);
-
-                Region::create([
-                    'id' => $request->region_id ?: null,
-                    'region_nombre' => $request->region_nombre,
-                    'user_id' => $user->id,
-                ]);
-            });
-
-            return back()->with('success', "La Región '{$request->region_nombre}' y su Director Regional han sido creados con éxito.");
-        })->name('admin.crear-region');
-
-        // Creación de Unidad Operativa (Incluye creación automática de Operador de Unidad)
-        Route::post('/admin/crear-unidad', function (Request $request) {
-            if (! session('modo_edicion')) {
-                abort(403, 'Acción bloqueada. Debe activar el Modo Edición.');
-            }
-
-            $request->validate([
-                'unidad_nombre' => 'required|string|max:255',
-                'unidad_email' => 'required|email|unique:users,email',
-                'region_id' => 'required|exists:region,id',
-                'unidad_id' => 'nullable|integer|unique:unidad,id',
-            ]);
-
-            DB::transaction(function () use ($request) {
-                $user = User::create([
-                    'name' => $request->unidad_nombre,
-                    'email' => $request->unidad_email,
-                    'password' => Hash::make('password'),
-                    'rol' => 'unidad',
-                    'activo' => true,
-                    'password_changed_at' => null,
-                ]);
-
-                Unidad::create([
-                    'id' => $request->unidad_id ?: null,
-                    'region_id' => $request->region_id,
-                    'user_id' => $user->id,
-                ]);
-            });
-
-            return back()->with('success', "La Unidad '{$request->unidad_nombre}' y su Operador han sido creados con éxito.");
-        })->name('admin.crear-unidad');
-
-        // Creación de Usuario de Sistema (Admin, Auditor o Cargador)
-        Route::post('/admin/crear-usuario', function (Request $request) {
-            if (! session('modo_edicion')) {
-                abort(403, 'Acción bloqueada. Debe activar el Modo Edición.');
-            }
-
-            $request->validate([
-                'name' => 'required|string|max:255',
-                'email' => 'required|email|unique:users,email',
-                'rol' => 'required|in:admin,auditor,cargador',
-            ]);
-
-            User::create([
-                'name' => $request->name,
-                'email' => $request->email,
-                'password' => Hash::make('password'),
-                'rol' => $request->rol,
-                'activo' => true,
-                'password_changed_at' => null,
-            ]);
-
-            return back()->with('success', "Usuario '{$request->name}' con rol '{$request->rol}' creado con éxito.");
-        })->name('admin.crear-usuario');
-
-        Route::get('/admin/edicion', function () {
-            session([
-                'modo_edicion' => true,
-                'modo_edicion_last_activity' => time(),
-            ]);
-
-            return redirect()->route('admin.dashboard')->with('success', 'Modo edición activado. Las opciones de edición crítica ahora son usables.');
-        })->middleware('password.confirm')->name('admin.edicion');
-
-        // Salir del modo edición administrativa, invalidar confirmación de password de Laravel y retornar al dashboard
-        Route::get('/admin/salir-edicion', function () {
-            session()->forget([
-                'modo_edicion',
-                'modo_edicion_last_activity',
-                'auth.password_confirmed_at', // Fuerza la reconfirmación de contraseña al volver a entrar
-            ]);
-
-            return redirect()->route('admin.dashboard')->with('success', 'Modo edición desactivado. Ha retornado al modo de visualización segura.');
-        })->name('admin.salir-edicion');
-
-        // Acción crítica: Alternar estado de cuentas de usuario. Requiere que el modo_edicion esté activo en sesión.
-        Route::patch('/admin/usuarios/{user}/toggle', function (User $user) {
-            // Defensa: Bloquear si no se encuentra en modo edición
-            if (! session('modo_edicion')) {
-                abort(403, 'Acción bloqueada. Debe activar el Modo Edición para realizar modificaciones en las unidades.');
-            }
-
-            if ($user->id === auth()->id()) {
-                return back()->with('error', 'No puede deshabilitar su propia cuenta de administrador.');
-            }
-
-            $user->update([
-                'activo' => ! $user->activo,
-            ]);
-
-            $statusText = $user->activo ? 'habilitada' : 'deshabilitada';
-
-            return back()->with('success', "La cuenta de {$user->name} ha sido {$statusText} con éxito.");
-        })->name('admin.usuarios.toggle');
+        // Controles de Modo Edición
+        Route::get('/admin/edicion', [AdminUserController::class, 'entrarEdicion'])->middleware('password.confirm')->name('admin.edicion');
+        Route::get('/admin/salir-edicion', [AdminUserController::class, 'salirEdicion'])->name('admin.salir-edicion');
+        Route::patch('/admin/usuarios/{user}/toggle', [AdminUserController::class, 'toggleUsuario'])->name('admin.usuarios.toggle');
     });
 
     // Rutas exclusivas de Carga Masiva (Excel)
