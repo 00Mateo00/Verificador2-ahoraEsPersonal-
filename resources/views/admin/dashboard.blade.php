@@ -146,7 +146,7 @@
         </div>
 
         <div style="display: flex; flex-direction: column; gap: 15px;">
-            <a href="{{ route('actividades.historial') }}" class="btn-primary-caj" style="text-align: center; text-decoration: none; padding: 12px; font-size: 0.9rem;">
+            <a href="{{ route('actividades.historial') }}" class="btn-dashboard-primary" style="text-align: center; text-decoration: none; padding: 12px; font-size: 0.9rem;">
                 Revisar Historial Completo
             </a>
             
