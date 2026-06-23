@@ -2,9 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Mail\NuevasActividadesPendientes;
 use App\Models\Actividad;
 use App\Models\Region;
 use App\Models\Unidad;
+use App\Services\MailService;
 use Illuminate\Support\Facades\Auth;
 
 class DirectorDashboardController extends Controller
@@ -12,7 +14,7 @@ class DirectorDashboardController extends Controller
     /**
      * Renderiza el Dashboard del Director Regional con estadísticas territoriales de su jurisdicción.
      */
-    public function __invoke()
+    public function index()
     {
         // Control dinámico de vistas y filtros temporales para el Director
         $view = request('view', 'mes'); // 'mes', 'ano' o 'global'
@@ -137,5 +139,28 @@ class DirectorDashboardController extends Controller
             'selectedMonth',
             'selectedYear'
         ));
+    }
+
+    /**
+     * Procesa la renotificación de una unidad regional validando aislamiento territorial.
+     */
+    public function renotificarUnidad(Unidad $unidad)
+    {
+        $region = Region::where('user_id', Auth::id())->first();
+        if (! $region || $unidad->region_id !== $region->id) {
+            abort(403, 'No tiene permisos para renotificar unidades fuera de su jurisdicción.');
+        }
+
+        $sent = MailService::sendSafe(
+            $unidad->user->email,
+            new NuevasActividadesPendientes($unidad),
+            ['unidad_id' => $unidad->id]
+        );
+
+        if ($sent) {
+            return back()->with('success', "Se ha enviado una nueva renotificación de forma síncrona a la unidad '{$unidad->user->name}'.");
+        }
+
+        return back()->with('error', "El envío síncrono falló. Se ha archivado la renotificación en 'Correos Fallidos' para posterior gestión administrativa.");
     }
 }

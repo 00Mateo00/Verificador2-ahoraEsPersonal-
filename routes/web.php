@@ -8,10 +8,6 @@ use App\Http\Controllers\AuditorDashboardController;
 use App\Http\Controllers\DescargaVerificadorController;
 use App\Http\Controllers\DirectorDashboardController;
 use App\Http\Controllers\PasswordRenewalController;
-use App\Mail\NuevasActividadesPendientes;
-use App\Models\Region;
-use App\Models\Unidad;
-use App\Services\MailService;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
@@ -75,27 +71,8 @@ Route::middleware(['auth'])->group(function () {
     });
     // Rutas exclusivas del Director Regional
     Route::middleware(['role:director'])->group(function () {
-        Route::get('/director/dashboard', DirectorDashboardController::class)->name('director.dashboard');
-
-        // Acción de renotificación regional asíncrona
-        Route::post('/director/unidades/{unidad}/renotificar', function (Unidad $unidad) {
-            $region = Region::where('user_id', Auth::id())->first();
-            if (! $region || $unidad->region_id !== $region->id) {
-                abort(403, 'No tiene permisos para renotificar unidades fuera de su jurisdicción.');
-            }
-
-            $sent = MailService::sendSafe(
-                $unidad->user->email,
-                new NuevasActividadesPendientes($unidad),
-                ['unidad_id' => $unidad->id]
-            );
-
-            if ($sent) {
-                return back()->with('success', "Se ha enviado una nueva renotificación de forma síncrona a la unidad '{$unidad->user->name}'.");
-            }
-
-            return back()->with('error', "El envío síncrono falló. Se ha archivado la renotificación en 'Correos Fallidos' para posterior gestión administrativa.");
-        })->name('director.unidades.renotificar');
+        Route::get('/director/dashboard', [DirectorDashboardController::class, 'index'])->name('director.dashboard');
+        Route::post('/director/unidades/{unidad}/renotificar', [DirectorDashboardController::class, 'renotificarUnidad'])->name('director.unidades.renotificar');
     });
 
     //  Rutas exclusivas de Administración
