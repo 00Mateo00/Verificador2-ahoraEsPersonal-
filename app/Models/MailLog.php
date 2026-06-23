@@ -5,11 +5,10 @@ namespace App\Models;
 use App\Enums\MailStatus;
 use App\Mail\ActividadRegistrada;
 use App\Mail\NuevasActividadesPendientes;
-use App\Mail\PasswordRenewalMail;
 use App\Services\MailErrorParserService;
+use App\Services\MailService;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Support\Facades\Mail;
 
 class MailLog extends Model
 {
@@ -71,60 +70,10 @@ class MailLog extends Model
     }
 
     /**
-     * Reconstruye y envía el correo síncronamente.
+     * Reconstruye y envía el correo síncronamente delegando en MailService.
      */
     public function sendSynchronously(): bool
     {
-        try {
-            $class = $this->mailable_class;
-            if (! class_exists($class)) {
-                throw new \Exception("Clase mailable no encontrada: {$class}");
-            }
-
-            $mailable = null;
-            if ($class === NuevasActividadesPendientes::class) {
-                $unidadId = $this->payload['unidad_id'] ?? null;
-                $unidad = Unidad::find($unidadId);
-                if (! $unidad) {
-                    throw new \Exception("Unidad #{$unidadId} no encontrada para reconstruir correo.");
-                }
-                $mailable = new NuevasActividadesPendientes($unidad);
-            } elseif ($class === ActividadRegistrada::class) {
-                $actividadId = $this->payload['actividad_id'] ?? null;
-                $actividad = Actividad::find($actividadId);
-                if (! $actividad) {
-                    throw new \Exception("Actividad #{$actividadId} no encontrada para reconstruir correo.");
-                }
-                $mailable = new ActividadRegistrada($actividad);
-            } elseif ($class === PasswordRenewalMail::class) {
-                $userId = $this->payload['user_id'] ?? null;
-                $user = User::find($userId);
-                if (! $user) {
-                    throw new \Exception("Usuario #{$userId} no encontrado para reconstruir correo de renovación.");
-                }
-                $url = $this->payload['url'] ?? '';
-                $expirationString = $this->payload['expiration_string'] ?? '';
-                $mailable = new PasswordRenewalMail($user, $url, $expirationString);
-            } else {
-                throw new \Exception("Mailable no soportado para reconstrucción: {$class}");
-            }
-
-            Mail::to($this->recipient)->send($mailable);
-            $this->update([
-                'status' => MailStatus::Sent,
-                'attempts' => $this->attempts + 1,
-                'error_message' => null,
-            ]);
-
-            return true;
-        } catch (\Throwable $e) {
-            $this->update([
-                'status' => MailStatus::Failed,
-                'attempts' => $this->attempts + 1,
-                'error_message' => $e->getMessage(),
-            ]);
-
-            return false;
-        }
+        return MailService::sendSynchronously($this);
     }
 }
