@@ -321,13 +321,12 @@ Route::middleware(['auth'])->group(function () {
             $selectedMonth = (int) request('mes', $currentMonth);
             $selectedYear = (int) request('ano', $currentYear);
 
-            // Encontrar la región del director autenticado
-            $region = Region::where('user_id', Auth::id())->first();
-            $unidadIds = $region ? $region->unidades->pluck('id')->toArray() : [];
+            $user = Auth::user();
+            $region = Region::where('user_id', $user->id)->first();
 
-            // 1. Estadísticas operacionales restringidas de acuerdo a la vista y selectores
-            $queryCargadas = Actividad::where('estado', 'CARGADA')->whereIn('unidad_id_asignada', $unidadIds);
-            $queryVerificadas = Actividad::where('estado', 'VERIFICADA')->whereIn('unidad_id_asignada', $unidadIds);
+            // 1. Estadísticas operacionales restringidas de acuerdo a la vista y selectores usando el scope unificado
+            $queryCargadas = Actividad::query()->where('estado', 'CARGADA')->forUser($user);
+            $queryVerificadas = Actividad::query()->where('estado', 'VERIFICADA')->forUser($user);
 
             if ($view !== 'global') {
                 $queryCargadas->where('AÑO', $selectedYear);
@@ -406,10 +405,10 @@ Route::middleware(['auth'])->group(function () {
                 ->sortBy('avance')
                 ->values();
 
-            // 3. Lista de actividades vigentes de sus unidades para el periodo seleccionado
+            // 3. Lista de actividades vigentes de sus unidades para el periodo seleccionado usando el scope unificado
             $queryActividades = Actividad::with(['archivos', 'unidadAsignada'])
-                ->whereIn('unidad_id_asignada', $unidadIds)
-                ->where('activo', true);
+                ->where('activo', true)
+                ->forUser($user);
 
             if ($view !== 'global') {
                 $queryActividades->where('AÑO', $selectedYear);
