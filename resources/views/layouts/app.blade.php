@@ -200,8 +200,8 @@
 
 
             // Claves de sincronización compartidas en LocalStorage
-            const KEY_LAST_INTERACTION = 'caj_session_last_interaction';
-            const KEY_LAST_PING = 'caj_session_last_ping';
+            const KEY_LAST_INTERACTION = 'caj_verificador_last_interaction';
+            const KEY_LAST_PING = 'caj_verificador_last_ping';
 
             // Umbrales de cálculo de ventanas de Alerta en base a la última petición Keep-Alive
             const WARNING_THRESHOLD = SESSION_LIFETIME - minutesToMs(5)
