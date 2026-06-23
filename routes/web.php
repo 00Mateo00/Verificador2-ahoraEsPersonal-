@@ -132,4 +132,3 @@ Route::middleware(['auth'])->group(function () {
         })->name('unidad.dashboard');
     });
 });
-require __DIR__.'/settings.php';
