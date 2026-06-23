@@ -18,25 +18,13 @@
 
 <!-- Alerta de Advertencia Dinámica de Seguridad -->
 @if(session('modo_edicion'))
-<div style="background-color: #fff1f2; border: 1px solid #fecdd3; border-radius: 8px; padding: 20px; margin-bottom: 25px; display: flex; align-items: flex-start; gap: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.01);">
-    <span style="font-size: 1.5rem; line-height: 1;">⚠️</span>
-    <div>
-        <strong style="color: #9f1239; font-size: 1rem; display: block; margin-bottom: 4px;">Cuidado: Modo Edición Activado</strong>
-        <p style="color: #be123c; font-size: 0.85rem; margin: 0; line-height: 1.5;">
-            Se encuentra en el modo interactivo de administración. Cualquier habilitación o deshabilitación de cuentas de usuario impactará de forma inmediata en las sesiones de los operadores del sistema. Por seguridad, este modo edición expirará automáticamente tras 10 minutos de inactividad.
-        </p>
-    </div>
-</div>
+    <x-alert type="danger" title="Cuidado: Modo Edición Activado">
+        Se encuentra en el modo interactivo de administración. Cualquier habilitación o deshabilitación de cuentas de usuario impactará de forma inmediata en las sesiones de los operadores del sistema. Por seguridad, este modo edición expirará automáticamente tras 10 minutos de inactividad.
+    </x-alert>
 @else
-<div style="background-color: #eff6ff; border: 1px solid #bfdbfe; border-radius: 8px; padding: 20px; margin-bottom: 25px; display: flex; align-items: flex-start; gap: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.01);">
-    <span style="font-size: 1.5rem; line-height: 1;">🔒</span>
-    <div>
-        <strong style="color: #1e40af; font-size: 1rem; display: block; margin-bottom: 4px;">Modo Solo Lectura</strong>
-        <p style="color: #1e3a8a; font-size: 0.85rem; margin: 0; line-height: 1.5;">
-            Se encuentra visualizando el catálogo en modo de lectura segura. No se permite realizar modificaciones o alteraciones de estados de cuenta en esta vista. Para habilitar las acciones de edición, active el "Modo Edición Crítica" desde el Dashboard Principal.
-        </p>
-    </div>
-</div>
+    <x-alert type="info" title="Modo Solo Lectura">
+        Se encuentra visualizando el catálogo en modo de lectura segura. No se permite realizar modificaciones o alteraciones de estados de cuenta en esta vista. Para habilitar las acciones de edición, active el "Modo Edición Crítica" desde el Dashboard Principal.
+    </x-alert>
 @endif
 
 <!-- Buscador de Usuarios -->
@@ -117,8 +105,8 @@
         <form action="{{ route('admin.crear-region') }}" method="POST" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 15px; align-items: flex-end;" onsubmit="if(document.getElementById('region_id').value === '') { return confirm('¿Está seguro de que desea poner una ID automática para esta Región?'); }">
             @csrf
             <div>
-                <label for="region_id" style="font-size: 0.8rem; font-weight: 700; color: #475569; display: block; margin-bottom: 4px;">ID de la Región (Opcional)</label>
-                <input type="number" name="region_id" id="region_id" class="form-input-control-caj" placeholder="Ej: 8 (Vacío = Auto)">
+                <label for="region_id" style="font-size: 0.8rem; font-weight: 700; color: #475569; display: block; margin-bottom: 4px;">ID de la Región</label>
+                <input type="number" name="region_id" id="region_id" class="form-input-control-caj"required placeholder="Ej: 8">
             </div>
             <div>
                 <label for="region_nombre" style="font-size: 0.8rem; font-weight: 700; color: #475569; display: block; margin-bottom: 4px;">Nombre de la Región</label>
@@ -201,51 +189,51 @@
             <tbody>
                 @foreach($usuarios as $usr)
                <tr style="border-bottom: 1px solid #e2e8f0; @if(!$usr->activo) background-color: #f8fafc; opacity: 0.8; @endif">
-            <td style="padding: 14px 16px; font-size: 0.85rem; color: #64748b; font-family: monospace;">#{{ $usr->id }}</td>
-            <td style="padding: 14px 16px; font-size: 0.9rem; font-weight: 600; color: #0d1b2a;">{{ $usr->name }}</td>
-            <td style="padding: 14px 16px; font-size: 0.85rem; color: #475569;">{{ $usr->email }}</td>
-            <td style="padding: 14px 16px; text-align: center;">
-                @php
-                    $roleColors = [
-                        'admin' => ['bg' => 'rgba(239, 51, 64, 0.08)', 'text' => '#ef3340'],
-                        'director' => ['bg' => 'rgba(15, 105, 196, 0.08)', 'text' => '#0F69C4'],
-                        'auditor' => ['bg' => 'rgba(100, 116, 139, 0.08)', 'text' => '#64748b'],
-                        'cargador' => ['bg' => 'rgba(245, 158, 11, 0.08)', 'text' => '#d97706'],
-                        'unidad' => ['bg' => 'rgba(16, 185, 129, 0.08)', 'text' => '#059669']
-                    ];
-                    $colors = $roleColors[$usr->rol] ?? ['bg' => '#f1f5f9', 'text' => '#475569'];
-                @endphp
-                <span style="background-color: {{ $colors['bg'] }}; color: {{ $colors['text'] }}; padding: 3px 8px; border-radius: 4px; font-size: 0.72rem; font-weight: 700; text-transform: uppercase;">
-                    {{ $usr->rol }}
-                </span>
-            </td>
-            <td style="padding: 14px 16px; text-align: center;">
-                @if($usr->activo)
-                <span style="color: #2b8a3e; font-size: 0.85rem; font-weight: 600; display: inline-flex; align-items: center; gap: 4px;">
-                    <span style="width: 6px; height: 6px; background-color: #2b8a3e; border-radius: 50%;"></span> Activo
-                </span>
-                @else
-                <span style="color: #64748b; font-size: 0.85rem; font-weight: 600; display: inline-flex; align-items: center; gap: 4px;">
-                    <span style="width: 6px; height: 6px; background-color: #64748b; border-radius: 50%;"></span> Inactivo
-                </span>
-                @endif
-            </td>
-            <td style="padding: 14px 16px; text-align: right;">
-                @if($usr->id === auth()->id())
-                <span style="font-size: 0.8rem; color: #94a3b8; font-style: italic;">Su Cuenta</span>
-                @else
-                    @if(session('modo_edicion'))
-                    <form action="{{ route('admin.usuarios.toggle', $usr->id) }}" method="POST" style="display: inline;">
-                        @csrf
-                        @method('PATCH')
-                        <button type="submit" 
-                                class="btn-acc" 
-                                style="padding: 6px 12px; font-size: 0.8rem; font-weight: 700; border-radius: 4px; cursor: pointer; transition: all 0.15s ease;
-                                       @if($usr->activo) border-color: #ef3340; color: #ef3340 !important; background-color: rgba(239, 51, 64, 0.02); @else border-color: #2b8a3e; color: #2b8a3e !important; background-color: rgba(43, 138, 62, 0.02); @endif">
-                            {{ $usr->activo ? 'Deshabilitar' : 'Habilitar' }}
-                        </button>
-                    </form>
-                    @else
+                    <td style="padding: 14px 16px; font-size: 0.85rem; color: #64748b; font-family: monospace;">#{{ $usr->id }}</td>
+                    <td style="padding: 14px 16px; font-size: 0.9rem; font-weight: 600; color: #0d1b2a;">{{ $usr->name }}</td>
+                    <td style="padding: 14px 16px; font-size: 0.85rem; color: #475569;">{{ $usr->email }}</td>
+                    <td style="padding: 14px 16px; text-align: center;">
+                        @php
+                            $roleColors = [
+                                'admin' => ['bg' => 'rgba(239, 51, 64, 0.08)', 'text' => '#ef3340'],
+                                'director' => ['bg' => 'rgba(15, 105, 196, 0.08)', 'text' => '#0F69C4'],
+                                'auditor' => ['bg' => 'rgba(100, 116, 139, 0.08)', 'text' => '#64748b'],
+                                'cargador' => ['bg' => 'rgba(245, 158, 11, 0.08)', 'text' => '#d97706'],
+                                'unidad' => ['bg' => 'rgba(16, 185, 129, 0.08)', 'text' => '#059669']
+                            ];
+                            $colors = $roleColors[$usr->rol->value] ?? ['bg' => '#f1f5f9', 'text' => '#475569'];
+                        @endphp
+                        <span style="background-color: {{ $colors['bg'] }}; color: {{ $colors['text'] }}; padding: 3px 8px; border-radius: 4px; font-size: 0.72rem; font-weight: 700; text-transform: uppercase;">
+                            {{ $usr->rol->value }}
+                        </span>
+                    </td>
+                    <td style="padding: 14px 16px; text-align: center;">
+                        @if($usr->activo)
+                        <span style="color: #2b8a3e; font-size: 0.85rem; font-weight: 600; display: inline-flex; align-items: center; gap: 4px;">
+                            <span style="width: 6px; height: 6px; background-color: #2b8a3e; border-radius: 50%;"></span> Activo
+                        </span>
+                        @else
+                        <span style="color: #64748b; font-size: 0.85rem; font-weight: 600; display: inline-flex; align-items: center; gap: 4px;">
+                            <span style="width: 6px; height: 6px; background-color: #64748b; border-radius: 50%;"></span> Inactivo
+                        </span>
+                        @endif
+                    </td>
+                    <td style="padding: 14px 16px; text-align: right;">
+                        @if($usr->id === auth()->id())
+                        <span style="font-size: 0.8rem; color: #94a3b8; font-style: italic;">Su Cuenta</span>
+                        @else
+                            @if(session('modo_edicion'))
+                            <form action="{{ route('admin.usuarios.toggle', $usr->id) }}" method="POST" style="display: inline;">
+                                @csrf
+                                @method('PATCH')
+                                <button type="submit" 
+                                        class="btn-acc" 
+                                        style="padding: 6px 12px; font-size: 0.8rem; font-weight: 700; border-radius: 4px; cursor: pointer; transition: all 0.15s ease;
+                                            @if($usr->activo) border-color: #ef3340; color: #ef3340 !important; background-color: rgba(239, 51, 64, 0.02); @else border-color: #2b8a3e; color: #2b8a3e !important; background-color: rgba(43, 138, 62, 0.02); @endif">
+                                    {{ $usr->activo ? 'Deshabilitar' : 'Habilitar' }}
+                                </button>
+                            </form>
+                            @else
                             <button type="button" 
                                     class="btn-acc" 
                                     disabled

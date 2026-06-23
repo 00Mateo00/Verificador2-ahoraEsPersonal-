@@ -2,17 +2,24 @@
 $isAdmin = $isAdmin ?? false;
 @endphp
 
-<div style="background-color: #ffffff; border: 1px solid rgba(226, 232, 240, 0.8); padding: 25px; border-radius: 8px; margin-bottom: 25px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);">
-    <h4 style="margin: 0 0 15px 0; font-size: 0.95rem; text-transform: uppercase; font-weight: 700; color: #0d1b2a; opacity: 0.85; display: flex; align-items: center; justify-content: space-between;">
-        <span>Filtros de Búsqueda {{ $isAdmin ? 'Administrador' : '' }}</span>
-        <button type="button" @click="advancedOpen = !advancedOpen" style="background: none; border: none; color: #0F69C4; cursor: pointer; font-size: 0.85rem; font-weight: 600; display: flex; align-items: center; gap: 4px;">
+<div class="dashboard-card dashboard-filter-card">
+    <div class="filter-panel-header">
+        <div>
+            <h3>
+                Filtros de Búsqueda {{ $isAdmin ? 'Administrador' : '' }}
+            </h3>
+        </div>
+        <button 
+            type="button" 
+            @click="advancedOpen = !advancedOpen" 
+            class="filter-toggle-btn">
             <span x-text="advancedOpen ? 'Ocultar Filtros Avanzados' : 'Mostrar Filtros Avanzados'"></span>
             <span x-text="advancedOpen ? '▲' : '▼'"></span>
         </button>
-    </h4>
+    </div>
 
     <!-- Filtros Básicos (Siempre visibles) -->
-    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 15px;">
+    <div class="dashboard-filter-grid">
         <div class="form-group-item" style="margin: 0;">
             <label for="buscar" style="font-size: 0.8rem; font-weight: 600; color: #475569; display: block; margin-bottom: 6px;">Texto Libre</label>
             <input type="text" wire:model.live.debounce.350ms="buscar" id="buscar" class="form-input-control" placeholder="Ej: Ciberseguridad, Reunión, etc." style="width: 100%; box-sizing: border-box;">
@@ -37,7 +44,7 @@ $isAdmin = $isAdmin ?? false;
     </div>
 
     <!-- Filtros Avanzados (Desplegable) -->
-    <div x-show="advancedOpen" x-transition style="margin-top: 15px; border-top: 1px solid #f1f5f9; padding-top: 15px; display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
+    <div x-show="advancedOpen" x-transition class="dashboard-filter-advanced" x-bind:style:"advancedOpen ? 'display:grid' : 'display:none'">
 
         @if($isAdmin && isset($funcionarios))
         <div class="form-group-item" style="margin: 0;">
@@ -106,7 +113,7 @@ $isAdmin = $isAdmin ?? false;
         </div>
     </div>
 
-    <div style="margin-top: 15px; display: flex; justify-content: flex-end; gap: 10px;">
+    <div class="filter-actions">
         <!-- Botón de actualización manual inmediata (Item 4.5) -->
         <button type="button" 
                 wire:click="$refresh" 

@@ -14,16 +14,17 @@
 
     <!-- Navegación Principal CAJBIOBIO (Sumamente limpia, alineada a dashboard.png) -->
     <header class="header-nav-caj">
-        <div class="header-logo-container-caj">
-            <span class="logo-text-caj">
-                <strong>Intranet CAJBIOBIO</strong> <span style="font-weight: 300; opacity: 0.8; margin-left: 10px; font-size: 0.95rem; border-left: 1px solid rgba(255,255,255,0.3); padding-left: 10px;">Verificador de Actividades</span>
-            </span>
-        </div>
+        <div class="header-inner-caj">
+            <div class="header-logo-container-caj">
+                <span class="logo-text-caj">
+                    <strong>Intranet CAJBIOBIO</strong> <span style="font-weight: 300; opacity: 0.8; margin-left: 10px; font-size: 0.95rem; border-left: 1px solid rgba(255,255,255,0.3); padding-left: 10px;">Verificador de Actividades</span>
+                </span>
+            </div>
 
-        <div style="display: flex; align-items: center; gap: 20px;">
+            <div style="display: flex; align-items: center; gap: 20px;">
             <div class="user-display-profile-badge" style="color: #ffffff; display: flex; align-items: center; gap: 8px; font-size: 0.9rem;">
                 <span style="width: 8px; height: 8px; background-color: #2b8a3e; border-radius: 50%; display: inline-block;"></span>
-                @if(Auth::user()->rol === 'admin')
+                @if(Auth::user()->rol === \App\Enums\UserRole::Admin)
                 <span style="background-color: #ef3340; color: #ffffff; font-size: 0.75rem; font-weight: bold; padding: 2px 6px; border-radius: 4px; margin-right: 4px;">ADMIN</span>
                 @endif
                 <span style="font-weight: 500;">{{ Auth::user()->name }}</span>
@@ -35,6 +36,7 @@
                     Cerrar Sesión
                 </button>
             </form>
+            </div>
         </div>
     </header>
 
@@ -43,13 +45,13 @@
         <aside>
             <div class="menu-sidebar-left">
                 <div class="sidebar-title">
-                    @if(Auth::user()->rol === 'admin')
+                    @if(Auth::user()->rol === \App\Enums\UserRole::Admin)
                     Panel Central
-                    @elseif(Auth::user()->rol === 'cargador')
+                    @elseif(Auth::user()->rol ===\App\Enums\UserRole::Cargador)
                     Módulo Importación
-                    @elseif(Auth::user()->rol === 'unidad')
+                    @elseif(Auth::user()->rol === \App\Enums\UserRole::Unidad)
                     Menú Unidad
-                    @elseif(Auth::user()->rol === 'director')
+                    @elseif(Auth::user()->rol === \App\Enums\UserRole::Director)
                     Menú Dirección
                     @else
                     Menú Consultas
@@ -57,20 +59,20 @@
                 </div>
                 <ul>
                     <!-- Enlace dinámico al Dashboard según Rol -->
-                    @if(Auth::user()->rol === 'admin')
+                    @if(Auth::user()->rol === \App\Enums\UserRole::Admin)
                     <li>
                         <a href="{{ route('admin.dashboard') }}" class="{{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">
                             Dashboard Principal
                         </a>
                     </li>
-                    @elseif(Auth::user()->rol === 'auditor')
+                    @elseif(Auth::user()->rol === \App\Enums\UserRole::Auditor)
                     <li>
                         <a href="{{ route('auditor.dashboard') }}" class="{{ request()->routeIs('auditor.dashboard') ? 'active' : '' }}">
                             Dashboard Auditoría
                         </a>
                     </li>
 
-                    @elseif(Auth::user()->rol === 'director')
+                    @elseif(Auth::user()->rol === \App\Enums\UserRole::Director)
                     <li>
                         <a href="{{ route('director.dashboard') }}" class="{{ request()->routeIs('director.dashboard') ? 'active' : '' }}">
                             Dashboard Regional
@@ -79,7 +81,7 @@
                     @endif
 
                     <!-- Secciones exclusivas de Administración -->
-                    @if(Auth::user()->rol === 'admin')
+                    @if(Auth::user()->rol === \App\Enums\UserRole::Admin)
                     <li>
                         <a href="{{ route('admin.usuarios') }}" class="{{ request()->routeIs('admin.usuarios') ? 'active' : '' }}">
                             Usuarios
@@ -88,7 +90,7 @@
                     @endif
 
                     <!-- Historial de Correos (Admin) y Correos Fallidos (Auditor) con indicador dinámico -->
-                    @if(Auth::user()->rol === 'admin' || Auth::user()->rol === 'auditor')
+                    @if(Auth::user()->rol === \App\Enums\UserRole::Admin || Auth::user()->rol === \App\Enums\UserRole::Auditor)
                         @php
                             $pendingMailsCount = \App\Models\MailLog::whereIn('status', ['PENDING', 'FAILED'])->count();
                             $hasPendingMails = $pendingMailsCount > 0;
@@ -99,7 +101,7 @@
                                class="{{ $routeActive ? 'active' : '' }}"
                                style="@if($hasPendingMails && !$routeActive) background-color: rgba(239, 51, 64, 0.05); color: #ef3340 !important; font-weight: 700;  @endif display: flex; justify-content: space-between; align-items: center; width: 100%; box-sizing: border-box; transition: all 0.2s ease;">
                                 <span>
-                                    {{ Auth::user()->rol === 'admin' ? 'Historial de Correos' : 'Correos Fallidos' }}
+                                    {{ Auth::user()->rol === \App\Enums\UserRole::Admin ? 'Historial de Correos' : 'Correos Fallidos' }}
                                 </span>
                                 <span style="background-color: {{ $hasPendingMails ? '#ef3340' : '#cbd5e1' }}; color: #ffffff; padding: 2px 7px; border-radius: 10px; font-size: 0.75rem; font-weight: 700; margin-left: auto; transition: all 0.2s ease;">
                                     {{ $pendingMailsCount }}
@@ -109,7 +111,7 @@
                     @endif
 
                     <!-- Enlaces dinámicos centralizados por Rol -->
-                    @if(Auth::user()->rol === 'admin' || Auth::user()->rol === 'cargador')
+                    @if(Auth::user()->rol === \App\Enums\UserRole::Admin || Auth::user()->rol ===\App\Enums\UserRole::Cargador)
                     <li>
                         <a href="{{ route('actividades.importar') }}" class="{{ request()->routeIs('actividades.importar') ? 'active' : '' }}">
                             Importar Planilla
@@ -118,7 +120,7 @@
                     @endif
                     
 
-                    @if(Auth::user()->rol === 'unidad')
+                    @if(Auth::user()->rol === \App\Enums\UserRole::Unidad)
                     <li>
                         <a href="{{ route('unidad.dashboard') }}" class="{{ request()->routeIs('unidad.dashboard') ? 'active' : '' }}">
                             Verificar Pendientes
@@ -159,15 +161,15 @@
             @endif
 
             @if (session('success'))
-            <div class="form-group-item" style="background-color: #d4edda; color: #155724; padding: 15px; border-radius: 4px; margin-bottom: 20px; border: 1px solid #c3e6cb; font-size: 0.9rem;">
-                <strong>Éxito:</strong> {{ session('success') }}
-            </div>
+                <x-alert type="success" title="Éxito">
+                    {{ session('success') }}
+                </x-alert>
             @endif
 
             @if (session('error'))
-            <div class="form-group-item" style="background-color: #f8d7da; color: #721c24; padding: 15px; border-radius: 4px; margin-bottom: 20px; border: 1px solid #f5c6cb; font-size: 0.9rem;">
-                <strong>Error:</strong> {{ session('error') }}
-            </div>
+                <x-alert type="error" title="Error">
+                    {{ session('error') }}
+                </x-alert>
             @endif
 
             @yield('content')
@@ -177,6 +179,9 @@
     <footer class="footer-credits-caj" style="margin-top: auto; background-color: #ffffff; border-top: 1px solid rgba(226, 232, 240, 0.8); padding: 15px 30px; text-align: center;">
         <p style="margin: 0; color: #64748b; font-size: 0.85rem;">© 2026 Corporación de Asistencia Judicial de la Región del Biobío. Todos los derechos reservados.</p>
     </footer>
+
+    <!-- Caso 2: Modales estáticos integrados desde plantilla de Blade parcial -->
+    @include('layouts.partials.session-modals')
 
      @stack('scripts')
     
@@ -198,8 +203,8 @@
 
 
             // Claves de sincronización compartidas en LocalStorage
-            const KEY_LAST_INTERACTION = 'caj_session_last_interaction';
-            const KEY_LAST_PING = 'caj_session_last_ping';
+            const KEY_LAST_INTERACTION = 'caj_verificador_last_interaction';
+            const KEY_LAST_PING = 'caj_verificador_last_ping';
 
             // Umbrales de cálculo de ventanas de Alerta en base a la última petición Keep-Alive
             const WARNING_THRESHOLD = SESSION_LIFETIME - minutesToMs(5)
@@ -214,38 +219,19 @@
                 SESSION_LIFETIME, WARNING_THRESHOLD, PING_INTERVAL, EXPIRED_THRESHOLD
             );
 
-            // Inyectar dinámicamente los elementos de ventana modal con estilos alineados a la intranet
-            function ensureModalElements() {
-                if (!document.getElementById('caj-session-warning-modal')) {
-                    const warningHtml = `
-                        <div id="caj-session-warning-modal" style="display:none; position: fixed; inset: 0; background-color: rgba(13, 27, 42, 0.6); backdrop-filter: blur(4px); align-items: center; justify-content: center; z-index: 99999; padding: 20px;">
-                            <div style="background-color: #ffffff; border-radius: 12px; border: 1px solid #cbd5e1; width: 100%; max-width: 480px; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04); padding: 30px; text-align: left;">
-                                <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 15px;">
-                                    <span style="font-size: 2rem;">⚠️</span>
-                                    <strong style="color: #9f1239; font-size: 1.25rem; font-weight: 700;">¿Sigue ahí? Su sesión va a expirar</strong>
-                                </div>
-                                <p style="color: #475569; font-size: 0.92rem; line-height: 1.6; margin: 0 0 25px 0;">
-                                    Por motivos de seguridad y de acuerdo a las políticas de la intranet, su sesión de acceso caducará pronto debido a inactividad detectada. ¿Desea mantener su sesión activa?
-                                </p>
-                                <div style="display: flex; gap: 12px; justify-content: flex-end;">
-                                    <button id="caj-session-logout-btn" type="button" class="btn-acc" style="padding: 10px 18px; font-size: 0.85rem; border-color: #cbd5e1; border-radius: 6px; cursor: pointer; background: #f8fafc; color: #475569;">
-                                        Cerrar sesión ahora
-                                    </button>
-                                    <button id="caj-session-extend-btn" type="button" class="btn-primary-caj" style="padding: 10px 20px; font-size: 0.85rem; border-radius: 6px; cursor: pointer; height: auto;">
-                                        Sí, seguir activo
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    `;
-                    document.body.insertAdjacentHTML('beforeend', warningHtml);
-
-                    document.getElementById('caj-session-extend-btn').addEventListener('click', () => {
+            // Asignar controladores a elementos estáticos de Blade
+            function attachModalListeners() {
+                const extendBtn = document.getElementById('caj-session-extend-btn');
+                if (extendBtn) {
+                    extendBtn.addEventListener('click', () => {
                         console.log('%c[Session Monitor] Click en "Sí, seguir activo". Forzando keep-alive síncrono...', 'color: #2b8a3e; font-weight: bold;');
                         forceKeepAlive();
                     });
+                }
 
-                    document.getElementById('caj-session-logout-btn').addEventListener('click', () => {
+                const logoutBtn = document.getElementById('caj-session-logout-btn');
+                if (logoutBtn) {
+                    logoutBtn.addEventListener('click', () => {
                         console.log('%c[Session Monitor] Click en "Cerrar sesión". Redirigiendo...', 'color: #ef3340; font-weight: bold;');
                         const logoutForm = document.querySelector('form[action$="/logout"]');
                         if (logoutForm) {
@@ -256,24 +242,9 @@
                     });
                 }
 
-                if (!document.getElementById('caj-session-expired-modal')) {
-                    const expiredHtml = `
-                        <div id="caj-session-expired-modal" style="display:none; position: fixed; inset: 0; background-color: rgba(13, 27, 42, 0.7); backdrop-filter: blur(5px); align-items: center; justify-content: center; z-index: 99999; padding: 20px;">
-                            <div style="background-color: #ffffff; border-radius: 12px; border: 1px solid #cbd5e1; width: 100%; max-width: 480px; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04); padding: 35px; text-align: center;">
-                                <div style="font-size: 3rem; margin-bottom: 15px;">🔒</div>
-                                <strong style="color: #ef3340; font-size: 1.30rem; font-weight: 700; display: block; margin-bottom: 10px;">Su sesión ha caducado</strong>
-                                <p style="color: #64748b; font-size: 0.9rem; line-height: 1.6; margin: 0 0 25px 0;">
-                                    Su sesión de acceso a la Intranet CAJBIOBIO ha expirado debido a inactividad prolongada. Por favor, vuelva a ingresar sus credenciales para continuar.
-                                </p>
-                                <button id="caj-session-relogin-btn" type="button" class="btn-primary-caj" style="padding: 12px 30px; font-size: 0.9rem; border-radius: 6px; cursor: pointer; width: 100%;">
-                                    Ir al Inicio de Sesión
-                                </button>
-                            </div>
-                        </div>
-                    `;
-                    document.body.insertAdjacentHTML('beforeend', expiredHtml);
-
-                    document.getElementById('caj-session-relogin-btn').addEventListener('click', () => {
+                const reloginBtn = document.getElementById('caj-session-relogin-btn');
+                if (reloginBtn) {
+                    reloginBtn.addEventListener('click', () => {
                         window.location.reload();
                     });
                 }
@@ -422,7 +393,7 @@
 
             // Inicializar estructuras y bucles
             document.addEventListener('DOMContentLoaded', () => {
-                ensureModalElements();
+                attachModalListeners();
                 updateModalsState();
             });
 

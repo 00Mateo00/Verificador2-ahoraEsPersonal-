@@ -106,16 +106,24 @@ class ExcelService
 
         $filteredRows = [];
 
+        $exclusiones = config('excel_ingestion.exclusiones_tipo_unidad', []);
+        $permitidos = config('excel_ingestion.codigos_actividad_permitidos', []);
+
         foreach ($data['rows'] as $row) {
-            // 1. Excluir filas donde TIPO_UNIDAD contenga "NAD" o "SENADIS"
+            // 1. Excluir filas donde TIPO_UNIDAD contenga alguno de los criterios parametrizados
             $tipoUnidad = strtoupper($row['TIPO_UNIDAD'] ?? '');
-            if (str_contains($tipoUnidad, 'NAD') || str_contains($tipoUnidad, 'SENADIS')) {
+
+            $excluir = collect($exclusiones)
+                ->map(fn ($e) => strtoupper($e))
+                ->contains(fn ($exclusion) => str_contains($tipoUnidad, $exclusion));
+
+            if ($excluir) {
                 continue;
             }
 
-            // 2. Preservar únicamente filas donde TIPO_ACT_COD sea 1 o 2
+            // 2. Preservar únicamente filas donde TIPO_ACT_COD sea permitido
             $tipoActCod = (int) ($row['TIPO_ACT_COD'] ?? 0);
-            if ($tipoActCod !== 1 && $tipoActCod !== 2) {
+            if (! in_array($tipoActCod, $permitidos, true)) {
                 continue;
             }
 

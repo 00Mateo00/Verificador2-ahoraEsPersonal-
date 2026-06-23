@@ -1,15 +1,15 @@
 <div class="panel-dashboard-content" style="margin-top: 20px;">
     <!-- Mensajes de Alerta -->
     @if (session()->has('success'))
-    <div style="background-color: #d4edda; color: #155724; padding: 15px; border-radius: 6px; margin-bottom: 20px; border: 1px solid #c3e6cb; font-size: 0.9rem;">
-        <strong>Éxito:</strong> {{ session('success') }}
-    </div>
+        <x-alert type="success" title="Éxito">
+            {{ session('success') }}
+        </x-alert>
     @endif
 
     @if (session()->has('error'))
-    <div style="background-color: #f8d7da; color: #721c24; padding: 15px; border-radius: 6px; margin-bottom: 20px; border: 1px solid #f5c6cb; font-size: 0.9rem;">
-        <strong>Error:</strong> {{ session('error') }}
-    </div>
+        <x-alert type="error" title="Error">
+            {{ session('error') }}
+        </x-alert>
     @endif
 
 
@@ -281,25 +281,7 @@
 
    <!-- PASO 3: CUENTA REGRESIVA DE ENVÍO -->
     @if($step === 3)
-    <div x-data="{ 
-            timeLeft: 10, 
-            timerInterval: null,
-            init() {
-                this.timeLeft = 10;
-                this.timerInterval = setInterval(() => {
-                    if (this.timeLeft > 1) {
-                        this.timeLeft--;
-                    } else {
-                        clearInterval(this.timerInterval);
-                        $wire.set('step', 4); // Transicionar directamente al Paso 4 (Procesamiento/Envío)
-                    }
-                }, 1000);
-            },
-            cancel() {
-                clearInterval(this.timerInterval);
-                $wire.cancelSend();
-            }
-        }" style="text-align: center; padding: 30px 0;">
+    <div x-data="timerComponent" style="text-align: center; padding: 30px 0;">
 
         <h3 style="color: #0d1b2a; font-size: 1.6rem; margin-bottom: 10px;">Enviando Notificaciones Automáticas</h3>
         <p style="color: #475569; font-size: 0.95rem; margin-bottom: 30px;">
@@ -329,7 +311,7 @@
             <div style="text-align: center; margin-bottom: 30px;">
                 <div class="animate-spin" style="font-size: 3.5rem; display: inline-block; margin-bottom: 12px;">⏳</div>
                 <h3 style="color: #0F69C4; font-size: 1.5rem; margin: 0; font-weight: 700;">Enviando correos y Procesando registros</h3>
-                <p style="color: #64748b; font-size: 0.88rem; margin-top: 6px;">El servidor se encuentra despachando los correos electrónicos y registrando las actividades. Por favor, no cierre esta pestaña.</p>
+                <p style="color: #64748b; font-size: 0.88rem; margin-top: 6px;">El servidor se encuentra despachando los correos electrónicos y registrando las actividades. Por favor, <strong style="text-decoration: underline;">no cierre esta pestaña.</strong></p>
             </div>
 
             <div style="display: flex; flex-direction: column; gap: 20px;">

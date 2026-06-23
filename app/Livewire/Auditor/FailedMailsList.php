@@ -2,6 +2,8 @@
 
 namespace App\Livewire\Auditor;
 
+use App\Enums\MailStatus;
+use App\Enums\UserRole;
 use App\Models\MailLog;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
@@ -12,16 +14,17 @@ class FailedMailsList extends Component
     use WithPagination;
 
     public string $search = '';
+
     public string $activeTab = 'pending'; // 'pending' o 'sent'
 
     public function mount()
     {
         $user = Auth::user();
-        
-        if ($user->rol === 'admin') {
+
+        if ($user->rol === UserRole::Admin) {
             // Lógica por defecto para el admin:
             // Si hay correos pendientes, la pestaña por defecto es 'pending'. De lo contrario, es 'sent'.
-            $hasPending = MailLog::whereIn('status', ['PENDING', 'FAILED'])->exists();
+            $hasPending = MailLog::whereIn('status', [MailStatus::Pending, MailStatus::Failed])->exists();
             $this->activeTab = $hasPending ? 'pending' : 'sent';
         } else {
             // Auditor no tiene pestañas, siempre visualiza pendientes
@@ -36,7 +39,7 @@ class FailedMailsList extends Component
 
     public function setTab($tab)
     {
-        if (Auth::user()->rol === 'admin') {
+        if (Auth::user()->rol === UserRole::Admin) {
             $this->activeTab = $tab;
             $this->resetPage();
         }
@@ -61,7 +64,7 @@ class FailedMailsList extends Component
      */
     public function resendAll()
     {
-        $pendingMails = MailLog::whereIn('status', ['PENDING', 'FAILED'])->get();
+        $pendingMails = MailLog::whereIn('status', [MailStatus::Pending, MailStatus::Failed])->get();
 
         if ($pendingMails->isEmpty()) {
             session()->flash('info', 'No hay correos pendientes o fallidos para reenviar.');
@@ -95,7 +98,7 @@ class FailedMailsList extends Component
         $user = Auth::user();
 
         // Defensa: Validar rol admin y que el Modo Edición esté activo en sesión
-        if ($user->rol !== 'admin' || ! session('modo_edicion')) {
+        if ($user->rol !== UserRole::Admin || ! session('modo_edicion')) {
             abort(403, 'Acción no autorizada. Solo un Administrador en Modo Edición puede eliminar registros de correos.');
         }
 
@@ -109,19 +112,19 @@ class FailedMailsList extends Component
     public function render()
     {
         $user = Auth::user();
-        $isAdmin = $user->rol === 'admin';
+        $isAdmin = $user->rol === UserRole::Admin;
 
         $query = MailLog::query()->with('user');
 
         if ($isAdmin) {
             if ($this->activeTab === 'sent') {
-                $query->where('status', 'SENT');
+                $query->where('status', MailStatus::Sent);
             } else {
-                $query->whereIn('status', ['PENDING', 'FAILED']);
+                $query->whereIn('status', [MailStatus::Pending, MailStatus::Failed]);
             }
         } else {
             // Auditor siempre ve pendientes/fallidos
-            $query->whereIn('status', ['PENDING', 'FAILED']);
+            $query->whereIn('status', [MailStatus::Pending, MailStatus::Failed]);
         }
 
         $mails = $query->when($this->search, function ($q) {

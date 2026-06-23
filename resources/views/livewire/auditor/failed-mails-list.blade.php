@@ -47,19 +47,19 @@
 
     <!-- Alertas dinámicas internas -->
     @if (session()->has('success'))
-        <div style="background-color: #d4edda; color: #155724; padding: 15px; border-radius: 6px; margin-bottom: 20px; border: 1px solid #c3e6cb; font-size: 0.9rem; font-weight: 600;">
-            ✅ {{ session('success') }}
-        </div>
+        <x-alert type="success" title="Éxito">
+            {{ session('success') }}
+        </x-alert>
     @endif
     @if (session()->has('error'))
-        <div style="background-color: #f8d7da; color: #721c24; padding: 15px; border-radius: 6px; margin-bottom: 20px; border: 1px solid #f5c6cb; font-size: 0.9rem; font-weight: 600;">
-            ⚠️ {{ session('error') }}
-        </div>
+        <x-alert type="error" title="Error">
+            {{ session('error') }}
+        </x-alert>
     @endif
     @if (session()->has('info'))
-        <div style="background-color: #e2f0fd; color: #0b4e91; padding: 15px; border-radius: 6px; margin-bottom: 20px; border: 1px solid #bfdbfe; font-size: 0.9rem; font-weight: 600;">
-            ℹ️ {{ session('info') }}
-        </div>
+        <x-alert type="info" title="Información">
+            {{ session('info') }}
+        </x-alert>
     @endif
 
     <!-- Tabla de datos -->

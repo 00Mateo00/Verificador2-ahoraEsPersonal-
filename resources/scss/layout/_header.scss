@@ -1,14 +1,14 @@
 .header-nav-caj{
+    position:sticky;
+    top:0;
+    z-index:1000;
     background:linear-gradient(
         135deg,
         #003366 0%,
         #004080 100%
     );
     color:#ffffff;
-    min-height:90px;
-    display:flex;
-    align-items:center;
-    padding:18px 60px;
+    min-height:70px;
     border-bottom:2px solid #c8102e;
     box-shadow:0 2px 12px rgba(0,0,0,.08);
 }
@@ -49,4 +49,15 @@
     font-size: 1.15rem;
     letter-spacing: 0.5px;
     font-family: var(--font-sans);
+}
+
+.header-inner-caj{
+    max-width:1600px;
+    margin:0 auto;
+    width:100%;
+    min-height:70px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:0 52px;
 }

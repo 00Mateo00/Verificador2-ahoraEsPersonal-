@@ -2,16 +2,15 @@
 
 namespace App\Models;
 
+use App\Enums\UserRole;
+use App\Services\ExcelService;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use App\Services\ExcelService;
-
 
 class Actividad extends Model
 {
-
-    /** 
+    /**
      *Columnas obligatorias que debe contener el excel para poder luego crear una actividad
      */
     public const MANDATORY_FIELDS_TO_CREATE_ACTIVIDAD = [
@@ -25,6 +24,7 @@ class Actividad extends Model
         'TIPO_MODIFICADO',
         'SUB_TIPO_MODIFICADO',
     ];
+
     /**
      * Columnas que si no vienen en el excel se guardan con un valor por defecto o null
      */
@@ -38,9 +38,10 @@ class Actividad extends Model
         'FUNCIONARIO',
     ];
 
-
     protected $table = 'actividad';
+
     protected $primaryKey = 'actividad_id';
+
     protected $fillable = [];
 
     protected $casts = [
@@ -57,16 +58,14 @@ class Actividad extends Model
         'activo' => 'boolean',
     ];
 
-
     // Cabeceras requeridas minimas
-
 
     /* TO-DO : preguntar a Felipe si con "opcional" se refiera a:
      * 1.- No es requerido en la carga?
      * 2.- Puede tener un valor nulo?
-    
+
     */
-    //To-do: si estamos en enero 
+    // To-do: si estamos en enero
     // ya existen archivos de enero 2026 (A.E anterior) estas seguro que quieres subirlo? (si sube algo de enero 2026 y estamos realmente a 2027, pero solo en enero )
     // si estamos en enero 2027 y en el excel aparece un M.E de enero 2026, estas seguro que quieres subirlo? (si sube algo de enero 2026 y estamos realmente a 2027, pero solo en enero )
     private const EXCEL_COLUMN_MAPPING = [
@@ -79,17 +78,15 @@ class Actividad extends Model
     {
         return [
             ...array_map(
-                fn(string $header) => self::EXCEL_COLUMN_MAPPING[$header] ?? $header,
+                fn (string $header) => self::EXCEL_COLUMN_MAPPING[$header] ?? $header,
                 self::MANDATORY_FIELDS_TO_CREATE_ACTIVIDAD
             ),
             ...self::OPTIONAL_ACTIVIDAD_FIELDS,
         ];
     }
 
-
     /**
      * Acepta una fila del excel y lo remapea. Tambien filtra lo que no exista en excelColumnsToPersist
-     * 
      */
     private static function mapRowToPersistableData(array $row): array
     {
@@ -101,14 +98,14 @@ class Actividad extends Model
         foreach (ExcelService::REQUIRED_EXCEL_HEADERS as $header) {
             $column = self::EXCEL_COLUMN_MAPPING[$header] ?? $header;
 
-            if (!isset($allowedColumns[$column])) {
+            if (! isset($allowedColumns[$column])) {
                 continue;
             }
             $data[$column] = $row[$header];
         }
+
         return $data;
     }
-
 
     public static function fromExcelRow(
         array $row,
@@ -117,7 +114,7 @@ class Actividad extends Model
     ): array {
         // mapeo y filtro
         $data = [...self::mapRowToPersistableData($row)];
-        // control interno 
+        // control interno
         $data['estado'] = 'CARGADA';
         $data['carga_id'] = $cargaId;
         $data['unidad_id_asignada'] = $unidadIdAsignada;
@@ -155,7 +152,36 @@ class Actividad extends Model
         ];
     }
 
+    public function scopeForUser($query, User $user, ?int $filteredUnidadId = null)
+    {
+        $rol = $user->rol;
 
+        if ($rol === UserRole::Unidad) {
+            $userUnidadId = $user->unidad ? $user->unidad->id : null;
+
+            return $query->where('unidad_id_asignada', $userUnidadId);
+        }
+
+        if ($rol === UserRole::Director) {
+            $userRegionId = $user->region ? $user->region->id : null;
+            $unidadIds = $userRegionId
+                ? Unidad::query()->where('region_id', $userRegionId)->pluck('id')->toArray()
+                : [];
+
+            if ($filteredUnidadId && in_array($filteredUnidadId, $unidadIds, true)) {
+                return $query->where('unidad_id_asignada', $filteredUnidadId);
+            }
+
+            return $query->whereIn('unidad_id_asignada', $unidadIds);
+        }
+
+        // Admin, Auditor, Cargador (Acceso global)
+        if ($filteredUnidadId) {
+            return $query->where('unidad_id_asignada', $filteredUnidadId);
+        }
+
+        return $query;
+    }
 
     /**
      * Relación con la unidad del sistema que debe gestionar esta actividad.

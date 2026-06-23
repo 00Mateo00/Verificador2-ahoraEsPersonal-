@@ -1,4 +1,4 @@
-<div x-data="{ advancedOpen: false }" @if(Auth::user()->rol === 'auditor') wire:poll.600s @endif>
+<div x-data="{ advancedOpen: false }" @if(Auth::user()->rol === \App\Enums\UserRole::Auditor) wire:poll.600s @endif>
     <!-- 1. Filtros Básicos y Avanzados -->
     @include('livewire.actividades.partials.filtros')
 
@@ -12,11 +12,13 @@
     <!-- 3. Contenedor de Listado de Actividades -->
     <div id="actividades-container">
         @if ($actividades->isEmpty())
-        <div
-            style="background-color: #ffffff; border: 1px solid rgba(226, 232, 240, 0.8); border-radius: 8px; padding: 40px; text-align: center; color: #64748b;">
-            <span style="font-size: 1.5rem;">📁</span>
-            <p style="margin: 10px 0 0; font-weight: 500;">No se encontraron reportes con los criterios de búsqueda
-                seleccionados.</p>
+        <div class="dashoard-card empty-state-card">
+            <div class="empty-state-icon">📁</div>
+            <h3>No se encontraron actividades</h3>
+            <p>
+                No se encontraron reportes con los criterios de búsqueda
+                seleccionados.
+            </p>
         </div>
         @else
         @php $lastMonthYear = null; @endphp
@@ -32,35 +34,35 @@
         $lastMonthYear = $monthYearKey;
         $totalMonthCount = $monthCounts[$monthYearKey] ?? 0;
         $monthLabel = str_replace(
-        [
-        'January',
-        'February',
-        'March',
-        'April',
-        'May',
-        'June',
-        'July',
-        'August',
-        'September',
-        'October',
-        'November',
-        'December',
-        ],
-        [
-        'Enero',
-        'Febrero',
-        'Marzo',
-        'Abril',
-        'Mayo',
-        'Junio',
-        'Julio',
-        'Agosto',
-        'Septiembre',
-        'Octubre',
-        'Noviembre',
-        'Diciembre',
-        ],
-        $actDate->format('F'),
+            [
+                'January',
+                'February',
+                'March',
+                'April',
+                'May',
+                'June',
+                'July',
+                'August',
+                'September',
+                'October',
+                'November',
+                'December',
+            ],
+            [
+                'Enero',
+                'Febrero',
+                'Marzo',
+                'Abril',
+                'Mayo',
+                'Junio',
+                'Julio',
+                'Agosto',
+                'Septiembre',
+                'Octubre',
+                'Noviembre',
+                'Diciembre',
+            ],
+            $actDate->format('F'),
         );
         @endphp
         <div

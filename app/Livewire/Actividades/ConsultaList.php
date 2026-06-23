@@ -6,6 +6,7 @@ use App\Models\Actividad;
 use App\Models\Archivo;
 use App\Models\Region;
 use App\Models\Unidad;
+use App\Enums\UserRole;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -75,43 +76,14 @@ class ConsultaList extends Component
         $this->resetPage();
     }
 
-    /**
-     * Aplica las restricciones de visibilidad de manera centralizada de acuerdo al rol del usuario.
-     */
-    private function applyRoleRestrictions($query, string $userRol): void
-    {
-        if ($userRol === 'unidad') {
-            $unidad = Unidad::query()->where('user_id', Auth::id())->first();
-            $userUnidadId = $unidad ? $unidad->id : null;
-            $query->where('unidad_id_asignada', $userUnidadId);
-        } elseif ($userRol === 'director') {
-            $region = Region::query()->where('user_id', Auth::id())->first();
-            $regionId = $region ? $region->id : null;
-            $unidadIds = $regionId ? Unidad::query()->where('region_id', $regionId)->pluck('id')->toArray() : [];
-
-            if (! empty($this->unidad_filtro) && in_array($this->unidad_filtro, $unidadIds)) {
-                $query->where('unidad_id_asignada', $this->unidad_filtro);
-            } else {
-                $query->whereIn('unidad_id_asignada', $unidadIds);
-            }
-        } else {
-            // Admin, Auditor, Cargador (Acceso global)
-            if (! empty($this->unidad_filtro)) {
-                $query->where('unidad_id_asignada', $this->unidad_filtro);
-            }
-        }
-    }
-
     private function getFilteredActivitiesQuery()
     {
-        $userRol = Auth::user()->rol;
+        $user = Auth::user();
 
         $query = Actividad::query()
             ->where('activo', true)
-            ->where('estado', 'VERIFICADA');
-
-        // Limitación jerárquica por unidad de acuerdo al rol usando el helper centralizado
-        $this->applyRoleRestrictions($query, $userRol);
+            ->where('estado', 'VERIFICADA')
+            ->forUser($user, (int) $this->unidad_filtro ?: null);
 
         if (! empty($this->actividad_id)) {
             $query->where('actividad_id', $this->actividad_id);
@@ -153,7 +125,7 @@ class ConsultaList extends Component
     public function eliminarArchivo($archivoId)
     {
         // Defensa: Bloquear mutación si no es admin en modo edición
-        if (Auth::user()->rol !== 'admin' || ! session('modo_edicion')) {
+        if (Auth::user()->rol !== UserRole::Admin || ! session('modo_edicion')) {
             abort(403, 'No autorizado para realizar esta acción.');
         }
 
@@ -174,7 +146,7 @@ class ConsultaList extends Component
      */
     public function desactivarActividad($actividadId)
     {
-        if (Auth::user()->rol !== 'admin' || ! session('modo_edicion')) {
+        if (Auth::user()->rol !== UserRole::Admin || ! session('modo_edicion')) {
             abort(403, 'No autorizado para realizar esta acción.');
         }
 
@@ -191,7 +163,7 @@ class ConsultaList extends Component
     public function adjuntarVerificadorAdministrativo($actividadId)
     {
         // Defensa: Bloquear mutación si no es admin en modo edición
-        if (Auth::user()->rol !== 'admin' || ! session('modo_edicion')) {
+        if (Auth::user()->rol !== UserRole::Admin || ! session('modo_edicion')) {
             abort(403, 'No autorizado para realizar esta acción.');
         }
 
@@ -254,14 +226,13 @@ class ConsultaList extends Component
         $totalResults = $query->count();
         $actividades = $query->paginate($perPage);
 
-        $userRol = Auth::user()->rol;
+        $user = Auth::user();
+        $userRol = $user->rol;
 
         $monthQuery = Actividad::query()
             ->where('activo', true)
-            ->where('estado', 'VERIFICADA');
-
-        // Aplicar restricciones de rol centralizadas
-        $this->applyRoleRestrictions($monthQuery, $userRol);
+            ->where('estado', 'VERIFICADA')
+            ->forUser($user, (int) $this->unidad_filtro ?: null);
 
         $monthCounts = $monthQuery->selectRaw("SUBSTRING_INDEX(FECHA, '-', -2) as ym, count(*) as total")
             ->groupBy('ym')
@@ -270,13 +241,13 @@ class ConsultaList extends Component
 
         // Cargar las unidades asociadas al usuario autenticado para el filtro dinámico
         $unidadesAsignadas = [];
-        if ($userRol === 'admin' || $userRol === 'auditor') {
+        if ($userRol === UserRole::Admin || $userRol === UserRole::Auditor) {
             $unidadesAsignadas = Unidad::query()
                 ->join('users', 'unidad.user_id', '=', 'users.id')
                 ->orderBy('users.name', 'asc')
                 ->select('unidad.*', 'users.name as unidad_nombre')
                 ->get();
-        } elseif ($userRol === 'director') {
+        } elseif ($userRol === UserRole::Director) {
             $region = Region::query()->where('user_id', Auth::id())->first();
             $regionId = $region ? $region->id : null;
             $unidadesAsignadas = Unidad::query()

@@ -33,7 +33,7 @@ class EnsureUserHasRole
         }
 
         // Si el usuario pertenece a uno de los roles permitidos, continuar
-        if (empty($roles) || in_array($user->rol, $roles)) {
+        if (empty($roles) || in_array($user->rol->value, $roles)) {
             return $next($request);
         }
 

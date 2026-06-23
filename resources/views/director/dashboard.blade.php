@@ -49,14 +49,20 @@
             9 => 'Septiembre', 10 => 'Octubre', 11 => 'Noviembre', 12 => 'Diciembre'
         ];
     @endphp
-    <div style="background-color: #f1f5f9; border: 1px solid #cbd5e1; padding: 20px; border-radius: 8px; margin-bottom: 30px;">
-        <form action="{{ route('director.dashboard') }}" method="GET" style="display: flex; gap: 15px; align-items: flex-end; flex-wrap: wrap;">
+    <div class="dashboard-filter-stat-card">
+        <div class="dashboard-filter-stat-header">
+            <div>
+                <h3>Filtros Estadísticos</h3>
+                <p>Selecciona el período que deseas visualizar.</p>
+            </div>
+        </div>
+        <form action="{{ route('director.dashboard') }}" method="GET" class="estadistica-filtros">
             <input type="hidden" name="view" value="{{ $view }}">
             
             @if($view === 'mes')
-            <div style="flex: 1; min-width: 150px;">
-                <label for="mes" style="font-size: 0.85rem; font-weight: 700; color: #334155; display: block; margin-bottom: 6px;">Seleccionar Mes Estadístico</label>
-                <select name="mes" id="mes" style="width: 100%; box-sizing: border-box; padding: 10px 14px; border: 1px solid #cbd5e1; border-radius: 6px; background-color: #ffffff; font-size: 0.95rem;">
+            <div class="estadistica-form-group">
+                <label for="mes">Seleccionar Mes Estadístico</label>
+                <select name="mes" id="mes" class="estadistica-select">
                     @for($m = $maxMonth; $m >= 1; $m--)
                         <option value="{{ $m }}" @if($m === $selectedMonth) selected @endif>{{ $meses[$m] }}</option>
                     @endfor
@@ -64,21 +70,21 @@
             </div>
             @endif
 
-            <div style="flex: 1; min-width: 150px;">
-                <label for="ano" style="font-size: 0.85rem; font-weight: 700; color: #334155; display: block; margin-bottom: 6px;">Seleccionar Año Estadístico</label>
-                <select name="ano" id="ano" style="width: 100%; box-sizing: border-box; padding: 10px 14px; border: 1px solid #cbd5e1; border-radius: 6px; background-color: #ffffff; font-size: 0.95rem;">
+            <div class="estadistica-form-group">
+                <label for="ano">Seleccionar Año Estadístico</label>
+                <select name="ano" id="ano" class="estadistica-select">
                     @for($y = $currentYear; $y >= 2020; $y--)
                         <option value="{{ $y }}" @if($y === $selectedYear) selected @endif>{{ $y }}</option>
                     @endfor
                 </select>
             </div>
 
-            <div style="display: flex; gap: 10px;">
-                <button type="submit" class="btn-primary-caj" style="padding: 10px 20px; font-size: 0.9rem;">
+            <div class="estadistica-actions">
+                <button type="submit" class="btn-primary-caj">
                     Filtrar 🔍
                 </button>
                 @if($selectedMonth !== $currentMonth || $selectedYear !== $currentYear)
-                <a href="{{ route('director.dashboard', ['view' => $view, 'mes' => $currentMonth, 'ano' => $currentYear]) }}" class="btn-acc" style="text-align: center; padding: 10px 15px; text-decoration: none; border-color: #cbd5e1; font-weight: 600; font-size: 0.9rem; border-radius: 6px; display: inline-flex; align-items: center;">
+                <a href="{{ route('director.dashboard', ['view' => $view, 'mes' => $currentMonth, 'ano' => $currentYear]) }}" class="btn-acc estadistica-btn-reset">
                     Volver al Periodo Actual 🔄
                 </a>
                 @endif

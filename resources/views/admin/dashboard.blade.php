@@ -12,25 +12,13 @@
 
 <!-- Alertas Dinámicas de (Dashboard) -->
 @if(session('modo_edicion'))
-<div style="background-color: #fff1f2; border: 1px solid #fecdd3; border-radius: 8px; padding: 20px; margin-bottom: 30px; display: flex; align-items: flex-start; gap: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.01);">
-    <span style="font-size: 1.5rem; line-height: 1;">⚠️</span>
-    <div>
-        <strong style="color: #9f1239; font-size: 1rem; display: block; margin-bottom: 4px;">¡Cuidado! Modo Edición Activado</strong>
-        <p style="color: #be123c; font-size: 0.85rem; margin: 0; line-height: 1.5;">
-            Se encuentra en el modo interactivo de administración. Ahora los controles de edición en la vista de Unidades y las acciones para adjuntar o eliminar verificadores en el Historial están activos y usables. Por seguridad, este modo expirará automáticamente tras 10 minutos de inactividad.
-        </p>
-    </div>
-</div>
+    <x-alert type="danger" title="¡Cuidado! Modo Edición Activado">
+        Se encuentra en el modo interactivo de administración. Ahora los controles de edición en la vista de Unidades y las acciones para adjuntar o eliminar verificadores en el Historial están activos y usables. Por seguridad, este modo expirará automáticamente tras 10 minutos de inactividad.
+    </x-alert>
 @else
-<div style="background-color: #eff6ff; border: 1px solid #bfdbfe; border-radius: 8px; padding: 20px; margin-bottom: 30px; display: flex; align-items: flex-start; gap: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.01);">
-    <span style="font-size: 1.5rem; line-height: 1;">🔒</span>
-    <div>
-        <strong style="color: #1e40af; font-size: 1rem; display: block; margin-bottom: 4px;">Modo Solo Lectura</strong>
-        <p style="color: #1e3a8a; font-size: 0.85rem; margin: 0; line-height: 1.5;">
-            Se encuentra visualizando la intranet en modo de lectura segura. Los controles críticos de cuentas de unidades y verificadores están bloqueados. Para habilitar las operaciones de edición, active el modo de edición crítica abajo.
-        </p>
-    </div>
-</div>
+    <x-alert type="info" title="Modo Solo Lectura">
+        Se encuentra visualizando la intranet en modo de lectura segura. Los controles críticos de cuentas de unidades y verificadores están bloqueados. Para habilitar las operaciones de edición, active el modo de edición crítica abajo.
+    </x-alert>
 @endif
 
 <!-- Tarjetas de Indicadores Consolidados -->

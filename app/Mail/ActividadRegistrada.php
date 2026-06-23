@@ -41,7 +41,7 @@ class ActividadRegistrada extends Mailable
         $attachments = [];
 
         foreach ($this->actividad->archivos as $archivo) {
-            $attachments[] = Attachment::fromStorageDisk('public', $archivo->archivo_ruta)
+            $attachments[] = Attachment::fromStorageDisk('local', $archivo->archivo_ruta)
                 ->as($archivo->archivo_nombre)
                 ->withMime($archivo->archivo_tipo);
         }

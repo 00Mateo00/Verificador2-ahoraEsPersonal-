@@ -27,3 +27,22 @@
     border-color:#0F69C4;
     box-shadow:0 0 0 3px rgba(15, 105, 196, 0.15);
 }
+
+.form-input-control,
+.form-select-control{
+    width:100%;
+    padding:12px 14px;
+    border:1px solid #dbe3ef;
+    border-radius:12px;
+    font-size:.9rem;
+    transition:.2s ease;
+    background:#fff;
+}
+
+.form-input-control:focus,
+.form-select-control:focus{
+    outline:none;
+    border-color:#0f69c4;
+    box-shadow:0 0 0 4px rgba(15, 105, 196,.12);
+}
+

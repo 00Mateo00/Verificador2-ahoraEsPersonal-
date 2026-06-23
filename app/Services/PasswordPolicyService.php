@@ -2,6 +2,8 @@
 
 namespace App\Services;
 
+use App\Enums\MailStatus;
+use App\Enums\UserRole;
 use App\Mail\PasswordRenewalMail;
 use App\Models\MailLog;
 use App\Models\User;
@@ -20,7 +22,7 @@ class PasswordPolicyService
      */
     public function isExpired(User $user): bool
     {
-        if ($user->rol === 'admin') {
+        if ($user->rol === UserRole::Admin) {
             return false;
         }
 
@@ -37,7 +39,7 @@ class PasswordPolicyService
      */
     public function isInWarningWindow(User $user): bool
     {
-        if ($user->rol === 'admin') {
+        if ($user->rol === UserRole::Admin) {
             return false;
         }
 
@@ -111,7 +113,7 @@ class PasswordPolicyService
     {
         $failedMail = MailLog::where('user_id', $user->id)
             ->where('mailable_class', PasswordRenewalMail::class)
-            ->whereIn('status', ['PENDING', 'FAILED'])
+            ->whereIn('status', [MailStatus::Pending, MailStatus::Failed])
             ->latest()
             ->first();
 

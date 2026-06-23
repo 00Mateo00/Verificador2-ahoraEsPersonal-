@@ -5,6 +5,8 @@ namespace App\Policies;
 use App\Models\Actividad;
 use App\Models\User;
 
+use App\Enums\UserRole;
+
 class ActividadPolicy
 {
     /**
@@ -15,18 +17,18 @@ class ActividadPolicy
         $rol = $user->rol;
 
         // Admin, Auditor y Cargador tienen acceso de visualizacion global
-        if (in_array($rol, ['admin', 'auditor', 'cargador'])) {
+        if (in_array($rol, [UserRole::Admin, UserRole::Auditor, UserRole::Cargador], true)) {
             return true;
         }
 
         // Rol Unidad: Solo puede visualizar si la actividad está asignada a su propia unidad operativa
-        if ($rol === 'unidad') {
+        if ($rol === UserRole::Unidad) {
             $userUnidadId = $user->unidad ? $user->unidad->id : null;
             return $userUnidadId !== null && (int)$actividad->unidad_id_asignada === (int)$userUnidadId;
         }
 
         // Rol Director: Solo puede visualizar si la unidad de la actividad pertenece a su region asignada
-        if ($rol === 'director') {
+        if ($rol === UserRole::Director) {
             $userRegionId = $user->region ? $user->region->id : null;
             $actUnidad = $actividad->unidadAsignada;
             return $userRegionId !== null && $actUnidad !== null && (int)$actUnidad->region_id === (int)$userRegionId;
@@ -43,17 +45,17 @@ class ActividadPolicy
         $rol = $user->rol;
 
         // El auditor nunca puede realizar mutaciones de escritura
-        if ($rol === 'auditor') {
+        if ($rol === UserRole::Auditor) {
             return false;
         }
 
         // Admin tiene permisos globales de escritura
-        if ($rol === 'admin') {
+        if ($rol === UserRole::Admin) {
             return true;
         }
 
         // Rol Unidad: Puede subir verificadores únicamente si la actividad le pertenece
-        if ($rol === 'unidad') {
+        if ($rol === UserRole::Unidad) {
             $userUnidadId = $user->unidad ? $user->unidad->id : null;
             return $userUnidadId !== null && (int)$actividad->unidad_id_asignada === (int)$userUnidadId;
         }

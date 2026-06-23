@@ -2,7 +2,13 @@
 
 namespace App\Services;
 
+use App\Enums\MailStatus;
+use App\Mail\ActividadRegistrada;
+use App\Mail\NuevasActividadesPendientes;
+use App\Mail\PasswordRenewalMail;
+use App\Models\Actividad;
 use App\Models\MailLog;
+use App\Models\Unidad;
 use App\Models\User;
 use Illuminate\Mail\Mailable;
 use Illuminate\Support\Facades\Mail;
@@ -10,6 +16,64 @@ use Throwable;
 
 class MailService
 {
+    /**
+     * Reconstruye y envía un correo del log síncronamente por red.
+     */
+    public static function sendSynchronously(MailLog $mailLog): bool
+    {
+        try {
+            $class = $mailLog->mailable_class;
+            if (! class_exists($class)) {
+                throw new \Exception("Clase mailable no encontrada: {$class}");
+            }
+
+            $mailable = null;
+            if ($class === NuevasActividadesPendientes::class) {
+                $unidadId = $mailLog->payload['unidad_id'] ?? null;
+                $unidad = Unidad::find($unidadId);
+                if (! $unidad) {
+                    throw new \Exception("Unidad #{$unidadId} no encontrada para reconstruir correo.");
+                }
+                $mailable = new NuevasActividadesPendientes($unidad);
+            } elseif ($class === ActividadRegistrada::class) {
+                $actividadId = $mailLog->payload['actividad_id'] ?? null;
+                $actividad = Actividad::find($actividadId);
+                if (! $actividad) {
+                    throw new \Exception("Actividad #{$actividadId} no encontrada para reconstruir correo.");
+                }
+                $mailable = new ActividadRegistrada($actividad);
+            } elseif ($class === PasswordRenewalMail::class) {
+                $userId = $mailLog->payload['user_id'] ?? null;
+                $user = User::find($userId);
+                if (! $user) {
+                    throw new \Exception("Usuario #{$userId} no encontrado para reconstruir correo de renovación.");
+                }
+                $url = $mailLog->payload['url'] ?? '';
+                $expirationString = $mailLog->payload['expiration_string'] ?? '';
+                $mailable = new PasswordRenewalMail($user, $url, $expirationString);
+            } else {
+                throw new \Exception("Mailable no soportado para reconstrucción: {$class}");
+            }
+
+            Mail::to($mailLog->recipient)->send($mailable);
+            $mailLog->update([
+                'status' => MailStatus::Sent,
+                'attempts' => $mailLog->attempts + 1,
+                'error_message' => null,
+            ]);
+
+            return true;
+        } catch (Throwable $e) {
+            $mailLog->update([
+                'status' => MailStatus::Failed,
+                'attempts' => $mailLog->attempts + 1,
+                'error_message' => $e->getMessage(),
+            ]);
+
+            return false;
+        }
+    }
+
     /**
      * Fusible de conexión (Circuit Breaker).
      * Si se detecta que el servidor SMTP está fuera de línea durante la transacción,

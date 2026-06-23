@@ -51,11 +51,11 @@
                           password: '',
                           submitted: @json($errors->has('password')),
                           config: {
-                              minLength: @json(config('password_policy.min_length', 8)),
-                              requireMixedCase: @json(config('password_policy.require_mixed_case', true)),
-                              requireLetters: @json(config('password_policy.require_letters', true)),
-                              requireNumbers: @json(config('password_policy.require_numbers', true)),
-                              requireSymbols: @json(config('password_policy.require_symbols', true))
+                              minLength: @json(config('password_policy.min_length')),
+                              requireMixedCase: @json(config('password_policy.require_mixed_case')),
+                              requireLetters: @json(config('password_policy.require_letters')),
+                              requireNumbers: @json(config('password_policy.require_numbers')),
+                              requireSymbols: @json(config('password_policy.require_symbols'))
                           },
                           get rules() {
                               let items = [];
