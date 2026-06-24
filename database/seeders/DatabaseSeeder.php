@@ -21,32 +21,32 @@ class DatabaseSeeder extends Seeder
             [
                 8,
                 'Biobio',
-                'micorreo+biobio@gmail.com',
+                'mateo.ossa.b+biobio@gmail.com',
             ],
             [
                 9,
                 'Araucanía',
-                'micorreo+araucania@gmail.com',
+                'mateo.ossa.b+araucania@gmail.com',
             ],
             [
                 10,
                 'Los Lagos',
-                'micorreo+loslagos@gmail.com',
+                'mateo.ossa.b+loslagos@gmail.com',
             ],
             [
                 11,
                 'Aysén',
-                'micorreo+aysen@gmail.com',
+                'mateo.ossa.b+aysen@gmail.com',
             ],
             [
                 14,
                 'Los Ríos',
-                'micorreo+losrios@gmail.com',
+                'mateo.ossa.b+losrios@gmail.com',
             ],
             [
                 16,
                 'Ñuble',
-                'micorreo+nuble@gmail.com',
+                'mateo.ossa.b+nuble@gmail.com',
             ],
         ];
 

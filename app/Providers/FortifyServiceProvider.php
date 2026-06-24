@@ -13,6 +13,8 @@ use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Str;
 use Laravel\Fortify\Contracts\LoginResponse;
 use Laravel\Fortify\Fortify;
+use Laravel\Fortify\Contracts\SuccessfulPasswordResetResponse;
+use App\Http\Responses\SuccessfulPasswordResetResponse as CustomSuccessfulPasswordResetResponse;
 
 class FortifyServiceProvider extends ServiceProvider
 {
@@ -21,7 +23,10 @@ class FortifyServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        $this->app->singleton(
+            SuccessfulPasswordResetResponse::class,
+            CustomSuccessfulPasswordResetResponse::class
+        );
     }
 
     /**
