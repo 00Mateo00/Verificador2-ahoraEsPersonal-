@@ -113,11 +113,18 @@
     <!-- PASO 2: PREVISUALIZACIÓN DE FILAS -->
     @if($step === 2)
     <div>
-        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #cbd5e1; padding-bottom: 15px; margin-bottom: 20px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #cbd5e1; padding-bottom: 15px; margin-bottom: 20px; flex-wrap: wrap; gap: 10px;">
             <h3 style="margin: 0; color: #0d1b2a; font-size: 1.4rem;">Previsualización de Carga</h3>
-            <span style="background-color: rgba(15, 105, 196, 0.1); color: #0F69C4; font-weight: 700; padding: 6px 12px; border-radius: 20px; font-size: 0.85rem;">
-                {{ $totalRows }} registros detectados
-            </span>
+            <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+                @if($omittedRows > 0)
+                <span style="background-color: rgba(239, 51, 64, 0.08); color: #ef3340; font-weight: 700; padding: 6px 12px; border-radius: 20px; font-size: 0.85rem; border: 1px solid rgba(239, 51, 64, 0.15);">
+                    {{ $omittedRows }} {{ $omittedRows === 1 ? 'actividad omitida' : 'actividades omitidas' }} (no serán enviadas)
+                </span>
+                @endif
+                <span style="background-color: rgba(43, 138, 62, 0.08); color: #2b8a3e; font-weight: 700; padding: 6px 12px; border-radius: 20px; font-size: 0.85rem; border: 1px solid rgba(43, 138, 62, 0.15);">
+                    {{ $totalRows }} {{ $totalRows === 1 ? 'actividad disponible' : 'actividades disponibles' }} a enviar
+                </span>
+            </div>
         </div>
 
         <!-- Selector Dinámico de Período según contenido del Excel -->
@@ -270,7 +277,7 @@
                     class="btn-primary-caj" 
                     style="padding: 12px 24px; background-color: #2b8a3e;"
                     wire:loading.attr="disabled"
-                    @if($todoDuplicado) disabled @endif
+                    @if($totalRows === 0 || $todoDuplicado) disabled @endif
                     wire:target="startCountdown, resetForm">
                 <span wire:loading.remove wire:target="startCountdown">Iniciar Confirmación e Importación</span>
                 <span wire:loading wire:target="startCountdown">Preparando Confirmación...</span>

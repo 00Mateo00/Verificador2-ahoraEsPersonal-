@@ -49,6 +49,8 @@ class ImportActividadesForm extends Component
 
     public int $totalRows = 0;
 
+    public int $omittedRows = 0;
+
     public string $tempFilePath = '';
 
     public string $originalFileName = '';
@@ -210,6 +212,7 @@ class ImportActividadesForm extends Component
 
         // Excluir filas con advertencias de la previsualización y el conteo total
         $this->totalRows = count($validRows);
+        $this->omittedRows = count($periodRows) - $this->totalRows;
         $this->previewRows = array_slice($validRows, 0, 10);
     }
 
@@ -301,7 +304,7 @@ class ImportActividadesForm extends Component
     {
         $this->isCountingDown = false;
         $this->step = 2;
-        session()->flash('success', 'El envío de notificaciones y persistencia de datos fue cancelado.');
+        session()->flash('error', 'Se canceló el envío de notificaciones y persistencia de datos.');
     }
 
     public function processImport(ExcelImporterService $importer)
