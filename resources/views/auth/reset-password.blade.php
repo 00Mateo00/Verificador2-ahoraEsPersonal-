@@ -154,13 +154,8 @@
                         </div>
                     </div>
 
-<<<<<<< HEAD
-                    <div class="form-group-item-caj" style="margin-top: 25px;">
-                        <button type="submit" class="btn-primary-caj" disabled>
-=======
                     <div class="form-group-item-caj">
                         <button type="submit" class="btn-primary-caj">
->>>>>>> cristian
                             Restablecer Contraseña
                         </button>
                     </div>
