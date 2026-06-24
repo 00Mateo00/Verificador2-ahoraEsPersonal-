@@ -92,13 +92,33 @@ $isAdmin = $isAdmin ?? false;
         @endif
 
         <div class="form-group-item" style="margin: 0;">
-            <label for="fecha_inicio" style="font-size: 0.8rem; font-weight: 600; color: #475569; display: block; margin-bottom: 6px;">Fecha Desde</label>
-            <input type="date" wire:model.live="fecha_inicio" id="fecha_inicio" class="form-input-control" style="width: 100%; box-sizing: border-box;">
+            <label for="mes" style="font-size: 0.8rem; font-weight: 600; color: #475569; display: block; margin-bottom: 6px;">Mes de Actividad</label>
+            <select wire:model.live="mes" id="mes" class="form-select-control" style="width: 100%; box-sizing: border-box; padding: 12px 14px; border: 1px solid #dee2e6; border-radius: 4px;">
+                <option value="">Todos los meses</option>
+                <option value="1">Enero</option>
+                <option value="2">Febrero</option>
+                <option value="3">Marzo</option>
+                <option value="4">Abril</option>
+                <option value="5">Mayo</option>
+                <option value="6">Junio</option>
+                <option value="7">Julio</option>
+                <option value="8">Agosto</option>
+                <option value="9">Septiembre</option>
+                <option value="10">Octubre</option>
+                <option value="11">Noviembre</option>
+                <option value="12">Diciembre</option>
+            </select>
         </div>
 
+        @if(Auth::user()->rol === \App\Enums\UserRole::Admin || Auth::user()->rol === \App\Enums\UserRole::Auditor)
         <div class="form-group-item" style="margin: 0;">
-            <label for="fecha_fin" style="font-size: 0.8rem; font-weight: 600; color: #475569; display: block; margin-bottom: 6px;">Fecha Hasta</label>
-            <input type="date" wire:model.live="fecha_fin" id="fecha_fin" class="form-input-control" style="width: 100%; box-sizing: border-box;">
+            <label for="director_filtro" style="font-size: 0.8rem; font-weight: 600; color: #475569; display: block; margin-bottom: 6px;">Director Regional</label>
+            <select wire:model.live="director_filtro" id="director_filtro" class="form-select-control" style="width: 100%; box-sizing: border-box; padding: 12px 14px; border: 1px solid #dee2e6; border-radius: 4px;">
+                <option value="">Todos los directores</option>
+                @foreach($directoresRegionales as $dir)
+                    <option value="{{ $dir->id }}">{{ $dir->name }}</option>
+                @endforeach
+            </select>
         </div>
 
         <div class="form-group-item" style="margin: 0;">
@@ -111,6 +131,7 @@ $isAdmin = $isAdmin ?? false;
                 <option value="Despliegue en Terreno">Despliegue en Terreno</option>
             </select>
         </div>
+        @endif
     </div>
 
     <div class="filter-actions">
@@ -123,8 +144,7 @@ $isAdmin = $isAdmin ?? false;
             <span wire:loading.remove wire:target="$refresh">🔄 Actualizar Datos</span>
             <span wire:loading wire:target="$refresh">⏳ Actualizando...</span>
         </button>
-        <button type="button" wire:click="$set('buscar', ''); $set('ano', ''); $set('fecha_inicio', ''); $set('fecha_fin', ''); $set('region', ''); $set('tipo_unidad', ''); $set('tipo', ''); $set('actividad_id', ''); {{ $isAdmin ? '$set(\'funcionario_id\', \'\'); $set(\'estado\', \'1\');' : '' }}" class="btn-secondary" style="padding: 8px 16px; font-size: 0.85rem; border: 1px solid #cbd5e1; border-radius: 4px; cursor: pointer; background: transparent;">
+        <button type="button" wire:click="$set('buscar', ''); $set('ano', ''); $set('mes', ''); $set('director_filtro', ''); $set('region', ''); $set('tipo_unidad', ''); $set('tipo', ''); $set('actividad_id', ''); {{ $isAdmin ? '$set(\'funcionario_id\', \'\'); $set(\'estado\', \'1\');' : '' }}" class="btn-secondary" style="padding: 8px 16px; font-size: 0.85rem; border: 1px solid #cbd5e1; border-radius: 4px; cursor: pointer; background: transparent;">
             Limpiar Filtros
         </button>
     </div>
-</div>

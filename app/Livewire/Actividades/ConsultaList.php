@@ -2,11 +2,13 @@
 
 namespace App\Livewire\Actividades;
 
+use App\Enums\UserRole;
 use App\Models\Actividad;
 use App\Models\Archivo;
+use App\Models\CargaExcel;
 use App\Models\Region;
 use App\Models\Unidad;
-use App\Enums\UserRole;
+use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -29,17 +31,17 @@ class ConsultaList extends Component
     #[Url(as: 'ano')]
     public string $ano = '';
 
-    #[Url(as: 'desde')]
-    public string $fecha_inicio = '';
-
-    #[Url(as: 'hasta')]
-    public string $fecha_fin = '';
+    #[Url(as: 'mes')]
+    public string $mes = '';
 
     #[Url(as: 'act')]
     public string $tipo = '';
 
     #[Url(as: 'uf')]
     public string $unidad_filtro = '';
+
+    #[Url(as: 'dir')]
+    public string $director_filtro = '';
 
     // ID seleccionado desde Deep Link
     #[Url(as: 'id')]
@@ -56,17 +58,17 @@ class ConsultaList extends Component
         $this->resetPage();
     }
 
-    public function updatedFechaInicio()
-    {
-        $this->resetPage();
-    }
-
-    public function updatedFechaFin()
+    public function updatedMes()
     {
         $this->resetPage();
     }
 
     public function updatedUnidadFiltro()
+    {
+        $this->resetPage();
+    }
+
+    public function updatedDirectorFiltro()
     {
         $this->resetPage();
     }
@@ -102,16 +104,18 @@ class ConsultaList extends Component
             $query->where('AÑO', $this->ano);
         }
 
-        if (! empty($this->fecha_inicio)) {
-            $query->where('FECHA', '>=', $this->fecha_inicio);
-        }
-
-        if (! empty($this->fecha_fin)) {
-            $query->where('FECHA', '<=', $this->fecha_fin);
+        if (! empty($this->mes)) {
+            $query->where('MES', $this->mes);
         }
 
         if (! empty($this->tipo)) {
             $query->where('TIPO_ACTIVIDAD', $this->tipo);
+        }
+
+        if (! empty($this->director_filtro) && ($user->rol === UserRole::Admin || $user->rol === UserRole::Auditor)) {
+            $region = Region::where('user_id', $this->director_filtro)->first();
+            $unidadIds = $region ? Unidad::where('region_id', $region->id)->pluck('id')->toArray() : [];
+            $query->whereIn('unidad_id_asignada', $unidadIds);
         }
 
         return $query->with(['archivos', 'unidadAsignada'])
@@ -215,8 +219,25 @@ class ConsultaList extends Component
 
     public function render()
     {
+        $user = Auth::user();
+        $userRol = $user->rol;
+
+        // Si es Cargador, se muestra únicamente su historial de cargas agrupadas
+        if ($userRol === UserRole::Cargador) {
+            $cargasAgrupadas = CargaExcel::where('user_id', $user->id)
+                ->with(['actividades' => function ($q) {
+                    $q->where('activo', true);
+                }])
+                ->latest()
+                ->paginate(10);
+
+            return view('livewire.actividades.consulta-list', [
+                'cargasAgrupadas' => $cargasAgrupadas,
+            ]);
+        }
+
         $perPage = 25;
-        if (! empty($this->fecha_inicio) || ! empty($this->fecha_fin)) {
+        if (! empty($this->mes)) {
             $perPage = 100;
         } elseif (! empty($this->ano)) {
             $perPage = 50;
@@ -225,9 +246,6 @@ class ConsultaList extends Component
         $query = $this->getFilteredActivitiesQuery();
         $totalResults = $query->count();
         $actividades = $query->paginate($perPage);
-
-        $user = Auth::user();
-        $userRol = $user->rol;
 
         $monthQuery = Actividad::query()
             ->where('activo', true)
@@ -266,12 +284,19 @@ class ConsultaList extends Component
                 ->get();
         }
 
+        // Cargar directores regionales para el filtro de Auditor / Admin
+        $directoresRegionales = [];
+        if ($userRol === UserRole::Admin || $userRol === UserRole::Auditor) {
+            $directoresRegionales = User::where('rol', UserRole::Director)->orderBy('name', 'asc')->get();
+        }
+
         return view('livewire.actividades.consulta-list', [
             'actividades' => $actividades,
             'monthCounts' => $monthCounts,
             'totalResults' => $totalResults,
             'unidadesAsignadas' => $unidadesAsignadas,
-            'isDateRangeActive' => (! empty($this->fecha_inicio) || ! empty($this->fecha_fin)),
+            'directoresRegionales' => $directoresRegionales,
+            'isDateRangeActive' => ! empty($this->mes),
         ]);
     }
 }
