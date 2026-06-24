@@ -36,7 +36,7 @@
         </div>
         <div style="display: flex; gap: 10px;">
             <button type="submit" class="btn-dashboard-primary" style="padding: 12px 24px; font-size: 0.9rem;">
-                🔍 Filtrar
+                 Filtrar
             </button>
             @if($search)
             <a href="{{ route('admin.usuarios') }}" class="btn-acc" style="text-align: center; padding: 12px 20px; text-decoration: none; border-color: #cbd5e1; font-weight: 600; font-size: 0.9rem; border-radius: 6px; display: inline-block;">
@@ -60,7 +60,7 @@
             🏢 Crear Unidad Operativa
         </button>
         <button type="button" @click="activeForm = 'region'" :style="activeForm === 'region' ? 'background-color: #0F69C4; color: #ffffff;' : 'background-color: #f1f5f9; color: #475569;'" style="border: none; padding: 8px 16px; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 0.85rem;">
-            🗺️ Crear Región y Director
+             Crear Región y Director
         </button>
         <button type="button" @click="activeForm = 'usuario'" :style="activeForm === 'usuario' ? 'background-color: #0F69C4; color: #ffffff;' : 'background-color: #f1f5f9; color: #475569;'" style="border: none; padding: 8px 16px; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 0.85rem;">
             👤 Crear Usuario Sistema

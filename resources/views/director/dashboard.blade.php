@@ -25,17 +25,17 @@
     <a href="{{ route('director.dashboard', ['view' => 'mes', 'mes' => $selectedMonth, 'ano' => $selectedYear]) }}" 
        style="padding: 10px 20px; font-size: 0.85rem; font-weight: 700; border-radius: 6px; text-decoration: none; transition: all 0.2s ease;
               @if($view === 'mes') background-color: #0F69C4; color: #ffffff !important; @else background-color: #ffffff; color: #475569 !important; border: 1px solid #cbd5e1; @endif">
-        📅 Visualizar Este Mes
+         Visualizar Este Mes
     </a>
     <a href="{{ route('director.dashboard', ['view' => 'ano', 'ano' => $selectedYear]) }}" 
        style="padding: 10px 20px; font-size: 0.85rem; font-weight: 700; border-radius: 6px; text-decoration: none; transition: all 0.2s ease;
               @if($view === 'ano') background-color: #0F69C4; color: #ffffff !important; @else background-color: #ffffff; color: #475569 !important; border: 1px solid #cbd5e1; @endif">
-        📆 Visualizar Todo el Año
+         Visualizar Todo el Año
     </a>
     <a href="{{ route('director.dashboard', ['view' => 'global']) }}" 
        style="padding: 10px 20px; font-size: 0.85rem; font-weight: 700; border-radius: 6px; text-decoration: none; transition: all 0.2s ease;
               @if($view === 'global') background-color: #0F69C4; color: #ffffff !important; @else background-color: #ffffff; color: #475569 !important; border: 1px solid #cbd5e1; @endif">
-        📊 Estadísticas Globales
+         Estadísticas Globales
     </a>
 </div>
 
@@ -81,7 +81,7 @@
 
             <div class="estadistica-actions">
                 <button type="submit" class="btn-filter-dashboard">
-                    Filtrar 🔍
+                    Filtrar 
                 </button>
                 @if($selectedMonth !== $currentMonth || $selectedYear !== $currentYear)
                 <a href="{{ route('director.dashboard', ['view' => $view, 'mes' => $currentMonth, 'ano' => $currentYear]) }}" class="btn-acc estadistica-btn-reset">
@@ -95,7 +95,7 @@
 
 <!-- Tarjeta Informativa de Rol -->
 <div class="dashboard-alert-card">
-    <span>🗺️</span>
+    <span></span>
     <div>
         <strong>Control de Operación Regional</strong>
         <p>
@@ -139,10 +139,10 @@
     </div>
 </div>
 
-<!-- 🗺️ Avance Individual de Unidades Operativas (Exclusivo de su Región) -->
+<!--  Avance Individual de Unidades Operativas (Exclusivo de su Región) -->
 <div class="dashboard-card">
     <h3 style="margin-top: 0; margin-bottom: 20px; font-size: 1.15rem; color: #0d1b2a; font-weight: 700; border-bottom: 2px solid #f1f5f9; padding-bottom: 12px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
-        <span>🗺️ Avance Individual de Unidades Asignadas</span>
+        <span> Avance Individual de Unidades Asignadas</span>
         <span style="font-size: 0.8rem; color: #64748b; font-weight: 500;">Ordenado por menor porcentaje de avance</span>
     </h3>
     
@@ -185,7 +185,7 @@
                                     </form>
                                 
                                 @else
-                                    <p>al dia✅</p>
+                                    <p>al dia</p>
 
                                 @endif
                             </div>

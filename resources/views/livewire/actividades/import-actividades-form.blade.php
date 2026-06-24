@@ -72,7 +72,7 @@
         <!-- 3. Estado: Archivo cargado con éxito en el cliente (No cargando) -->
         <div x-show="$wire.excelFile && !isUploading" x-cloak>
             <div style="background-color: #f8fafc; border: 1px solid #cbd5e1; border-radius: 8px; padding: 30px; text-align: center; box-shadow: inset 0 2px 4px rgba(0,0,0,0.01);">
-                <div style="font-size: 3.5rem; margin-bottom: 15px;">📊</div>
+                <div style="font-size: 3.5rem; margin-bottom: 15px;"></div>
                 <p style="margin: 0; font-weight: 700; color: #0d1b2a; font-size: 1.15rem;">
                     {{ $excelFile ? $excelFile->getClientOriginalName() : '' }}
                 </p>
@@ -183,7 +183,7 @@
 
                 <!-- Columna Derecha: Sistema Real -->
                 <div style="background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 15px; box-shadow: 0 1px 3px rgba(0,0,0,0.01);">
-                    <h4 style="margin-top: 0; color: #2b8a3e; font-size: 0.95rem; text-transform: uppercase; font-weight: 700; border-bottom: 2px solid #e2e8f0; padding-bottom: 12px; margin-bottom: 15px;">✅ Registros en Plataforma</h4>
+                    <h4 style="margin-top: 0; color: #2b8a3e; font-size: 0.95rem; text-transform: uppercase; font-weight: 700; border-bottom: 2px solid #e2e8f0; padding-bottom: 12px; margin-bottom: 15px;"> Registros en Plataforma</h4>
                     <div style="overflow-x: auto;">
                         <table style="width: 100%; border-collapse: collapse; font-size: 0.78rem; text-align: left;">
                             <thead>

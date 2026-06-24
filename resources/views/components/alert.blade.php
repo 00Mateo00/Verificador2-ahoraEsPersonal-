@@ -10,7 +10,7 @@
             'border' => '#c3e6cb',
             'text' => '#155724',
             'title_color' => '#155724',
-            'icon' => '✅'
+            'icon' => ''
         ],
         'error' => [
             'bg' => '#f8d7da',

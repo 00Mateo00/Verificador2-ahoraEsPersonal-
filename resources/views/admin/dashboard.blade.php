@@ -59,7 +59,7 @@
 <!-- Sección Central: Estadísticas Territoriales por Región -->
 <div style="background-color: #ffffff; border: 1px solid rgba(226, 232, 240, 0.8); border-radius: 8px; padding: 25px; margin-bottom: 35px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.02);">
     <h3 style="margin-top: 0; margin-bottom: 20px; font-size: 1.15rem; color: #0d1b2a; font-weight: 700; border-bottom: 2px solid #f1f5f9; padding-bottom: 12px;">
-        🗺️ Avance y Desempeño Territorial por Región
+         Avance y Desempeño Territorial por Región
     </h3>
     
     <div style="overflow-x: auto;">

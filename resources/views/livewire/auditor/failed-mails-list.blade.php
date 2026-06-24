@@ -12,7 +12,7 @@
                     wire:click="setTab('sent')" 
                     style="padding: 10px 20px; font-size: 0.85rem; font-weight: 700; border-radius: 6px; cursor: pointer; border: none; transition: all 0.2s ease;
                            @if($activeTab === 'sent') background-color: #2b8a3e; color: #ffffff; @else background-color: #ffffff; color: #475569; border: 1px solid #cbd5e1; @endif">
-                ✅ Historial de Enviados
+                 Historial de Enviados
             </button>
         </div>
     @endif
@@ -107,7 +107,7 @@
                     </thead>
                     <tbody>
                         @foreach($mails as $mail)
-                            <tr style="border-bottom: 1px solid #e2e8f0; @if($mail->status === 'SENT') background-color: #f0fdf4; @endif">
+                            <tr style="border-bottom: 1px solid #e2e8f0; @if($mail->status->value === 'SENT') background-color: #f0fdf4; @endif">
                                 <td style="padding: 14px 16px; font-size: 0.9rem; font-weight: 600; color: #0d1b2a;">
                                     {{ $mail->user->name ?? 'Usuario de Sistema' }}
                                     @if($isAdmin && $mail->user)
@@ -124,17 +124,18 @@
                                     {{ $mail->attempts }}
                                 </td>
                                 <td style="padding: 14px 16px; text-align: center;">
-                                    @if($mail->status === 'SENT')
-                                        <span style="background-color: rgba(43, 138, 62, 0.08); color: #2b8a3e; padding: 3px 8px; border-radius: 4px; font-size: 0.72rem; font-weight: 700; text-transform: uppercase;">
-                                            Enviado
+                                    @if($mail->status->value === 'PENDING')
+                                        <span style="background-color: rgba(245, 158, 11, 0.08); color: #d97706; padding: 3px 8px; border-radius: 4px; font-size: 0.72rem; font-weight: 700; text-transform: uppercase;">
+                                            Pendiente
                                         </span>
-                                    @elseif($mail->status === 'FAILED')
+                                        
+                                    @elseif($mail->status->value === 'FAILED')
                                         <span style="background-color: rgba(239, 51, 64, 0.08); color: #ef3340; padding: 3px 8px; border-radius: 4px; font-size: 0.72rem; font-weight: 700; text-transform: uppercase;">
                                             Fallado
                                         </span>
                                     @else
-                                        <span style="background-color: rgba(245, 158, 11, 0.08); color: #d97706; padding: 3px 8px; border-radius: 4px; font-size: 0.72rem; font-weight: 700; text-transform: uppercase;">
-                                            Pendiente
+                                        <span style="background-color: rgba(43, 138, 62, 0.08); color: #2b8a3e; padding: 3px 8px; border-radius: 4px; font-size: 0.72rem; font-weight: 700; text-transform: uppercase;">
+                                            Enviado
                                         </span>
                                     @endif
                                 </td>
@@ -165,7 +166,7 @@
                                                     <button type="button" 
                                                             @click="open = true" 
                                                             style="background: none; border: none; color: #0F69C4; font-size: 0.72rem; font-weight: 700; cursor: pointer; padding: 0; text-decoration: underline;">
-                                                        Detalles del Error 🔍
+                                                        Detalles del Error 
                                                     </button>
                                                     <span style="color: #cbd5e1;">|</span>
                                                     <button type="button" 
@@ -246,7 +247,7 @@
                                 @endif
                                 <td style="padding: 14px 16px; text-align: right;">
                                     <div style="display: flex; gap: 8px; justify-content: flex-end;">
-                                        @if($mail->status !== 'SENT')
+                                        @if($mail->status->value !== 'SENT')
                                             <button type="button" 
                                                     wire:click="resendIndividual({{ $mail->id }})" 
                                                     class="btn-acc" 

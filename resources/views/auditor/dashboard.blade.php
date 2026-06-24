@@ -20,7 +20,7 @@
 
 <!-- Tarjeta Informativa de Solo Lectura -->
 <div style="background-color: #eff6ff; border: 1px solid #bfdbfe; border-radius: 8px; padding: 20px; margin-bottom: 25px; display: flex; align-items: flex-start; gap: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.01);">
-    <span style="font-size: 1.5rem; line-height: 1;">🔍</span>
+    <span style="font-size: 1.5rem; line-height: 1;"></span>
     <div>
         <strong style="color: #1e40af; font-size: 1rem; display: block; margin-bottom: 4px;">Supervisión de Auditoría Global</strong>
         <p style="color: #1e3a8a; font-size: 0.85rem; margin: 0; line-height: 1.5;">
@@ -34,17 +34,17 @@
     <a href="{{ route('auditor.dashboard', ['view' => 'mes', 'mes' => $selectedMonth, 'ano' => $selectedYear]) }}" 
        style="padding: 10px 20px; font-size: 0.85rem; font-weight: 700; border-radius: 6px; text-decoration: none; transition: all 0.2s ease;
               @if($view === 'mes') background-color: #0F69C4; color: #ffffff !important; @else background-color: #ffffff; color: #475569 !important; border: 1px solid #cbd5e1; @endif">
-        📅 Visualizar Este Mes
+         Visualizar Este Mes
     </a>
     <a href="{{ route('auditor.dashboard', ['view' => 'ano', 'ano' => $selectedYear]) }}" 
        style="padding: 10px 20px; font-size: 0.85rem; font-weight: 700; border-radius: 6px; text-decoration: none; transition: all 0.2s ease;
               @if($view === 'ano') background-color: #0F69C4; color: #ffffff !important; @else background-color: #ffffff; color: #475569 !important; border: 1px solid #cbd5e1; @endif">
-        📆 Visualizar Todo el Año
+         Visualizar Todo el Año
     </a>
     <a href="{{ route('auditor.dashboard', ['view' => 'global']) }}" 
        style="padding: 10px 20px; font-size: 0.85rem; font-weight: 700; border-radius: 6px; text-decoration: none; transition: all 0.2s ease;
               @if($view === 'global') background-color: #0F69C4; color: #ffffff !important; @else background-color: #ffffff; color: #475569 !important; border: 1px solid #cbd5e1; @endif">
-        📊 Estadísticas Globales
+         Estadísticas Globales
     </a>
 </div>
 
@@ -84,7 +84,7 @@
 
             <div style="display: flex; gap: 10px;">
                 <button type="submit" class="btn-primary-caj" style="padding: 10px 20px; font-size: 0.9rem;">
-                    Filtrar 🔍
+                    Filtrar 
                 </button>
                 @if($selectedMonth !== $currentMonth || $selectedYear !== $currentYear)
                 <a href="{{ route('auditor.dashboard', ['view' => $view, 'mes' => $currentMonth, 'ano' => $currentYear]) }}" class="btn-acc" style="text-align: center; padding: 10px 15px; text-decoration: none; border-color: #cbd5e1; font-weight: 600; font-size: 0.9rem; border-radius: 6px; display: inline-flex; align-items: center;">
@@ -140,7 +140,7 @@
 <!-- Sección Central: Estadísticas Territoriales por Región -->
 <div style="background-color: #ffffff; border: 1px solid rgba(226, 232, 240, 0.8); border-radius: 8px; padding: 25px; margin-bottom: 35px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.02);">
     <h3 style="margin-top: 0; margin-bottom: 20px; font-size: 1.15rem; color: #0d1b2a; font-weight: 700; border-bottom: 2px solid #f1f5f9; padding-bottom: 12px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
-        <span>🗺️ Avance y Desempeño Territorial por Región</span>
+        <span> Avance y Desempeño Territorial por Región</span>
         <span style="font-size: 0.8rem; color: #64748b; font-weight: 500;">Periodo: @if($view === 'mes') {{ $meses[$selectedMonth] }} - {{ $selectedYear }} @elseif($view === 'ano') Año {{ $selectedYear }} @else Histórico Global @endif</span>
     </h3>
     
@@ -193,7 +193,7 @@
 
         @if($unidadesPendientes->isEmpty())
         <div style="text-align: center; padding: 30px; color: #2b8a3e; background-color: rgba(43, 138, 62, 0.02); border: 1px dashed #2b8a3e; border-radius: 6px; font-size: 0.9rem; font-weight: 600;">
-            ✅ ¡Excelente! No existen unidades con actividades pendientes de verificación para este periodo.
+             ¡Excelente! No existen unidades con actividades pendientes de verificación para este periodo.
         </div>
         @else
         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 15px; max-height: 350px; overflow-y: auto; padding-right: 5px;">
