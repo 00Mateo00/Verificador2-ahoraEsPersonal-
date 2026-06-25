@@ -5,17 +5,24 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Confirmar Contraseña - Intranet CAJBIOBIO</title>
-    <link rel="stylesheet" href="{{ asset('assets/css/style.css') }}">
+    @vite([
+        'resources/scss/app.scss',
+        'resources/js/app.js'
+    ])
 </head>
 
 <body class="login-layout-body">
 
     <!-- Navegación Principal Institucional -->
     <header class="header-nav-caj">
-        <div class="header-logo-container-caj">
-            <span class="logo-text-caj">
-                <strong>Intranet CAJBIOBIO</strong> <span style="font-weight: 300; opacity: 0.8; margin-left: 10px; font-size: 0.95rem; border-left: 1px solid rgba(255,255,255,0.3); padding-left: 10px;">Verificador de Actividades</span>
-            </span>
+        <div class="header-inner-caj">
+            <div class="header-brand-sgv">
+                <div class="header-brand-icon">CAJ</div>
+                <div class="header-brand-text">
+                    <h1>Intranet</h1>
+                    <span>Corporación de Asistencia Judicial - Region del Biobió</span>
+                </div>
+            </div>
         </div>
     </header>
 
