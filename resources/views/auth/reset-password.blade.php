@@ -17,10 +17,14 @@
 <body class="login-layout-body">
 
     <header class="header-nav-caj">
-        <div class="header-logo-container-caj">
-            <span class="logo-text-caj">
-                <strong>Intranet CAJBIOBIO</strong>
-            </span>
+        <div class="header-inner-caj">
+            <div class="header-brand-sgv">
+                <div class="header-brand-icon">CAJ</div>
+                <div class="header-brand-text">
+                    <h1>Intranet</h1>
+                    <span>Corporación de Asistencia Judicial - Region del  Biobió</span>
+                </div>
+            </div>
         </div>
     </header>
 

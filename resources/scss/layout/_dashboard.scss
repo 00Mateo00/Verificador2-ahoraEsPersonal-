@@ -507,6 +507,10 @@
     color:#0f69c4;
 }
 
+.admin-form-section:not(:last-of-type) {
+    margin-bottom: 25px;
+}
+
 @media (max-width:768px){
     .layout-dashboard-main{
         padding:20px;

@@ -68,7 +68,7 @@
     </div>
 
     <!-- Formulario: Crear Unidad -->
-    <div x-show="activeForm === 'unidad'" x-cloak>
+    <div x-show="activeForm === 'unidad'" x-cloak class="admin-form-section">
         <form action="{{ route('admin.crear-unidad') }}" method="POST" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 15px; align-items: flex-end;" onsubmit="if(document.getElementById('unidad_id').value === '') { return confirm('¿Está seguro de que desea poner una ID automática para esta Unidad?'); }">
             @csrf
             <div>
@@ -93,7 +93,7 @@
                 </select>
             </div>
             <div>
-                <button type="submit" class="btn-dashboard-primary" style="width: 100%; height: 48px; border-radius: 6px; font-size: 0.9rem;">
+                <button type="submit" class="btn-dashboard-primary">
                     Crear Unidad
                 </button>
             </div>
@@ -101,7 +101,7 @@
     </div>
 
     <!-- Formulario: Crear Región -->
-    <div x-show="activeForm === 'region'" x-cloak>
+    <div x-show="activeForm === 'region'" x-cloak class="admin-form-section">
         <form action="{{ route('admin.crear-region') }}" method="POST" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 15px; align-items: flex-end;" onsubmit="if(document.getElementById('region_id').value === '') { return confirm('¿Está seguro de que desea poner una ID automática para esta Región?'); }">
             @csrf
             <div>
@@ -121,7 +121,7 @@
                 <input type="email" name="director_email" id="director_email" class="form-input-control-caj" required placeholder="Ej: director.biobio@cajbiobio.cl">
             </div>
             <div>
-                <button type="submit" class="btn-dashboard-primary" style="width: 100%; height: 48px; border-radius: 6px; font-size: 0.9rem;">
+                <button type="submit" class="btn-dashboard-primary">
                     Crear Región
                 </button>
             </div>
@@ -129,7 +129,7 @@
     </div>
 
     <!-- Formulario: Crear Usuario -->
-    <div x-show="activeForm === 'usuario'" x-cloak>
+    <div x-show="activeForm === 'usuario'" x-cloak class="admin-form-section">
         <form action="{{ route('admin.crear-usuario') }}" method="POST" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 15px; align-items: flex-end;">
             @csrf
             <div>
