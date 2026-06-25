@@ -1,4 +1,5 @@
 .btn-primary-caj{
+    cursor:pointer;
     background:
         linear-gradient(
             135deg,
@@ -21,7 +22,6 @@
             #6699aa
         );
         cursor: url('button.svg'), pointer;
-        pointer-events: none;
     }
 }
 

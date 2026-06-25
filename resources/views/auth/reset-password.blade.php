@@ -5,7 +5,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Establecer Nueva Contraseña - Verificador de Actividades</title>
-    <link rel="stylesheet" href="{{ asset('assets/css/style.css') }}">
+    @vite([
+        'resources/scss/app.scss',
+        'resources/js/app.js'
+    ])
     
     <!-- Script Vanilla JS independiente para validación de complejidad de contraseña en cliente -->
     <script src="{{ asset('assets/js/password-reset.js') }}" defer></script>
