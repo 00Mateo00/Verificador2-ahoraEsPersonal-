@@ -13,13 +13,12 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Livewire\Attributes\Url;
-use Livewire\Component;
+use App\Livewire\PaginatedComponent;
 use Livewire\WithFileUploads;
-use Livewire\WithPagination;
 
-class ConsultaList extends Component
+class ConsultaList extends PaginatedComponent
 {
-    use WithFileUploads, WithPagination;
+    use WithFileUploads;
 
     // Propiedades para administración interactiva de verificadores (Modo Edición)
     public $nuevosVerificadores = [];

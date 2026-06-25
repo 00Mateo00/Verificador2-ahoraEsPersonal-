@@ -6,12 +6,10 @@ use App\Models\Actividad;
 use App\Models\Unidad;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\On;
-use Livewire\Component;
-use Livewire\WithPagination;
+use App\Livewire\PaginatedComponent;
 
-class VerificarPendientes extends Component
+class VerificarPendientes extends PaginatedComponent
 {
-    use WithPagination;
 
     // Escuchar el evento del componente hijo de forma segura para refrescar la lista paginada
     #[On('actividad-verificada')]

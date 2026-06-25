@@ -7,6 +7,7 @@ use Carbon\CarbonImmutable;
 use Illuminate\Auth\Notifications\ResetPassword;
 use Illuminate\Notifications\Events\NotificationFailed;
 use Illuminate\Notifications\Messages\MailMessage;
+use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Event;
@@ -41,6 +42,9 @@ class AppServiceProvider extends ServiceProvider
             NotificationFailed::class,
             LogFailedNotification::class
         );
+
+        // Registro de plantillas de paginación personalizadas globales
+        Paginator::defaultView('components.pagination');
     }
 
     /**

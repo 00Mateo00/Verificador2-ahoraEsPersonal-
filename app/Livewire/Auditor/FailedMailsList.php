@@ -4,15 +4,12 @@ namespace App\Livewire\Auditor;
 
 use App\Enums\MailStatus;
 use App\Enums\UserRole;
+use App\Livewire\PaginatedComponent;
 use App\Models\MailLog;
 use Illuminate\Support\Facades\Auth;
-use Livewire\Component;
-use Livewire\WithPagination;
 
-class FailedMailsList extends Component
+class FailedMailsList extends PaginatedComponent
 {
-    use WithPagination;
-
     public string $search = '';
 
     public string $activeTab = 'pending'; // 'pending' o 'sent'
