@@ -44,52 +44,7 @@ $isAdmin = $isAdmin ?? false;
     </div>
 
     <!-- Filtros Avanzados (Desplegable) -->
-    <div x-show="advancedOpen" x-transition class="dashboard-filter-advanced" x-bind:style:"advancedOpen ? 'display:grid' : 'display:none'">
-
-        @if($isAdmin && isset($funcionarios))
-        <div class="form-group-item" style="margin: 0;">
-            <label for="funcionario_id" style="font-size: 0.8rem; font-weight: 600; color: #475569; display: block; margin-bottom: 6px;">Filtrar por Funcionario</label>
-            <select wire:model.live="funcionario_id" id="funcionario_id" class="form-select-control" style="width: 100%; box-sizing: border-box; padding: 12px 14px; border: 1px solid #dee2e6; border-radius: 4px;">
-                <option value="">Todos los funcionarios</option>
-                @foreach($funcionarios as $f)
-                <option value="{{ $f->usuario_id }}">
-                    {{ $f->persona ? $f->persona->persona_nombre . ' ' . $f->persona->persona_apellido : $f->usuario_nombre }}
-                </option>
-                @endforeach
-            </select>
-
-        </div>
-
-        <div class="form-group-item" style="margin: 0;">
-            <label for="estado" style="font-size: 0.8rem; font-weight: 600; color: #475569; display: block; margin-bottom: 6px;">Estado del Reporte</label>
-            <select wire:model.live="estado" id="estado" class="form-select-control" style="width: 100%; box-sizing: border-box; padding: 12px 14px; border: 1px solid #dee2e6; border-radius: 4px;">
-                <option value="1">Activos</option>
-                <option value="0">Ocultos / Inactivos</option>
-                <option value="">Todos los registros</option>
-            </select>
-        </div>
-        <div class="form-group-item" style="margin: 0;">
-            <label for="region" style="font-size: 0.8rem; font-weight: 600; color: #475569; display: block; margin-bottom: 6px;">Región</label>
-            <select wire:model.live="region" id="region" class="form-select-control" style="width: 100%; box-sizing: border-box; padding: 12px 14px; border: 1px solid #dee2e6; border-radius: 4px;">
-                <option value="">Todas las regiones</option>
-                <option value="Región Metropolitana">Región Metropolitana</option>
-                <option value="Región de Valparaíso">Región de Valparaíso</option>
-                <option value="Región del Biobío">Región del Biobío</option>
-                <option value="Región de Antofagasta">Región de Antofagasta</option>
-                <option value="Región de la Araucanía">Región de la Araucanía</option>
-            </select>
-        </div>
-        <div class="form-group-item" style="margin: 0;">
-            <label for="tipo_unidad" style="font-size: 0.8rem; font-weight: 600; color: #475569; display: block; margin-bottom: 6px;">Tipo Unidad</label>
-            <select wire:model.live="tipo_unidad" id="tipo_unidad" class="form-select-control" style="width: 100%; box-sizing: border-box; padding: 12px 14px; border: 1px solid #dee2e6; border-radius: 4px;">
-                <option value="">Todos los tipos...</option>
-                <option value="División Tecnológica">División Tecnológica</option>
-                <option value="Departamento de Operaciones">Departamento de Operaciones</option>
-                <option value="Oficina de Atención Ciudadana">Oficina de Atención Ciudadana</option>
-                <option value="Dirección Nacional">Dirección Nacional</option>
-            </select>
-        </div>
-        @endif
+    <div x-show="advancedOpen" x-transition class="dashboard-filter-advanced" x-bind:style="advancedOpen ? 'display:grid' : 'display:none'">
 
         <div class="form-group-item" style="margin: 0;">
             <label for="mes" style="font-size: 0.8rem; font-weight: 600; color: #475569; display: block; margin-bottom: 6px;">Mes de Actividad</label>
@@ -141,10 +96,10 @@ $isAdmin = $isAdmin ?? false;
                 class="btn-secondary" 
                 style="padding: 8px 16px; font-size: 0.85rem; border: 1px solid #0F69C4; color: #0F69C4; border-radius: 4px; cursor: pointer; background: rgba(15, 105, 196, 0.05); font-weight: 600;"
                 wire:loading.attr="disabled">
-            <span wire:loading.remove wire:target="$refresh">🔄 Actualizar Datos</span>
+            <span wire:loading.remove wire:target="$refresh"> Actualizar Datos</span>
             <span wire:loading wire:target="$refresh">⏳ Actualizando...</span>
         </button>
-        <button type="button" wire:click="$set('buscar', ''); $set('ano', ''); $set('mes', ''); $set('director_filtro', ''); $set('region', ''); $set('tipo_unidad', ''); $set('tipo', ''); $set('actividad_id', ''); {{ $isAdmin ? '$set(\'funcionario_id\', \'\'); $set(\'estado\', \'1\');' : '' }}" class="btn-secondary" style="padding: 8px 16px; font-size: 0.85rem; border: 1px solid #cbd5e1; border-radius: 4px; cursor: pointer; background: transparent;">
+        <button type="button" wire:click="$set('buscar', ''); $set('ano', ''); $set('mes', ''); $set('director_filtro', ''); $set('tipo', ''); $set('actividad_id', ''); $set('unidad_filtro', '');" class="btn-secondary" style="padding: 8px 16px; font-size: 0.85rem; border: 1px solid #cbd5e1; border-radius: 4px; cursor: pointer; background: transparent;">
             Limpiar Filtros
         </button>
     </div>

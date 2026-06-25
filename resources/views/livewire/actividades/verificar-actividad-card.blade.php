@@ -80,7 +80,8 @@
                         wire:click="verificarActividad" 
                         class="btn-dashboard-primary" 
                         wire:loading.attr="disabled" 
-                        wire:target="verificarActividad">
+                        wire:target="verificador, verificarActividad"
+                        @if(empty($verificador)) disabled @endif>
                     <span wire:loading.remove wire:target="verificarActividad">Guardar Verificador</span>
                     <span wire:loading wire:target="verificarActividad">Guardando...</span>
                 </button>

@@ -39,7 +39,7 @@
                             ¡Bienvenido(a) a la Intranet CAJBIOBIO! Como medida de seguridad obligatoria para su <strong>primer inicio de sesión</strong>, es necesario que reemplace su clave temporal por una contraseña definitiva de uso personal.
                         </p>
                     @elseif(request('reason') === 'renewal')
-                        <h2>🔄 Renovar Contraseña</h2>
+                        <h2> Renovar Contraseña</h2>
                         <p style="margin-top: 8px; margin-bottom: 25px; font-size: 0.92rem; color: #475569; line-height: 1.6;">
                             Su contraseña de acceso ha expirado (política de seguridad de 90 días). Por favor, establezca una nueva contraseña segura para restablecer su acceso de forma inmediata y sin fricciones.
                         </p>

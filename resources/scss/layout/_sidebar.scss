@@ -1,66 +1,66 @@
-aside{
-    position:sticky;
-    top:110px;
-    align-self:flex-start;
+aside {
+    position: sticky;
+    top: 110px;
+    align-self: flex-start;
 }
-.menu-sidebar-left{
-    width:220px;
-    flex-shrink:0;
-    top:20px;
-    background:#ffffff;
-    border:1px solid #e2e8f0;
-    border-radius:20px;
-    padding:20px;
-    box-shadow: 0 10px 25px rgba(15,23,42,.05);
-}
-
-.sidebar-title{
-    padding-bottom:16px;
-    margin-bottom:16px;
-    border-bottom:1px solid #e2e8f0;
-    font-size:.78rem;
-    font-weight:700;
-    text-transform:uppercase;
-    letter-spacing:1px;
-    color:#64748b;
+.menu-sidebar-left {
+    width: 220px;
+    flex-shrink: 0;
+    top: 20px;
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 20px;
+    padding: 20px;
+    box-shadow: 0 10px 25px rgba(15, 23, 42, 0.05);
 }
 
-.menu-sidebar-left ul{
-    list-style:none;
-    margin:0;
-    padding:0;
+.sidebar-title {
+    padding-bottom: 16px;
+    margin-bottom: 16px;
+    border-bottom: 1px solid #e2e8f0;
+    font-size: 0.78rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: #002c6b;
 }
 
-.menu-sidebar-left li{
-    margin-bottom:8px;
+.menu-sidebar-left ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
 }
 
-.menu-sidebar-left a{
-    display:flex;
-    align-items:center;
-    padding:12px 14px;
-    border-radius:12px;
-    text-decoration:none;
-    color:#475569;
-    font-size:.95rem;
-    font-weight:500;
-    transition:all .2s ease;
+.menu-sidebar-left li {
+    margin-bottom: 8px;
 }
 
-.menu-sidebar-left a:hover{
-    background:#f8fafc;
-    color:#0F69C4;
+.menu-sidebar-left a {
+    display: flex;
+    align-items: center;
+    padding: 12px 14px;
+    border-radius: 12px;
+    text-decoration: none;
+    color: #475569;
+    font-size: 0.95rem;
+    font-weight: 500;
+    transition: all 0.2s ease;
 }
 
-.menu-sidebar-left a.active{
-    background:#eff6ff;
-    color:#0F69C4;
-    font-weight:700;
-
-    border-left:4px solid #0F69C4;
-    border-radius:0 12px 12px 0;
+.menu-sidebar-left a:hover {
+    background: #f8fafc;
+    color: #0f69c4;
 }
 
-.menu-sidebar-left a span:last-child{
-    margin-left:auto;
+.menu-sidebar-left a.active {
+    background: #eff6ff;
+    color: #0f69c4;
+    font-weight: 700;
+
+    border-left: 4px solid #0f69c4;
+    border-radius: 0 12px 12px 0;
+}
+
+.menu-sidebar-left a span:last-child {
+    margin-left: auto;
 }

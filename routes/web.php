@@ -68,6 +68,7 @@ Route::middleware(['auth'])->group(function () {
     // Rutas exclusivas del Auditor (Dashboard con estadísticas de solo lectura)
     Route::middleware(['role:auditor'])->group(function () {
         Route::get('/auditor/dashboard', AuditorDashboardController::class)->name('auditor.dashboard');
+        Route::post('/auditor/unidades/{unidad}/renotificar', [AuditorDashboardController::class, 'renotificarUnidad'])->name('auditor.unidades.renotificar');
     });
     // Rutas exclusivas del Director Regional
     Route::middleware(['role:director'])->group(function () {

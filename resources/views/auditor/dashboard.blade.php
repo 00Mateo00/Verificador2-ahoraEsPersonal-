@@ -88,7 +88,7 @@
                 </button>
                 @if($selectedMonth !== $currentMonth || $selectedYear !== $currentYear)
                 <a href="{{ route('auditor.dashboard', ['view' => $view, 'mes' => $currentMonth, 'ano' => $currentYear]) }}" class="btn-acc" style="text-align: center; padding: 10px 15px; text-decoration: none; border-color: #cbd5e1; font-weight: 600; font-size: 0.9rem; border-radius: 6px; display: inline-flex; align-items: center;">
-                    Volver al Periodo Actual 🔄
+                    Volver al Periodo Actual 
                 </a>
                 @endif
             </div>

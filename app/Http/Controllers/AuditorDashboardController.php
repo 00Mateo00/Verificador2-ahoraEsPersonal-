@@ -2,10 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Mail\NuevasActividadesPendientes;
 use App\Models\Actividad;
 use App\Models\CargaExcel;
 use App\Models\Region;
 use App\Models\Unidad;
+use App\Services\MailService;
 
 class AuditorDashboardController extends Controller
 {
@@ -67,7 +69,7 @@ class AuditorDashboardController extends Controller
                         } elseif ($view === 'ano') {
                             $query->where('AÑO', $selectedYear);
                         }
-                    }
+                    },
                 ]);
             }])
             ->get()
@@ -124,5 +126,23 @@ class AuditorDashboardController extends Controller
             'selectedMonth',
             'selectedYear'
         ));
+    }
+
+    /**
+     * Procesa la renotificación de una unidad desde el perfil de Auditor con acceso global.
+     */
+    public function renotificarUnidad(Unidad $unidad)
+    {
+        $sent = MailService::sendSafe(
+            $unidad->user->email,
+            new NuevasActividadesPendientes($unidad),
+            ['unidad_id' => $unidad->id]
+        );
+
+        if ($sent) {
+            return back()->with('success', "Se ha enviado una nueva renotificación de forma síncrona a la unidad '{$unidad->user->name}'.");
+        }
+
+        return back()->with('error', "El envío síncrono falló. Se ha archivado la renotificación en 'Correos Fallidos'.");
     }
 }

@@ -85,7 +85,7 @@
                 </button>
                 @if($selectedMonth !== $currentMonth || $selectedYear !== $currentYear)
                 <a href="{{ route('director.dashboard', ['view' => $view, 'mes' => $currentMonth, 'ano' => $currentYear]) }}" class="btn-acc estadistica-btn-reset">
-                    Volver al Periodo Actual 🔄
+                    Volver al Periodo Actual 
                 </a>
                 @endif
             </div>

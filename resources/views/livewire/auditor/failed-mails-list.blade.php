@@ -37,7 +37,7 @@
                         class="btn-dashboard-primary" 
                         wire:loading.attr="disabled"
                         wire:target="resendAll">
-                    <span wire:loading.remove wire:target="resendAll">🔄 Reintentar Todos los Pendientes</span>
+                    <span wire:loading.remove wire:target="resendAll"> Reintentar Todos los Pendientes</span>
                     <span wire:loading wire:target="resendAll">⏳ Reenviando...</span>
                 </button>
             </div>
