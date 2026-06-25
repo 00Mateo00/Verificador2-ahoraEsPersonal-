@@ -1,9 +1,9 @@
 @if ($paginator->hasPages())
-    <nav role="navigation" aria-label="Pagination Navigation" class="flex justify-center">
-        <div class="flex items-center gap-2">
+    <nav role="navigation" aria-label="Pagination Navigation" class="nav-pagination">
+        <div >
             {{-- Botón Anterior --}}
             @if ($paginator->onFirstPage())
-                <span class="cursor-not-allowed opacity-50" aria-disabled="true" aria-label="Anterior">
+                <span >
                     &lsaquo;
                 </span>
             @else
@@ -41,7 +41,7 @@
                     &rsaquo;
                 </a>
             @else
-                <span class="cursor-not-allowed opacity-50" aria-disabled="true" aria-label="Siguiente">
+                <span class="cursor-not-allowed" aria-disabled="true" aria-label="Siguiente">
                     &rsaquo;
                 </span>
             @endif
