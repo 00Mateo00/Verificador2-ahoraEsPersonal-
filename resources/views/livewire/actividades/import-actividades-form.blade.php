@@ -273,7 +273,7 @@
             </button>
             <button type="button" 
                     wire:click="startCountdown" 
-                    class="btn-dashboard.primary" 
+                    class="btn-dashboard-primary" 
                     wire:loading.attr="disabled"
                     @if($totalRows === 0 || $todoDuplicado) disabled @endif
                     wire:target="startCountdown, resetForm">
