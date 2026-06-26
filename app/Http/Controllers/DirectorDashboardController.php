@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Mail\NuevasActividadesPendientes;
 use App\Models\Actividad;
 use App\Models\Region;
+use App\Models\Scopes\StatisticalYearScope;
 use App\Models\Unidad;
 use App\Services\MailService;
 use Illuminate\Support\Facades\Auth;
@@ -32,14 +33,17 @@ class DirectorDashboardController extends Controller
         $queryCargadas = Actividad::query()->where('estado', 'CARGADA')->forUser($user);
         $queryVerificadas = Actividad::query()->where('estado', 'VERIFICADA')->forUser($user);
 
-        if ($view !== 'global') {
-            $queryCargadas->where('AÑO', $selectedYear);
-            $queryVerificadas->where('AÑO', $selectedYear);
+        if ($view === 'global') {
+            $queryCargadas->withoutGlobalScope(StatisticalYearScope::class);
+            $queryVerificadas->withoutGlobalScope(StatisticalYearScope::class);
+        } elseif ($selectedYear !== $currentYear) {
+            $queryCargadas->withoutGlobalScope(StatisticalYearScope::class)->where('AÑO', $selectedYear);
+            $queryVerificadas->withoutGlobalScope(StatisticalYearScope::class)->where('AÑO', $selectedYear);
+        }
 
-            if ($view === 'mes') {
-                $queryCargadas->where('MES', $selectedMonth);
-                $queryVerificadas->where('MES', $selectedMonth);
-            }
+        if ($view === 'mes') {
+            $queryCargadas->where('MES', $selectedMonth);
+            $queryVerificadas->where('MES', $selectedMonth);
         }
 
         $totalCargadas = $queryCargadas->count();
@@ -52,27 +56,25 @@ class DirectorDashboardController extends Controller
             ->with(['user'])
             ->where('region_id', $region?->id)
             ->get()
-            ->map(function ($unidad) use ($selectedYear, $selectedMonth, $view) {
-                $cargadas = Actividad::where('unidad_id_asignada', $unidad->id)
-                    ->where('estado', 'CARGADA')
-                    ->when($view !== 'global', function ($q) use ($selectedYear) {
-                        $q->where('AÑO', $selectedYear);
-                    })
-                    ->when($view === 'mes', function ($q) use ($selectedMonth) {
-                        $q->where('MES', $selectedMonth);
-                    })
-                    ->count();
+            ->map(function ($unidad) use ($selectedYear, $selectedMonth, $view, $currentYear) {
+                $cargadasQuery = Actividad::where('unidad_id_asignada', $unidad->id)->where('estado', 'CARGADA');
+                $verificadasQuery = Actividad::where('unidad_id_asignada', $unidad->id)->where('estado', 'VERIFICADA');
 
-                $verificadas = Actividad::where('unidad_id_asignada', $unidad->id)
-                    ->where('estado', 'VERIFICADA')
-                    ->when($view !== 'global', function ($q) use ($selectedYear) {
-                        $q->where('AÑO', $selectedYear);
-                    })
-                    ->when($view === 'mes', function ($q) use ($selectedMonth) {
-                        $q->where('MES', $selectedMonth);
-                    })
-                    ->count();
+                if ($view === 'global') {
+                    $cargadasQuery->withoutGlobalScope(StatisticalYearScope::class);
+                    $verificadasQuery->withoutGlobalScope(StatisticalYearScope::class);
+                } elseif ($selectedYear !== $currentYear) {
+                    $cargadasQuery->withoutGlobalScope(StatisticalYearScope::class)->where('AÑO', $selectedYear);
+                    $verificadasQuery->withoutGlobalScope(StatisticalYearScope::class)->where('AÑO', $selectedYear);
+                }
 
+                if ($view === 'mes') {
+                    $cargadasQuery->where('MES', $selectedMonth);
+                    $verificadasQuery->where('MES', $selectedMonth);
+                }
+
+                $cargadas = $cargadasQuery->count();
+                $verificadas = $verificadasQuery->count();
                 $total = $cargadas + $verificadas;
 
                 if ($total === 0) {
@@ -82,17 +84,21 @@ class DirectorDashboardController extends Controller
                 $avance = $verificadas === 0 ? 0 : round(($verificadas / $total) * 100, 1);
 
                 // Recuperar únicamente las actividades verificadas con archivos asociados que corresponden al periodo actual
-                $actividadesVerificadas = Actividad::with(['archivos'])
+                $actividadesVerificadasQuery = Actividad::with(['archivos'])
                     ->where('unidad_id_asignada', $unidad->id)
-                    ->where('estado', 'VERIFICADA')
-                    ->when($view !== 'global', function ($q) use ($selectedYear) {
-                        $q->where('AÑO', $selectedYear);
-                    })
-                    ->when($view === 'mes', function ($q) use ($selectedMonth) {
-                        $q->where('MES', $selectedMonth);
-                    })
-                    ->orderBy('FECHA', 'desc')
-                    ->get();
+                    ->where('estado', 'VERIFICADA');
+
+                if ($view === 'global') {
+                    $actividadesVerificadasQuery->withoutGlobalScope(StatisticalYearScope::class);
+                } elseif ($selectedYear !== $currentYear) {
+                    $actividadesVerificadasQuery->withoutGlobalScope(StatisticalYearScope::class)->where('AÑO', $selectedYear);
+                }
+
+                if ($view === 'mes') {
+                    $actividadesVerificadasQuery->where('MES', $selectedMonth);
+                }
+
+                $actividadesVerificadas = $actividadesVerificadasQuery->orderBy('FECHA', 'desc')->get();
 
                 return [
                     'id' => $unidad->id,
@@ -110,16 +116,19 @@ class DirectorDashboardController extends Controller
             ->values();
 
         // 3. Lista de actividades vigentes de sus unidades para el periodo seleccionado usando el scope unificado
-        $queryActividades = Actividad::with(['archivos', 'unidadAsignada'])
-            ->where('activo', true)
+        $queryActividades = Actividad::with(['archivos', 'unidadAsignada']);
+
+        if ($view === 'global') {
+            $queryActividades->withoutGlobalScope(StatisticalYearScope::class);
+        } elseif ($selectedYear !== $currentYear) {
+            $queryActividades->withoutGlobalScope(StatisticalYearScope::class)->where('AÑO', $selectedYear);
+        }
+
+        $queryActividades->where('activo', true)
             ->forUser($user);
 
-        if ($view !== 'global') {
-            $queryActividades->where('AÑO', $selectedYear);
-
-            if ($view === 'mes') {
-                $queryActividades->where('MES', $selectedMonth);
-            }
+        if ($view === 'mes') {
+            $queryActividades->where('MES', $selectedMonth);
         }
 
         $actividades = $queryActividades->orderBy('FECHA', 'desc')

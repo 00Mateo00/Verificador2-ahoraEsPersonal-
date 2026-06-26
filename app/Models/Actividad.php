@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Scopes\StatisticalYearScope;
 use App\Services\ExcelService;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -133,6 +134,14 @@ class Actividad extends Model
             'unidad_id_asignada',
             'activo',
         ];
+    }
+
+    /**
+     * Registro de Scopes Globales para el modelo.
+     */
+    protected static function booted(): void
+    {
+        static::addGlobalScope(new StatisticalYearScope);
     }
 
     public function scopeForUser($query, User $user, ?int $filteredUnidadId = null)

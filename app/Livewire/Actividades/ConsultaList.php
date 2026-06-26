@@ -3,17 +3,18 @@
 namespace App\Livewire\Actividades;
 
 use App\Enums\UserRole;
+use App\Livewire\PaginatedComponent;
 use App\Models\Actividad;
 use App\Models\Archivo;
 use App\Models\CargaExcel;
 use App\Models\Region;
+use App\Models\Scopes\StatisticalYearScope;
 use App\Models\Unidad;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Livewire\Attributes\Url;
-use App\Livewire\PaginatedComponent;
 use Livewire\WithFileUploads;
 
 class ConsultaList extends PaginatedComponent
@@ -81,8 +82,14 @@ class ConsultaList extends PaginatedComponent
     {
         $user = Auth::user();
 
-        $query = Actividad::query()
-            ->where('activo', true)
+        $query = Actividad::query();
+
+        // Si se selecciona un año específico en el filtro, omitimos el Scope del Año Estadístico actual
+        if (! empty($this->ano)) {
+            $query->withoutGlobalScope(StatisticalYearScope::class)->where('AÑO', $this->ano);
+        }
+
+        $query->where('activo', true)
             ->where('estado', 'VERIFICADA')
             ->forUser($user, (int) $this->unidad_filtro ?: null);
 
@@ -97,10 +104,6 @@ class ConsultaList extends PaginatedComponent
                     ->orWhere('UNIDAD', 'like', '%'.$this->buscar.'%')
                     ->orWhere('DET_ACTIVIDAD', 'like', '%'.$this->buscar.'%');
             });
-        }
-
-        if (! empty($this->ano)) {
-            $query->where('AÑO', $this->ano);
         }
 
         if (! empty($this->mes)) {
@@ -246,8 +249,13 @@ class ConsultaList extends PaginatedComponent
         $totalResults = $query->count();
         $actividades = $query->paginate($perPage);
 
-        $monthQuery = Actividad::query()
-            ->where('activo', true)
+        $monthQuery = Actividad::query();
+
+        if (! empty($this->ano)) {
+            $monthQuery->withoutGlobalScope(StatisticalYearScope::class)->where('AÑO', $this->ano);
+        }
+
+        $monthQuery->where('activo', true)
             ->where('estado', 'VERIFICADA')
             ->forUser($user, (int) $this->unidad_filtro ?: null);
 
