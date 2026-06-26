@@ -89,22 +89,21 @@ class FortifyServiceProvider extends ServiceProvider
                             return redirect()->route('login')->with('error', 'Su cuenta se encuentra deshabilitada.');
                         }
 
-                        $rol = $user->rol;
-
-                        if ($rol === UserRole::Admin) {
+                        // Redirección dinámica basada en capacidades
+                        if ($user->hasPermissionTo('usuarios.crear')) {
                             return redirect()->route('admin.dashboard');
                         }
-                        if ($rol === UserRole::Auditor) {
+                        if ($user->hasPermissionTo('historial.ver-global')) {
                             return redirect()->route('auditor.dashboard');
                         }
-                        if ($rol === UserRole::Cargador) {
-                            return redirect()->route('actividades.importar');
+                        if ($user->hasPermissionTo('historial.ver-regional')) {
+                            return redirect()->route('director.dashboard');
                         }
-                        if ($rol === UserRole::Unidad) {
+                        if ($user->hasPermissionTo('actividades.verificar')) {
                             return redirect()->route('unidad.dashboard');
                         }
-                        if ($rol === UserRole::Director) {
-                            return redirect()->route('director.dashboard');
+                        if ($user->hasPermissionTo('actividades.importar')) {
+                            return redirect()->route('actividades.importar');
                         }
 
                         return redirect()->route('actividades.historial');

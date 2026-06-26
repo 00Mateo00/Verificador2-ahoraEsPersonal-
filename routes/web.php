@@ -13,19 +13,23 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
     if (Auth::check()) {
-        $rol = Auth::user()->rol;
-        info('(routing info): Usuario autenticado con rol: '.$rol->value);
-        if ($rol === UserRole::Admin) {
+        $user = Auth::user();
+        
+        // Redirección dinámica basada en prioridades de permisos reales
+        if ($user->hasPermissionTo('usuarios.crear')) {
             return redirect()->route('admin.dashboard');
         }
-        if ($rol === UserRole::Auditor) {
+        if ($user->hasPermissionTo('historial.ver-global')) {
             return redirect()->route('auditor.dashboard');
         }
-        if ($rol === UserRole::Cargador) {
-            return redirect()->route('actividades.importar');
+        if ($user->hasPermissionTo('historial.ver-regional')) {
+            return redirect()->route('director.dashboard');
         }
-        if ($rol === UserRole::Unidad) {
+        if ($user->hasPermissionTo('actividades.verificar')) {
             return redirect()->route('unidad.dashboard');
+        }
+        if ($user->hasPermissionTo('actividades.importar')) {
+            return redirect()->route('actividades.importar');
         }
 
         return redirect()->route('actividades.historial');
@@ -55,31 +59,31 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/archivos/{archivo}/descargar', [DescargaVerificadorController::class, 'descargar'])
         ->name('archivos.descargar');
 
-    // Historial global: Accesible por todos los roles autenticados (Renombrado de Consulta a Historial)
+    // Historial global: Protegido dinámicamente si cuenta con alguna de las capacidades de consulta
     Route::get('/historial', [ActividadController::class, 'historial'])
-        ->middleware('role:admin,director,auditor,cargador,unidad')
+        ->middleware('permission:historial.ver-global|historial.ver-regional|historial.ver-unidad|actividades.importar')
         ->name('actividades.historial');
 
-    // Módulo de Correos Fallidos compartido para Auditor y Administrador
+    // Módulo de Correos Fallidos compartido
     Route::get('/correos-fallidos', function () {
         return view('auditor.failed-mails');
-    })->middleware('role:admin,auditor')->name('auditor.correos-fallidos');
+    })->middleware('permission:correos.ver-historial')->name('auditor.correos-fallidos');
 
-    // Rutas exclusivas del Auditor (Dashboard con estadísticas de solo lectura)
-    Route::middleware(['role:auditor'])->group(function () {
+    // Rutas de Auditoría
+    Route::middleware(['permission:historial.ver-global'])->group(function () {
         Route::get('/auditor/dashboard', AuditorDashboardController::class)->name('auditor.dashboard');
         Route::post('/auditor/unidades/{unidad}/renotificar', [AuditorDashboardController::class, 'renotificarUnidad'])->name('auditor.unidades.renotificar');
     });
-    // Rutas exclusivas del Director Regional
-    Route::middleware(['role:director'])->group(function () {
+
+    // Rutas del Director Regional
+    Route::middleware(['permission:historial.ver-regional'])->group(function () {
         Route::get('/director/dashboard', [DirectorDashboardController::class, 'index'])->name('director.dashboard');
         Route::post('/director/unidades/{unidad}/renotificar', [DirectorDashboardController::class, 'renotificarUnidad'])->name('director.unidades.renotificar');
     });
 
-    //  Rutas exclusivas de Administración
-    Route::middleware(['role:admin'])->group(function () {
+    // Rutas de Administración Crítica
+    Route::middleware(['permission:usuarios.crear'])->group(function () {
         Route::get('/admin/dashboard', AdminDashboardController::class)->name('admin.dashboard');
-
         Route::get('/admin/actividades', [ActividadController::class, 'historial'])->name('admin.actividades');
 
         // Catálogo de usuarios
@@ -96,15 +100,15 @@ Route::middleware(['auth'])->group(function () {
         Route::patch('/admin/usuarios/{user}/toggle', [AdminUserController::class, 'toggleUsuario'])->name('admin.usuarios.toggle');
     });
 
-    // Rutas exclusivas de Carga Masiva (Excel)
-    Route::middleware(['role:admin,cargador'])->group(function () {
+    // Rutas de Carga Masiva (Excel)
+    Route::middleware(['permission:actividades.importar'])->group(function () {
         Route::get('/actividades/importar', function () {
             return view('actividades.import');
         })->name('actividades.importar');
     });
 
-    // Rutas exclusivas de Unidades Operativas
-    Route::middleware(['role:unidad'])->group(function () {
+    // Rutas de Unidades Operativas
+    Route::middleware(['permission:actividades.verificar'])->group(function () {
         Route::get('/unidad/dashboard', function () {
             return view('unidad.dashboard');
         })->name('unidad.dashboard');

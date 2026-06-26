@@ -29,23 +29,21 @@ class SuccessfulPasswordResetResponse implements SuccessfulPasswordResetResponse
             // Regenerar sesión para prevenir Session Fixation
             $request->session()->regenerate();
 
-            // Redirigir según el rol asignado
-            $rol = $user->rol;
-
-            if ($rol === UserRole::Admin) {
+            // Redirigir según prioridades de permisos dinámicos
+            if ($user->hasPermissionTo('usuarios.crear')) {
                 return redirect()->route('admin.dashboard')->with('success', 'Contraseña restablecida con éxito. Sesión iniciada automáticamente.');
             }
-            if ($rol === UserRole::Auditor) {
+            if ($user->hasPermissionTo('historial.ver-global')) {
                 return redirect()->route('auditor.dashboard')->with('success', 'Contraseña restablecida con éxito. Sesión iniciada automáticamente.');
             }
-            if ($rol === UserRole::Cargador) {
-                return redirect()->route('actividades.importar')->with('success', 'Contraseña restablecida con éxito. Sesión iniciada automáticamente.');
+            if ($user->hasPermissionTo('historial.ver-regional')) {
+                return redirect()->route('director.dashboard')->with('success', 'Contraseña restablecida con éxito. Sesión iniciada automáticamente.');
             }
-            if ($rol === UserRole::Unidad) {
+            if ($user->hasPermissionTo('actividades.verificar')) {
                 return redirect()->route('unidad.dashboard')->with('success', 'Contraseña restablecida con éxito. Sesión iniciada automáticamente.');
             }
-            if ($rol === UserRole::Director) {
-                return redirect()->route('director.dashboard')->with('success', 'Contraseña restablecida con éxito. Sesión iniciada automáticamente.');
+            if ($user->hasPermissionTo('actividades.importar')) {
+                return redirect()->route('actividades.importar')->with('success', 'Contraseña restablecida con éxito. Sesión iniciada automáticamente.');
             }
 
             return redirect()->route('actividades.historial')->with('success', 'Contraseña restablecida con éxito. Sesión iniciada automáticamente.');

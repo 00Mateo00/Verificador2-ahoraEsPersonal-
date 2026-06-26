@@ -28,8 +28,12 @@ class EnsureUserHasPermission
             return redirect()->route('login')->with('error', 'Su cuenta se encuentra deshabilitada.');
         }
 
-        if ($user->hasPermissionTo($permission)) {
-            return $next($request);
+        // Soporte multi-permiso con lógica OR (ej. 'permission:permiso1|permiso2')
+        $permissions = explode('|', $permission);
+        foreach ($permissions as $perm) {
+            if ($user->hasPermissionTo($perm)) {
+                return $next($request);
+            }
         }
 
         abort(403, 'No tiene los permisos necesarios para realizar esta acción.');
