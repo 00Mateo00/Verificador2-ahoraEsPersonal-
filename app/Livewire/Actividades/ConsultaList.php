@@ -31,9 +31,6 @@ class ConsultaList extends PaginatedComponent
     #[Url(as: 'ano')]
     public string $ano = '';
 
-    #[Url(as: 'mes')]
-    public string $mes = '';
-
     #[Url(as: 'act')]
     public string $tipo = '';
 
@@ -47,6 +44,14 @@ class ConsultaList extends PaginatedComponent
     #[Url(as: 'id')]
     public string $actividad_id = '';
 
+    /**
+     * Inicializar filtros por defecto (año más reciente de forma persistente).
+     */
+    public function mount()
+    {
+        $this->ano = (string) (Actividad::max('AÑO') ?: date('Y'));
+    }
+
     // Reiniciar paginación al cambiar filtros
     public function updatedBuscar()
     {
@@ -54,11 +59,6 @@ class ConsultaList extends PaginatedComponent
     }
 
     public function updatedAno()
-    {
-        $this->resetPage();
-    }
-
-    public function updatedMes()
     {
         $this->resetPage();
     }
@@ -90,7 +90,6 @@ class ConsultaList extends PaginatedComponent
         }
 
         $query->where('activo', true)
-            ->where('estado', 'VERIFICADA')
             ->forUser($user, (int) $this->unidad_filtro ?: null);
 
         if (! empty($this->actividad_id)) {
@@ -106,10 +105,6 @@ class ConsultaList extends PaginatedComponent
             });
         }
 
-        if (! empty($this->mes)) {
-            $query->where('MES', $this->mes);
-        }
-
         if (! empty($this->tipo)) {
             $query->where('TIPO_ACTIVIDAD', $this->tipo);
         }
@@ -120,7 +115,7 @@ class ConsultaList extends PaginatedComponent
             $query->whereIn('unidad_id_asignada', $unidadIds);
         }
 
-        return $query->with(['archivos', 'unidadAsignada'])
+        return $query->with(['archivos', 'unidadAsignada', 'cargaExcel'])
             ->orderBy('FECHA', 'desc')
             ->orderBy('actividad_id', 'desc');
     }
@@ -224,12 +219,12 @@ class ConsultaList extends PaginatedComponent
         $user = Auth::user();
         $userRol = $user->rol; // Restaura el accesor retrocompatible para subconsultas
 
-        $canViewHistory = $user->hasPermissionTo('historial.ver-global') || 
-                          $user->hasPermissionTo('historial.ver-regional') || 
+        $canViewHistory = $user->hasPermissionTo('historial.ver-global') ||
+                          $user->hasPermissionTo('historial.ver-regional') ||
                           $user->hasPermissionTo('historial.ver-unidad');
 
         // Si el usuario no tiene permisos para ver historiales generales pero sí cuenta con el de importar (Cargador puro)
-        if (!$canViewHistory && $user->hasPermissionTo('actividades.importar')) {
+        if (! $canViewHistory && $user->hasPermissionTo('actividades.importar')) {
             $cargasAgrupadas = CargaExcel::where('user_id', $user->id)
                 ->with(['actividades' => function ($q) {
                     $q->where('activo', true);
@@ -242,31 +237,14 @@ class ConsultaList extends PaginatedComponent
             ]);
         }
 
-        $perPage = 25;
-        if (! empty($this->mes)) {
-            $perPage = 100;
-        } elseif (! empty($this->ano)) {
-            $perPage = 50;
-        }
+        $perPage = 50;
 
         $query = $this->getFilteredActivitiesQuery();
         $totalResults = $query->count();
         $actividades = $query->paginate($perPage);
 
-        $monthQuery = Actividad::query();
-
-        if (! empty($this->ano)) {
-            $monthQuery->withoutGlobalScope(StatisticalYearScope::class)->where('AÑO', $this->ano);
-        }
-
-        $monthQuery->where('activo', true)
-            ->where('estado', 'VERIFICADA')
-            ->forUser($user, (int) $this->unidad_filtro ?: null);
-
-        $monthCounts = $monthQuery->selectRaw("SUBSTRING_INDEX(FECHA, '-', -2) as ym, count(*) as total")
-            ->groupBy('ym')
-            ->pluck('total', 'ym')
-            ->toArray();
+        // Se elimina la agrupación por meses estadísticos
+        $monthCounts = [];
 
         // Cargar las unidades asociadas al usuario autenticado para el filtro dinámico
         $unidadesAsignadas = [];
@@ -303,11 +281,12 @@ class ConsultaList extends PaginatedComponent
 
         return view('livewire.actividades.consulta-list', [
             'actividades' => $actividades,
-            'monthCounts' => $monthCounts,
+            'monthCounts' => [],
             'totalResults' => $totalResults,
             'unidadesAsignadas' => $unidadesAsignadas,
             'directoresRegionales' => $directoresRegionales,
-            'isDateRangeActive' => ! empty($this->mes),
+            'isDateRangeActive' => false,
+            'cargasAgrupadas' => collect(), // Fallback de resguardo defensivo
         ]);
     }
 }

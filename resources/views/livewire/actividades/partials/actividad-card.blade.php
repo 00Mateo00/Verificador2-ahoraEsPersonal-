@@ -9,6 +9,14 @@
             <span style="background-color: rgba(15, 105, 196, 0.08); color: #0F69C4; padding: 4px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase;">
                 {{ $act->REGION }}
             </span>
+            @can('actividades.importar')
+                @if($act->cargaExcel)
+                <span style="background-color: rgba(15, 105, 196, 0.05); color: #0f69c4; border: 1px solid rgba(15, 105, 196, 0.15); padding: 4px 8px; border-radius: 4px; font-size: 0.72rem; font-weight: 600;" 
+                      title="Planilla de origen: {{ $act->cargaExcel->nombre_archivo }}">
+                    📄 {{ \Illuminate\Support\Str::limit($act->cargaExcel->nombre_archivo, 20) }}
+                </span>
+                @endif
+            @endcan
             <strong style="color: #0d1b2a; font-size: 0.95rem;">{{ $act->TIPO_ACTIVIDAD }}</strong>
             <span style="color: #64748b; font-size: 0.8rem; font-weight: 500;">
                 Realizado el {{ $actDate->format('d-m-Y') }}

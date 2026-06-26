@@ -190,4 +190,12 @@ class Actividad extends Model
     {
         return $this->hasMany(Archivo::class, 'actividad_id', 'actividad_id');
     }
+
+    /**
+     * Relación con el lote de importación de Excel propietario.
+     */
+    public function cargaExcel(): BelongsTo
+    {
+        return $this->belongsTo(CargaExcel::class, 'carga_id', 'carga_id');
+    }
 }

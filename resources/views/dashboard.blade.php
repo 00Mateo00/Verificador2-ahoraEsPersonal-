@@ -68,46 +68,25 @@
 @endcan
 
 <!-- Selector de Periodo y Filtros Estadísticos (Supervisión Global o Regional) -->
-@if((Gate::allows('historial.ver-global') || Gate::allows('historial.ver-regional')) && $view !== 'global')
-    @php
-        $maxMonth = ($selectedYear == $currentYear) ? $currentMonth : 12;
-        $meses = [
-            1 => 'Enero', 2 => 'Febrero', 3 => 'Marzo', 4 => 'Abril',
-            5 => 'Mayo', 6 => 'Junio', 7 => 'Julio', 8 => 'Agosto',
-            9 => 'Septiembre', 10 => 'Octubre', 11 => 'Noviembre', 12 => 'Diciembre'
-        ];
-    @endphp
+@if(Gate::allows('historial.ver-global') || Gate::allows('historial.ver-regional'))
     <div style="background-color: #ffffff; border: 1px solid rgba(226, 232, 240, 0.8); border-radius: 8px; padding: 25px; margin-bottom: 35px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.02);">
         <form action="{{ route('dashboard') }}" method="GET" style="display: flex; gap: 15px; align-items: flex-end; flex-wrap: wrap;">
-            <input type="hidden" name="view" value="{{ $view }}">
-            
-            @if($view === 'mes')
-            <div style="flex: 1; min-width: 150px;">
-                <label for="mes" style="font-size: 0.85rem; font-weight: 700; color: #334155; display: block; margin-bottom: 6px;">Seleccionar Mes Estadístico</label>
-                <select name="mes" id="mes" style="width: 100%; box-sizing: border-box; padding: 10px 14px; border: 1px solid #cbd5e1; border-radius: 6px; background-color: #ffffff; font-size: 0.95rem;">
-                    @for($m = $maxMonth; $m >= 1; $m--)
-                        <option value="{{ $m }}" @if($m === $selectedMonth) selected @endif>{{ $meses[$m] }}</option>
-                    @endfor
-                </select>
-            </div>
-            @endif
-
             <div style="flex: 1; min-width: 150px;">
                 <label for="ano" style="font-size: 0.85rem; font-weight: 700; color: #334155; display: block; margin-bottom: 6px;">Seleccionar Año Estadístico</label>
                 <select name="ano" id="ano" style="width: 100%; box-sizing: border-box; padding: 10px 14px; border: 1px solid #cbd5e1; border-radius: 6px; background-color: #ffffff; font-size: 0.95rem;">
-                    @for($y = $currentYear; $y >= 2020; $y--)
+                    @for($y = (int)date('Y') + 1; $y >= 2020; $y--)
                         <option value="{{ $y }}" @if($y === $selectedYear) selected @endif>{{ $y }}</option>
                     @endfor
                 </select>
             </div>
 
             <div style="display: flex; gap: 10px;">
-                <button type="submit" class="btn-dashboard-primary">
-                    Filtrar
+                <button type="submit" class="btn-dashboard-primary" style="height: 42px;">
+                    Filtrar por Año
                 </button>
-                @if($selectedMonth !== $currentMonth || $selectedYear !== $currentYear)
-                <a href="{{ route('dashboard', ['view' => $view, 'mes' => $currentMonth, 'ano' => $currentYear]) }}" class="btn-acc" style="text-align: center; padding: 10px 15px; text-decoration: none; border-color: #cbd5e1; font-weight: 600; font-size: 0.9rem; border-radius: 6px; display: inline-flex; align-items: center; background: #fff;">
-                    Volver al Periodo Actual
+                @if($selectedYear !== $activeYear)
+                <a href="{{ route('dashboard', ['ano' => $activeYear]) }}" class="btn-acc" style="text-align: center; padding: 10px 15px; text-decoration: none; border-color: #cbd5e1; font-weight: 600; font-size: 0.9rem; border-radius: 6px; display: inline-flex; align-items: center; background: #fff; height: 42px; box-sizing: border-box;">
+                    Volver al Año Activo ({{ $activeYear }})
                 </a>
                 @endif
             </div>
