@@ -222,6 +222,7 @@ class ConsultaList extends PaginatedComponent
     public function render()
     {
         $user = Auth::user();
+        $userRol = $user->rol; // Restaura el accesor retrocompatible para subconsultas
 
         $canViewHistory = $user->hasPermissionTo('historial.ver-global') || 
                           $user->hasPermissionTo('historial.ver-regional') || 

@@ -58,7 +58,7 @@
         @endif
 
         <!-- Documentos de Respaldo Firmados -->
-        @if($act->archivos->isNotEmpty() || (Auth::user()->rol === \App\Enums\UserRole::Admin && session('modo_edicion')))
+        @if($act->archivos->isNotEmpty() || (Gate::allows('actividades.adjuntar-administrativo') && session('modo_edicion')))
             <div style="border-top: 1px dashed #e2e8f0; padding-top: 15px;">
                 <h4 style="margin: 0 0 10px 0; font-size: 0.85rem; color: #0F69C4; text-transform: uppercase; font-weight: 700;">Documentos de Respaldo</h4>
                 @if($act->archivos->isNotEmpty())
@@ -85,30 +85,27 @@
                                     </td>
                                     <td style="text-align: right;">
                                         <a href="{{ route('archivos.descargar', $archivo->archivo_id) }}" style="font-weight: 700; color: #0F69C4; margin-right: 15px;">Descargar</a>
-                                        @can('actividades.eliminar-verificador')
-                                            @if(session('modo_edicion'))
+                                        @if(Gate::allows('actividades.eliminar-verificador') && session('modo_edicion'))
                                             <button type="button" 
                                                     wire:click="eliminarArchivo({{ $archivo->archivo_id }})" 
                                                     wire:confirm="¿Está seguro de que desea eliminar permanentemente este archivo verificador de forma administrativa?"
                                                     style="background: none; border: none; color: #ef3340; font-weight: 700; cursor: pointer; padding: 0;">
                                                 Eliminar 🗑️
                                             </button>
-                                            @endif
-                                        @endcan
+                                        @endif
                                     </td>
                                 </tr>
-                            @endforeach
-                        </tbody>
-                    </table>
-                </div>
+                              @endforeach
+                          </tbody>
+                      </table>
+                  </div>
                 @else
-                <p style="margin: 0; font-size: 0.9rem; color: #64748b; font-style: italic;">Esta actividad no posee archivos verificadores cargados.</p>
+                    <p style="margin: 0; font-size: 0.9rem; color: #64748b; font-style: italic;">Esta actividad no posee archivos verificadores cargados.</p>
                 @endif
 
                 <!-- Formulario Administrativo para Adjuntar Nuevos Verificadores -->
-                @can('actividades.adjuntar-administrativo')
-                    @if(session('modo_edicion'))
-                        <div style="margin-top: 20px; background-color: rgba(15, 105, 196, 0.02); border: 1px dashed #0F69C4; padding: 20px; border-radius: 8px; display: grid; grid-template-columns: 1fr auto; gap: 20px; align-items: center; flex-wrap: wrap;">
+                @if(Gate::allows('actividades.adjuntar-administrativo') && session('modo_edicion'))
+                    <div style="margin-top: 20px; background-color: rgba(15, 105, 196, 0.02); border: 1px dashed #0F69C4; padding: 20px; border-radius: 8px; display: grid; grid-template-columns: 1fr auto; gap: 20px; align-items: center; flex-wrap: wrap;">
                         <div>
                             <label for="nuevosVerificadores-{{ $act->actividad_id }}" style="font-size: 0.85rem; font-weight: 700; color: #334155; display: block; margin-bottom: 6px;">
                                 Adjuntar archivos respaldatorios adicionales administrativamente
@@ -133,21 +130,19 @@
                     <div wire:loading wire:target="nuevosVerificadores" style="color: #0F69C4; font-size: 0.8rem; font-weight: 600; margin-top: 8px;">
                         ⏳ Cargando archivos temporales al servidor, por favor espere...
                     </div>
+                @endif
 
-                    <!-- Botón Administrativo para Desactivar Actividad -->
-                    @can('actividades.desactivar')
-                        @if(session('modo_edicion'))
-                        <div style="margin-top: 20px; border-top: 1px dashed #cbd5e1; padding-top: 15px; display: flex; justify-content: flex-end;">
-                            <button type="button" 
-                                    wire:click="desactivarActividad({{ $act->actividad_id }})" 
-                                    wire:confirm="¿Está seguro de que desea desactivar de forma permanente esta actividad del sistema?"
-                                    class="btn-acc" 
-                                    style="border-color: #ef3340; color: #ef3340 !important; background-color: rgba(239, 51, 64, 0.02); font-weight: 700; padding: 8px 16px; font-size: 0.8rem; border-radius: 4px; cursor: pointer;">
-                                Desactivar Actividad 🛑
-                            </button>
-                        </div>
-                        @endif
-                    @endcan
+                <!-- Botón Administrativo para Desactivar Actividad -->
+                @if(Gate::allows('actividades.desactivar') && session('modo_edicion'))
+                    <div style="margin-top: 20px; border-top: 1px dashed #cbd5e1; padding-top: 15px; display: flex; justify-content: flex-end;">
+                        <button type="button" 
+                                wire:click="desactivarActividad({{ $act->actividad_id }})" 
+                                wire:confirm="¿Está seguro de que desea desactivar de forma permanente esta actividad del sistema?"
+                                class="btn-acc" 
+                                style="border-color: #ef3340; color: #ef3340 !important; background-color: rgba(239, 51, 64, 0.02); font-weight: 700; padding: 8px 16px; font-size: 0.8rem; border-radius: 4px; cursor: pointer;">
+                            Desactivar Actividad 🛑
+                        </button>
+                    </div>
                 @endif
             </div>
         @endif

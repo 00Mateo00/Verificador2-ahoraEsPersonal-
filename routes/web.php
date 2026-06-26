@@ -1,10 +1,10 @@
 <?php
 
-use App\Enums\UserRole;
 use App\Http\Controllers\ActividadController;
 use App\Http\Controllers\AdminDashboardController;
 use App\Http\Controllers\AdminUserController;
 use App\Http\Controllers\AuditorDashboardController;
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DescargaVerificadorController;
 use App\Http\Controllers\DirectorDashboardController;
 use App\Http\Controllers\PasswordRenewalController;
@@ -13,34 +13,29 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
     if (Auth::check()) {
-        $user = Auth::user();
-        
-        // Redirección dinámica basada en prioridades de permisos reales
-        if ($user->hasPermissionTo('usuarios.crear')) {
-            return redirect()->route('admin.dashboard');
-        }
-        if ($user->hasPermissionTo('historial.ver-global')) {
-            return redirect()->route('auditor.dashboard');
-        }
-        if ($user->hasPermissionTo('historial.ver-regional')) {
-            return redirect()->route('director.dashboard');
-        }
-        if ($user->hasPermissionTo('actividades.verificar')) {
-            return redirect()->route('unidad.dashboard');
-        }
-        if ($user->hasPermissionTo('actividades.importar')) {
-            return redirect()->route('actividades.importar');
-        }
-
-        return redirect()->route('actividades.historial');
+        return redirect()->route('dashboard');
     }
 
     return redirect()->route('login');
 })->name('home');
 
-Route::get('/dashboard', function () {
-    return redirect()->route('home');
-})->name('dashboard');
+Route::get('/dashboard', DashboardController::class)
+    ->middleware(['auth', 'permission:usuarios.crear|historial.ver-global|historial.ver-regional|actividades.verificar|actividades.importar'])
+    ->name('dashboard');
+
+// Redirecciones de compatibilidad para evitar colisiones con URLs heredadas o marcadores de usuario
+Route::get('/admin/dashboard', function () {
+    return redirect()->route('dashboard');
+});
+Route::get('/auditor/dashboard', function () {
+    return redirect()->route('dashboard');
+});
+Route::get('/director/dashboard', function () {
+    return redirect()->route('dashboard');
+});
+Route::get('/unidad/dashboard', function () {
+    return redirect()->route('dashboard');
+});
 
 // Rutas de expiración de contraseña (accesibles de forma segura para usuarios deslogueados)
 Route::get('/password/expired', [PasswordRenewalController::class, 'showExpired'])->name('password.expired');
