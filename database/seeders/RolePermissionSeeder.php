@@ -12,7 +12,27 @@ class RolePermissionSeeder extends Seeder
      */
     public function run(): void
     {
-        // 1. Matriz de Permisos Granulares
+        // 1. Crear Roles Maestros
+        $roles = [
+            ['name' => 'admin', 'description' => 'Administrador con acceso y control total.'],
+            ['name' => 'auditor', 'description' => 'Auditor con accesos de lectura global.'],
+            ['name' => 'cargador', 'description' => 'Operador encargado de la carga masiva de Excel.'],
+            ['name' => 'director', 'description' => 'Director Regional con supervisión territorial.'],
+            ['name' => 'unidad', 'description' => 'Unidad Operativa encargada de subir verificadores.'],
+        ];
+
+        foreach ($roles as $role) {
+            DB::table('roles')->updateOrInsert(
+                ['name' => $role['name']],
+                [
+                    'description' => $role['description'],
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]
+            );
+        }
+
+        // 2. Crear Permisos Granulares
         $permissions = [
             ['name' => 'actividades.importar', 'description' => 'Permite acceder al módulo de subida masiva de planillas Excel.'],
             ['name' => 'actividades.verificar', 'description' => 'Permite adjuntar archivos verificadores y transicionar actividades del estado Cargada a Verificada.'],
@@ -43,7 +63,7 @@ class RolePermissionSeeder extends Seeder
             );
         }
 
-        // 2. Mapeo de Roles a Permisos
+        // 3. Mapear Roles a Permisos
         $roleMappings = [
             'admin' => [
                 'actividades.importar', 'actividades.verificar', 'actividades.desactivar',
@@ -67,20 +87,23 @@ class RolePermissionSeeder extends Seeder
             ],
         ];
 
-        foreach ($roleMappings as $role => $perms) {
-            foreach ($perms as $permName) {
-                $permissionId = DB::table('permissions')->where('name', $permName)->value('id');
-                if ($permissionId) {
-                    DB::table('permission_role')->updateOrInsert(
-                        [
-                            'role' => $role,
-                            'permission_id' => $permissionId,
-                        ],
-                        [
-                            'created_at' => now(),
-                            'updated_at' => now(),
-                        ]
-                    );
+        foreach ($roleMappings as $roleName => $perms) {
+            $roleId = DB::table('roles')->where('name', $roleName)->value('id');
+            if ($roleId) {
+                foreach ($perms as $permName) {
+                    $permissionId = DB::table('permissions')->where('name', $permName)->value('id');
+                    if ($permissionId) {
+                        DB::table('permission_role')->updateOrInsert(
+                            [
+                                'role_id' => $roleId,
+                                'permission_id' => $permissionId,
+                            ],
+                            [
+                                'created_at' => now(),
+                                'updated_at' => now(),
+                            ]
+                        );
+                    }
                 }
             }
         }

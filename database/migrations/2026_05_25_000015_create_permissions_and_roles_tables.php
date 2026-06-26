@@ -6,8 +6,18 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
+    /**
+     * Run the migrations.
+     */
     public function up(): void
     {
+        Schema::create('roles', function (Blueprint $table) {
+            $table->id();
+            $table->string('name')->unique();
+            $table->string('description')->nullable();
+            $table->timestamps();
+        });
+
         Schema::create('permissions', function (Blueprint $table) {
             $table->id();
             $table->string('name')->unique();
@@ -17,17 +27,21 @@ return new class extends Migration
 
         Schema::create('permission_role', function (Blueprint $table) {
             $table->id();
-            $table->string('role'); // Mapea directamente a los valores del enum UserRole ('admin', 'auditor', etc.)
+            $table->foreignId('role_id')->constrained('roles')->onDelete('cascade');
             $table->foreignId('permission_id')->constrained('permissions')->onDelete('cascade');
             $table->timestamps();
 
-            $table->unique(['role', 'permission_id']);
+            $table->unique(['role_id', 'permission_id']);
         });
     }
 
+    /**
+     * Reverse the migrations.
+     */
     public function down(): void
     {
         Schema::dropIfExists('permission_role');
         Schema::dropIfExists('permissions');
+        Schema::dropIfExists('roles');
     }
 };

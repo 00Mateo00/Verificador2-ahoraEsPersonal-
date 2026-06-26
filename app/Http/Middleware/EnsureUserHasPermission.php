@@ -7,16 +7,12 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Symfony\Component\HttpFoundation\Response;
 
-class EnsureUserHasRole
+class EnsureUserHasPermission
 {
     /**
-     * Maneja la solicitud entrante evaluando el rol del usuario autenticado.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
-     * @param  string  ...$roles
+     * Evalúa si el usuario autenticado tiene el permiso especificado.
      */
-    public function handle(Request $request, Closure $next, string ...$roles): Response
+    public function handle(Request $request, Closure $next, string $permission): Response
     {
         if (!Auth::check()) {
             return redirect()->route('login');
@@ -32,11 +28,10 @@ class EnsureUserHasRole
             return redirect()->route('login')->with('error', 'Su cuenta se encuentra deshabilitada.');
         }
 
-        // Si el usuario pertenece a uno de los roles permitidos, continuar
-        if (empty($roles) || ($user->role && in_array($user->role->name, $roles))) {
+        if ($user->hasPermissionTo($permission)) {
             return $next($request);
         }
 
-        abort(403, 'No tiene permisos para acceder a esta sección.');
+        abort(403, 'No tiene los permisos necesarios para realizar esta acción.');
     }
 }

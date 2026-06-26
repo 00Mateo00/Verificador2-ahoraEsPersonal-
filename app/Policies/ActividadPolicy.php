@@ -10,28 +10,26 @@ use App\Enums\UserRole;
 class ActividadPolicy
 {
     /**
-     * Determina si el usuario puede visualizar la actividad (Aislamiento Horizontal).
+     * Determina si el usuario puede visualizar la actividad (Aislamiento Horizontal basado en capacidades y límites relacionales).
      */
     public function view(User $user, Actividad $actividad): bool
     {
-        $rol = $user->rol;
-
-        // Admin, Auditor y Cargador tienen acceso de visualizacion global
-        if (in_array($rol, [UserRole::Admin, UserRole::Auditor, UserRole::Cargador], true)) {
+        // 1. Acceso de visualización Global
+        if ($user->hasPermissionTo('historial.ver-global')) {
             return true;
         }
 
-        // Rol Unidad: Solo puede visualizar si la actividad está asignada a su propia unidad operativa
-        if ($rol === UserRole::Unidad) {
-            $userUnidadId = $user->unidad ? $user->unidad->id : null;
-            return $userUnidadId !== null && (int)$actividad->unidad_id_asignada === (int)$userUnidadId;
-        }
-
-        // Rol Director: Solo puede visualizar si la unidad de la actividad pertenece a su region asignada
-        if ($rol === UserRole::Director) {
+        // 2. Acceso de visualización Regional (Director)
+        if ($user->hasPermissionTo('historial.ver-regional')) {
             $userRegionId = $user->region ? $user->region->id : null;
             $actUnidad = $actividad->unidadAsignada;
             return $userRegionId !== null && $actUnidad !== null && (int)$actUnidad->region_id === (int)$userRegionId;
+        }
+
+        // 3. Acceso de visualización de Unidad propia
+        if ($user->hasPermissionTo('historial.ver-unidad')) {
+            $userUnidadId = $user->unidad ? $user->unidad->id : null;
+            return $userUnidadId !== null && (int)$actividad->unidad_id_asignada === (int)$userUnidadId;
         }
 
         return false;
@@ -42,24 +40,18 @@ class ActividadPolicy
      */
     public function update(User $user, Actividad $actividad): bool
     {
-        $rol = $user->rol;
-
-        // El auditor nunca puede realizar mutaciones de escritura
-        if ($rol === UserRole::Auditor) {
+        // Evaluamos primero el permiso global de verificación
+        if (!$user->hasPermissionTo('actividades.verificar')) {
             return false;
         }
 
-        // Admin tiene permisos globales de escritura
-        if ($rol === UserRole::Admin) {
+        // El Administrador tiene permisos globales sobre cualquier actividad
+        if ($user->role && $user->role->name === 'admin') {
             return true;
         }
 
-        // Rol Unidad: Puede subir verificadores únicamente si la actividad le pertenece
-        if ($rol === UserRole::Unidad) {
-            $userUnidadId = $user->unidad ? $user->unidad->id : null;
-            return $userUnidadId !== null && (int)$actividad->unidad_id_asignada === (int)$userUnidadId;
-        }
-
-        return false;
+        // Para unidades operativas, validamos que la actividad esté asignada a su propia unidad
+        $userUnidadId = $user->unidad ? $user->unidad->id : null;
+        return $userUnidadId !== null && (int)$actividad->unidad_id_asignada === (int)$userUnidadId;
     }
 }
