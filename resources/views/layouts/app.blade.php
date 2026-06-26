@@ -105,16 +105,6 @@
                     </li>
                     @endcan
 
-                    @can('actividades.verificar')
-                        @if(!Gate::allows('usuarios.crear') && !Gate::allows('historial.ver-regional') && !Gate::allows('historial.ver-global'))
-                        <li>
-                            <a href="{{ route('unidad.dashboard') }}" class="{{ request()->routeIs('unidad.dashboard') ? 'active' : '' }}">
-                                Verificar Pendientes
-                            </a>
-                        </li>
-                        @endif
-                    @endcan
-
                     @if(Gate::allows('historial.ver-global') || Gate::allows('historial.ver-regional') || Gate::allows('historial.ver-unidad'))
                     <li>
                         <a href="{{ route('actividades.historial') }}" class="{{ request()->routeIs('actividades.historial') ? 'active' : '' }}">
