@@ -273,10 +273,12 @@ class ConsultaList extends PaginatedComponent
                 ->get();
         }
 
-        // Cargar directores regionales para el filtro de Auditor / Admin
+        // Cargar directores regionales para el filtro de Auditor / Admin (Relacionalmente)
         $directoresRegionales = [];
         if ($userRol === UserRole::Admin || $userRol === UserRole::Auditor) {
-            $directoresRegionales = User::where('rol', UserRole::Director)->orderBy('name', 'asc')->get();
+            $directoresRegionales = User::whereHas('role', function ($query) {
+                $query->where('name', 'director');
+            })->orderBy('name', 'asc')->get();
         }
 
         return view('livewire.actividades.consulta-list', [

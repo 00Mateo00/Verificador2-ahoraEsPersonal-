@@ -22,7 +22,7 @@ class AdminUserController extends Controller
                 $query->where('name', 'like', "%{$search}%")
                     ->orWhere('email', 'like', "%{$search}%");
             })
-            ->orderBy('rol', 'asc')
+            ->orderBy('role_id', 'asc')
             ->orderBy('name', 'asc')
             ->paginate(15);
 
