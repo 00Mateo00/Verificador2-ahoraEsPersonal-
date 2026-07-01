@@ -88,6 +88,14 @@ class ImportActividadesForm extends Component
         ];
     }
 
+    /**
+     * Hook automático de Livewire: se dispara cuando el archivo termina de subirse.
+     */
+    public function updatedExcelFile()
+    {
+        $this->uploadFile(app(ExcelImporterService::class));
+    }
+
     public function recalcularPeriodo()
     {
         $cacheKey = 'excel_import_'.Auth::id();

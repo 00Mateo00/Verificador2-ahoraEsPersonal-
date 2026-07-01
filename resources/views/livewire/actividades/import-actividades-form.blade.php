@@ -22,9 +22,9 @@
         x-on:livewire-upload-error="isUploading = false"
         x-on:livewire-upload-progress="progress = $event.detail.progress">
 
-        <h3 style="margin-bottom: 10px; color: #0d1b2a; font-size: 1.3rem;">Importar Planilla Masiva de Actividades</h3>
+        <h3 style="margin-bottom: 10px; color: #0d1b2a; font-size: 1.3rem;">Importar Planilla de Actividades</h3>
         <p style="color: #64748b; font-size: 0.9rem; margin-bottom: 20px;">
-            Cargue el archivo Excel (.xlsx) estructurado bajo las cabeceras institucionales requeridas para poblar automáticamente el verificador de actividades.
+            Cargue el archivo Excel (.xlsx) estructurado bajo las cabeceras institucionales requeridas.
         </p>
 
         
@@ -94,26 +94,14 @@
         </span>
         @enderror
 
-        @if($excelFile)
-        <div x-show="!isUploading" style="margin-top: 25px; display: flex; justify-content: flex-end;" x-cloak>
-            <button type="button" 
-                    wire:click="uploadFile" 
-                    class="btn-dashboard-primary" 
-                    wire:loading.attr="disabled" 
-                    wire:target="excelFile, uploadFile">
-                <span wire:loading.remove wire:target="uploadFile">Procesar Planilla</span>
-                <span wire:loading wire:target="uploadFile">Validando Planilla...</span>
-            </button>
         </div>
-        @endif
-    </div>
     @endif
 
     <!-- PASO 2: PREVISUALIZACIÓN DE FILAS -->
     @if($step === 2)
     <div>
         <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #cbd5e1; padding-bottom: 15px; margin-bottom: 20px; flex-wrap: wrap; gap: 10px;">
-            <h3 style="margin: 0; color: #0d1b2a; font-size: 1.4rem;">Previsualización de Carga</h3>
+            <h3 style="margin: 0; color: #0F69C4; font-size: 1.4rem;">{{ $originalFileName }}</h3>
             <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
                 @if($omittedRows > 0)
                 <span style="background-color: rgba(239, 51, 64, 0.08); color: #ef3340; font-weight: 700; padding: 6px 12px; border-radius: 20px; font-size: 0.85rem; border: 1px solid rgba(239, 51, 64, 0.15);">
