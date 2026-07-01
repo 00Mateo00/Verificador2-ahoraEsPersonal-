@@ -81,6 +81,7 @@ class ConsultaList extends PaginatedComponent
     private function getFilteredActivitiesQuery()
     {
         $user = Auth::user();
+        $isModoEdicion = session('modo_edicion');
 
         $query = Actividad::query();
 
@@ -89,8 +90,12 @@ class ConsultaList extends PaginatedComponent
             $query->withoutGlobalScope(StatisticalYearScope::class)->where('AÑO', $this->ano);
         }
 
-        $query->where('activo', true)
-            ->forUser($user, (int) $this->unidad_filtro ?: null);
+        // El Administrador en Modo Edición puede ver registros desactivados
+        if (!($user->rol === UserRole::Admin && $isModoEdicion)) {
+            $query->where('activo', true);
+        }
+
+        $query->forUser($user, (int) $this->unidad_filtro ?: null);
 
         if (! empty($this->actividad_id)) {
             $query->where('actividad_id', $this->actividad_id);
@@ -155,6 +160,22 @@ class ConsultaList extends PaginatedComponent
         if ($actividad) {
             $actividad->update(['activo' => false]);
             session()->flash('success', 'La actividad ha sido desactivada del sistema con éxito.');
+        }
+    }
+
+    /**
+     * Reactivar una actividad previamente desactivada (Solo Administradores en Modo Edición).
+     */
+    public function reactivarActividad($actividadId)
+    {
+        if (Auth::user()->rol !== UserRole::Admin || ! session('modo_edicion')) {
+            abort(403, 'No autorizado para realizar esta acción.');
+        }
+
+        $actividad = Actividad::find($actividadId);
+        if ($actividad) {
+            $actividad->update(['activo' => true]);
+            session()->flash('success', 'La actividad ha sido reactivada y ya es visible para todos los usuarios.');
         }
     }
 

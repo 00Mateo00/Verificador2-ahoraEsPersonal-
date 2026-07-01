@@ -1,7 +1,7 @@
 <div x-data="{ open: @json($act->actividad_id == $actividad_id) }" 
      class="accordion-activity-panel" 
-     style="background-color: #ffffff; border: 1px solid rgba(226, 232, 240, 0.8); border-radius: 8px; margin-bottom: 12px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.02); transition: all 0.2s ease;" 
-     :style="open ? 'border-color: #0F69C4; box-shadow: 0 4px 12px rgba(15, 105, 196, 0.05);' : ''">
+     style="background-color: {{ $act->activo ? '#ffffff' : '#f8fafc' }}; border: 1px solid {{ $act->activo ? 'rgba(226, 232, 240, 0.8)' : '#fca5a5' }}; border-radius: 8px; margin-bottom: 12px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.02); transition: all 0.2s ease; opacity: {{ $act->activo ? '1' : '0.85' }};" 
+     :style="open ? 'border-color: {{ $act->activo ? '#0F69C4' : '#ef3340' }}; box-shadow: 0 4px 12px rgba(15, 105, 196, 0.05);' : ''">
     
     <div class="accordion-activity-header" style="padding: 18px 20px; display: flex; align-items: center; justify-content: space-between; gap: 15px;">
         
@@ -10,8 +10,8 @@
                 {{ $act->REGION }}
             </span>
             @can('actividades.importar')
-                @if($act->cargaExcel)
-                <span style="background-color: rgba(15, 105, 196, 0.05); color: #0f69c4; border: 1px solid rgba(15, 105, 196, 0.15); padding: 4px 8px; border-radius: 4px; font-size: 0.72rem; font-weight: 600;" 
+            @if($act->cargaExcel)
+            <span style="background-color: rgba(15, 105, 196, 0.05); color: #0f69c4; border: 1px solid rgba(15, 105, 196, 0.15); padding: 4px 8px; border-radius: 4px; font-size: 0.72rem; font-weight: 600;" 
                       title="Planilla de origen: {{ $act->cargaExcel->nombre_archivo }}">
                     📄 {{ \Illuminate\Support\Str::limit($act->cargaExcel->nombre_archivo, 20) }}
                 </span>
@@ -22,7 +22,12 @@
                 Realizado el {{ $actDate->format('d-m-Y') }}
             </span>
         </div>
-
+        @if(!$act->activo)
+        <span style="background-color: #ef3340; color: #ffffff; padding: 4px 8px; border-radius: 4px; font-size: 0.72rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px;">
+            DESACTIVADA
+        </span>
+        @endif
+        
         <button type="button" @click="open = !open" style="background: none; border: none; cursor: pointer; color: #64748b; font-size: 0.9rem; padding: 5px;">
             <span x-text="open ? '▲' : '▼'"></span>
         </button>
@@ -140,16 +145,25 @@
                     </div>
                 @endif
 
-                <!-- Botón Administrativo para Desactivar Actividad -->
+                <!-- Botones Administrativos de Estado (Solo Modo Edición) -->
                 @if(Gate::allows('actividades.desactivar') && session('modo_edicion'))
                     <div style="margin-top: 20px; border-top: 1px dashed #cbd5e1; padding-top: 15px; display: flex; justify-content: flex-end;">
-                        <button type="button" 
-                                wire:click="desactivarActividad({{ $act->actividad_id }})" 
-                                wire:confirm="¿Está seguro de que desea desactivar de forma permanente esta actividad del sistema?"
-                                class="btn-acc" 
-                                style="border-color: #ef3340; color: #ef3340 !important; background-color: rgba(239, 51, 64, 0.02); font-weight: 700; padding: 8px 16px; font-size: 0.8rem; border-radius: 4px; cursor: pointer;">
-                            Desactivar Actividad 🛑
-                        </button>
+                        @if($act->activo)
+                            <button type="button" 
+                                    wire:click="desactivarActividad({{ $act->actividad_id }})" 
+                                    wire:confirm="¿Está seguro de que desea desactivar esta actividad? Dejará de ser visible para las unidades y directores."
+                                    class="btn-acc" 
+                                    style="border-color: #ef3340; color: #ef3340 !important; background-color: rgba(239, 51, 64, 0.02); font-weight: 700; padding: 8px 16px; font-size: 0.8rem; border-radius: 4px; cursor: pointer;">
+                                Desactivar Actividad
+                            </button>
+                        @else
+                            <button type="button" 
+                                    wire:click="reactivarActividad({{ $act->actividad_id }})" 
+                                    class="btn-acc" 
+                                    style="border-color: #2b8a3e; color: #2b8a3e !important; background-color: rgba(43, 138, 62, 0.02); font-weight: 700; padding: 8px 16px; font-size: 0.8rem; border-radius: 4px; cursor: pointer;">
+                                Reactivar Actividad
+                            </button>
+                        @endif
                     </div>
                 @endif
             </div>
