@@ -11,7 +11,7 @@ $alDiaCount = $unidadesColl->where('status', 'al_dia')->count();
 $sinActividadesCount = $unidadesColl->where('status', 'sin_actividades')->count();
 @endphp
 
-<div data-unit-container data-current-filter="all" style="width: 100%;">
+<div data-unit-container data-current-filter="pendientes" style="width: 100%;">
 
     <!-- Barra de Búsqueda e Input JS -->
     <div style="display: flex; justify-content: space-between; align-items: center; gap: 15px; margin-bottom: 25px; flex-wrap: wrap;">
@@ -25,17 +25,17 @@ $sinActividadesCount = $unidadesColl->where('status', 'sin_actividades')->count(
         <!-- Botonera de Filtros JS -->
         <div style="display: flex; gap: 8px; flex-wrap: wrap;">
             <button type="button" 
-                    class="js-unit-filter-btn active-filter"
+                    class="js-unit-filter-btn"
                     data-filter="all"
                     data-active-color="#0F69C4"
-                    style="background-color: #0F69C4; color: #ffffff; border: none; padding: 8px 14px; border-radius: 6px; font-weight: 700; cursor: pointer; font-size: 0.8rem; height: 42px; transition: all 0.15s ease;">
+                    style="background-color: #f8fafc; color: #475569; border: 1px solid #cbd5e1; padding: 8px 14px; border-radius: 6px; font-weight: 700; cursor: pointer; font-size: 0.8rem; height: 42px; transition: all 0.15s ease;">
                 Todos ({{ $totalCount }})
             </button>
             <button type="button" 
-                    class="js-unit-filter-btn"
+                    class="js-unit-filter-btn active-filter"
                     data-filter="pendientes"
                     data-active-color="#ef3340"
-                    style="background-color: #f8fafc; color: #475569; border: 1px solid #cbd5e1; padding: 8px 14px; border-radius: 6px; font-weight: 700; cursor: pointer; font-size: 0.8rem; height: 42px; transition: all 0.15s ease;">
+                    style="background-color: #ef3340; color: #ffffff; border: none; padding: 8px 14px; border-radius: 6px; font-weight: 700; cursor: pointer; font-size: 0.8rem; height: 42px; transition: all 0.15s ease;">
                 Pendientes ({{ $pendientesCount }})
             </button>
             <button type="button" 

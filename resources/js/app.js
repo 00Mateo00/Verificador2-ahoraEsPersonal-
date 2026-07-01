@@ -21,6 +21,11 @@ const DashboardManager = {
     },
 
     initFilters() {
+        // Ejecutar el filtro inicial para cada contenedor en la página
+        document.querySelectorAll('[data-unit-container]').forEach(container => {
+            this.applyUnitFilters(container);
+        });
+
         // Escuchar cambios en inputs de búsqueda de unidades
         document.addEventListener('input', (e) => {
             if (e.target.classList.contains('js-unit-search')) {
