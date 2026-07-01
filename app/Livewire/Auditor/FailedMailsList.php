@@ -3,7 +3,6 @@
 namespace App\Livewire\Auditor;
 
 use App\Enums\MailStatus;
-use App\Enums\MailStatus;
 use App\Enums\UserRole;
 use App\Livewire\PaginatedComponent;
 use App\Models\MailLog;

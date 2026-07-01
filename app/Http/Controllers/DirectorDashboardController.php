@@ -160,6 +160,11 @@ class DirectorDashboardController extends Controller
             abort(403, 'No tiene permisos para renotificar unidades fuera de su jurisdicción.');
         }
 
+        // Control de concurrencia
+        if ($unidad->ultima_notificacion_at?->isToday()) {
+            return back()->with('success', "La unidad '{$unidad->user->name}' ya ha sido notificada hoy. El listado ha sido actualizado.");
+        }
+
         $sent = MailService::sendSafe(
             $unidad->user->email,
             new NuevasActividadesPendientes($unidad),
@@ -167,6 +172,9 @@ class DirectorDashboardController extends Controller
         );
 
         if ($sent) {
+            $unidad->ultima_notificacion_at = now();
+            $unidad->save();
+
             return back()->with('success', "Se ha enviado una nueva renotificación de forma síncrona a la unidad '{$unidad->user->name}'.");
         }
 

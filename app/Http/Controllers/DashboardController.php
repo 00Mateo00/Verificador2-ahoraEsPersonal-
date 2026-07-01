@@ -154,6 +154,7 @@ class DashboardController extends Controller
                         'total' => $total,
                         'avance' => $avance,
                         'status' => $total === 0 ? 'sin_actividades' : ($cargadas > 0 ? 'pendientes' : 'al_dia'),
+                        'notificada_hoy' => $unidad->ultima_notificacion_at?->isToday() ?? false,
                     ];
                 })
                 ->sortBy('avance')

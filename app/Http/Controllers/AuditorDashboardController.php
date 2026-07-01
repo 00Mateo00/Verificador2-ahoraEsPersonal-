@@ -150,6 +150,11 @@ class AuditorDashboardController extends Controller
      */
     public function renotificarUnidad(Unidad $unidad)
     {
+        // Control de concurrencia: si ya fue notificada hoy, solo refrescar estado
+        if ($unidad->ultima_notificacion_at?->isToday()) {
+            return back()->with('success', "La unidad '{$unidad->user->name}' ya había sido notificada hoy por otro proceso. El estado ha sido actualizado.");
+        }
+
         $sent = MailService::sendSafe(
             $unidad->user->email,
             new NuevasActividadesPendientes($unidad),
@@ -157,7 +162,6 @@ class AuditorDashboardController extends Controller
         );
 
         if ($sent) {
-            // Actualización atómica de la fecha sin disparar updated_at inexistente
             $unidad->ultima_notificacion_at = now();
             $unidad->save();
 
