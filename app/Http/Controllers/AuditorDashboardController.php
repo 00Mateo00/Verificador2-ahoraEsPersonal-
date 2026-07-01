@@ -157,6 +157,10 @@ class AuditorDashboardController extends Controller
         );
 
         if ($sent) {
+            // Actualización atómica de la fecha sin disparar updated_at inexistente
+            $unidad->ultima_notificacion_at = now();
+            $unidad->save();
+
             return back()->with('success', "Se ha enviado una nueva renotificación de forma síncrona a la unidad '{$unidad->user->name}'.");
         }
 

@@ -20,7 +20,7 @@ return new class extends Migration
             $table->timestamp('password_changed_at')->nullable();
             $table->rememberToken();
             $table->timestamps();
-            $table->string('rol')->default('usuario');
+            $table->foreignId('role_id')->nullable()->constrained('roles')->onDelete('set null');
             $table->boolean('activo')->default(true);
 
         });

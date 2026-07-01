@@ -98,22 +98,24 @@ $sinActividadesCount = $unidadesColl->where('status', 'sin_actividades')->count(
                         <td style="padding: 14px 16px; text-align: right;">
                             @if($stat['status'] === 'pendientes')
                                 @php
-                                    // Determinar la ruta según el permiso del usuario logueado
                                     $notifyRoute = '#';
                                     if(Auth::user()->hasPermissionTo('historial.ver-global')) {
                                         $notifyRoute = route('auditor.unidades.renotificar', $stat['id']);
                                     } elseif(Auth::user()->hasPermissionTo('historial.ver-regional')) {
                                         $notifyRoute = route('director.unidades.renotificar', $stat['id']);
                                     }
+                                    $isNotifiedToday = $stat['notificada_hoy'] ?? false;
                                 @endphp
                                 
                                 @if($notifyRoute !== '#')
-                                    <form action="{{ $notifyRoute }}" method="POST" style="margin: 0;" onsubmit="this.querySelector('button').disabled = true; this.querySelector('button').innerHTML = '... ⏳';">
+                                    <form action="{{ $notifyRoute }}" method="POST" style="margin: 0;" 
+                                          onsubmit="if({{ $isNotifiedToday ? 'true' : 'false' }}) { if(!confirm('La unidad ya fue notificada anteriormente el día de hoy, ¿está seguro que desea volver a notificar a la unidad?')) return false; } this.querySelector('button').disabled = true; this.querySelector('button').innerHTML = '... ⏳';">
                                         @csrf
                                         <button type="submit" 
                                                 class="btn-acc" 
-                                                style="padding: 6px 12px; font-size: 0.8rem; font-weight: 700; border-color: #ef3340; color: #ef3340 !important; background-color: rgba(239, 51, 64, 0.02); border-radius: 4px; cursor: pointer; transition: all 0.15s ease;">
-                                            Notificar ✉️
+                                                style="padding: 6px 12px; font-size: 0.8rem; font-weight: 700; border-radius: 4px; cursor: pointer; transition: all 0.15s ease;
+                                                       {{ $isNotifiedToday ? 'border-color: #64748b; color: #64748b !important; background-color: #f1f5f9;' : 'border-color: #ef3340; color: #ef3340 !important; background-color: rgba(239, 51, 64, 0.02);' }}">
+                                            {{ $isNotifiedToday ? 'Ya notificada' : 'Notificar' }} ✉️
                                         </button>
                                     </form>
                                 @endif
