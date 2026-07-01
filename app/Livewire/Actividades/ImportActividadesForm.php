@@ -312,7 +312,7 @@ class ImportActividadesForm extends Component
     {
         $this->isCountingDown = false;
         $this->step = 2;
-        session()->flash('error', 'Se canceló el envío de notificaciones y persistencia de datos.');
+        session()->flash('success', 'Se ha cancelado el envío');
     }
 
     public function processImport(ExcelImporterService $importer)
@@ -320,7 +320,8 @@ class ImportActividadesForm extends Component
         // Defensa en profundidad: Bloquear mutación si el rol del usuario es auditor
         Gate::authorize('mutate');
 
-        if (! $this->isCountingDown) {
+        // Permitimos procesar si está en la cuenta regresiva o si se forzó el envío manual
+        if (! $this->isCountingDown && $this->step !== 4) {
             return;
         }
 
@@ -331,14 +332,11 @@ class ImportActividadesForm extends Component
             $cacheKey = 'excel_import_'.Auth::id();
             $data = Cache::get($cacheKey);
 
-            // Re-parseo defensivo de respaldo (Fallback) únicamente si la caché expiró o fue eliminada
             if (! $data) {
                 return redirect()->route('actividades.importar');
             }
 
             $allRows = $data['allRows'] ?? [];
-
-            // Filtrar en el servidor las filas válidas correspondientes al periodo seleccionado
             $validRows = [];
             $mapaNormalizado = $importer->obtenerMapaUnidadesNormalizado();
 
@@ -354,7 +352,6 @@ class ImportActividadesForm extends Component
                     continue;
                 }
 
-                // Validar campos obligatorios
                 $hasError = false;
                 foreach (self::MANDATORY_FIELDS as $field) {
                     if (! isset($row[$field]) || trim((string) $row[$field]) === '') {
@@ -362,27 +359,18 @@ class ImportActividadesForm extends Component
                         break;
                     }
                 }
-                if ($hasError) {
-                    continue;
-                }
+                if ($hasError) continue;
 
-                // Validar colisión de COD
                 $codRaw = trim((string) ($row['COD'] ?? ''));
-                if ($codRaw !== '' && isset($existingCodsMap[$codRaw])) {
-                    continue;
-                }
+                if ($codRaw !== '' && isset($existingCodsMap[$codRaw])) continue;
 
-                // Validar correspondencia territorial de la unidad
                 $unidadNombreRaw = trim($row['UNIDAD'] ?? '');
                 $unidadIdAsignada = $importer->resolverUnidadId($unidadNombreRaw, $mapaNormalizado);
-                if ($unidadIdAsignada === null) {
-                    continue;
-                }
+                if ($unidadIdAsignada === null) continue;
 
                 $validRows[] = $row;
             }
 
-            // Delegar almacenamiento, transaccionalidad y despacho de notificaciones al Servicio de Importación
             $importer->storeImportedRows(
                 $validRows,
                 Auth::id(),
@@ -390,12 +378,11 @@ class ImportActividadesForm extends Component
                 $this->totalRows
             );
 
-            // Limpieza inmediata de la caché de importación para liberar memoria del servidor
-            $cacheKey = 'excel_import_'.Auth::id();
             Cache::forget($cacheKey);
 
-            $this->step = 5; // Avanzar al paso de éxito (Paso 5)
-            session()->flash('success', "¡Excelente! Se han importado exitosamente {$this->totalRows} actividades e iniciado las colas de notificación.");
+            // Redirección inmediata al dashboard con mensaje de éxito
+            return redirect()->route('dashboard')->with('success', "¡Excelente! Se han importado exitosamente {$this->totalRows} actividades correspondientes a {$this->periodosDisponibles[$this->periodoSeleccionado]}.");
+
         } catch (\Exception $e) {
             session()->flash('error', 'Fallo al persistir registros en base de datos: '.$e->getMessage());
             $this->step = 2;

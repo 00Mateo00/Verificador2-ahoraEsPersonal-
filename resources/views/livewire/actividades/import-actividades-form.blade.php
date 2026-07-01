@@ -285,15 +285,18 @@
             <span x-text="timeLeft" style="font-size: 3rem; font-weight: 800; color: #ef3340; font-family: monospace;">10</span>
         </div>
 
-        <p style="color: #64748b; font-size: 0.85rem; margin-bottom: 35px; max-width: 500px; margin-left: auto; margin-right: auto;">
-            Si ha detectado algún error de último momento, puede suspender la importación antes de que expire el tiempo haciendo clic en el botón de abajo de manera inmediata.
-        </p>
-
-        <div style="display: flex; justify-content: center;">
-            <button type="button" @click="cancel" class="btn-dashboard-primary">
-                ⛔ CANCELAR OPERACIÓN
+        <div style="display: flex; justify-content: center; gap: 15px; margin-bottom: 35px;">
+            <button type="button" @click="cancel" class="btn-acc" style="border: 1px solid #cbd5e1; padding: 12px 24px; font-weight: 700;">
+                 CANCELAR ENVÍO
+            </button>
+            <button type="button" @click="$wire.set('step', 4)" class="btn-dashboard-primary" style="padding: 12px 24px;">
+                ENVIAR AHORA
             </button>
         </div>
+
+        <p style="color: #64748b; font-size: 0.85rem; max-width: 500px; margin-left: auto; margin-right: auto;">
+            Puede esperar a que el temporizador finalice o forzar el envío inmediato si ya verificó los datos.
+        </p>
     </div>
     @endif
 
@@ -336,20 +339,5 @@
     </div>
     @endif
 
-    <!-- PASO 5: ÉXITO -->
-    @if($step === 5)
-    <div style="text-align: center; padding: 40px 0;">
-        <div style="font-size: 4rem; margin-bottom: 20px;">🎉</div>
-        <h3 style="color: #2b8a3e; font-size: 1.8rem; margin-bottom: 10px; font-weight: 700;">Planilla Importada con Éxito</h3>
-        <p style="color: #475569; font-size: 1rem; margin-bottom: 35px; max-width: 600px; margin-left: auto; margin-right: auto;">
-            Se han procesado, validado e ingresado de forma íntegra las <strong>{{ $totalRows }}</strong> actividades en la base de datos de Intranet. Los correos de notificación a las unidades ya se encuentran agendados en la cola de procesamiento.
-        </p>
-
-        <div style="display: flex; justify-content: center; gap: 15px;">
-            <button type="button" wire:click="resetForm" class="btn-dashboard-primary">
-                Cargar Nueva Planilla
-            </button>
-        </div>
-    </div>
-    @endif
+    <!-- PASO 5 ELIMINADO: AHORA REDIRIGE AL DASHBOARD -->
 </div>
