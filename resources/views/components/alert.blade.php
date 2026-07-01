@@ -39,6 +39,13 @@
             'text' => '#1e3a8a',
             'title_color' => '#1e40af',
             'icon' => '🔒'
+        ],
+        'neutral' => [
+            'bg' => '#fffbeb',
+            'border' => '#fef3c7',
+            'text' => '#b45309',
+            'title_color' => '#92400e',
+            'icon' => ''
         ]
     ][$type] ?? [
         'bg' => '#f1f5f9',

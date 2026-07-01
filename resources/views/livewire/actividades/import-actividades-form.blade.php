@@ -12,6 +12,12 @@
         </x-alert>
     @endif
 
+    @if (session()->has('status_neutral'))
+        <x-alert type="neutral">
+            {{ session('status_neutral') }}
+        </x-alert>
+    @endif
+
 
     <!-- PASO 1: SUBIDA DE ARCHIVO -->
     @if($step === 1)

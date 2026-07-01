@@ -312,7 +312,7 @@ class ImportActividadesForm extends Component
     {
         $this->isCountingDown = false;
         $this->step = 2;
-        session()->flash('success', 'Se ha cancelado el envío');
+        session()->flash('status_neutral', 'Se ha cancelado el envío');
     }
 
     public function processImport(ExcelImporterService $importer)
