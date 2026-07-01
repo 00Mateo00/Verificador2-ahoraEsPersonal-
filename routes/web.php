@@ -1,10 +1,10 @@
 <?php
 
-use App\Enums\UserRole;
 use App\Http\Controllers\ActividadController;
 use App\Http\Controllers\AdminDashboardController;
 use App\Http\Controllers\AdminUserController;
 use App\Http\Controllers\AuditorDashboardController;
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DescargaVerificadorController;
 use App\Http\Controllers\DirectorDashboardController;
 use App\Http\Controllers\PasswordRenewalController;
@@ -13,30 +13,29 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
     if (Auth::check()) {
-        $rol = Auth::user()->rol;
-        info('(routing info): Usuario autenticado con rol: '.$rol->value);
-        if ($rol === UserRole::Admin) {
-            return redirect()->route('admin.dashboard');
-        }
-        if ($rol === UserRole::Auditor) {
-            return redirect()->route('auditor.dashboard');
-        }
-        if ($rol === UserRole::Cargador) {
-            return redirect()->route('actividades.importar');
-        }
-        if ($rol === UserRole::Unidad) {
-            return redirect()->route('unidad.dashboard');
-        }
-
-        return redirect()->route('actividades.historial');
+        return redirect()->route('dashboard');
     }
 
     return redirect()->route('login');
 })->name('home');
 
-Route::get('/dashboard', function () {
-    return redirect()->route('home');
-})->name('dashboard');
+Route::get('/dashboard', DashboardController::class)
+    ->middleware(['auth', 'permission:usuarios.crear|historial.ver-global|historial.ver-regional|actividades.verificar|actividades.importar'])
+    ->name('dashboard');
+
+// Redirecciones de compatibilidad para evitar colisiones con URLs heredadas o marcadores de usuario
+Route::get('/admin/dashboard', function () {
+    return redirect()->route('dashboard');
+});
+Route::get('/auditor/dashboard', function () {
+    return redirect()->route('dashboard');
+});
+Route::get('/director/dashboard', function () {
+    return redirect()->route('dashboard');
+});
+Route::get('/unidad/dashboard', function () {
+    return redirect()->route('dashboard');
+});
 
 // Rutas de expiración de contraseña (accesibles de forma segura para usuarios deslogueados)
 Route::get('/password/expired', [PasswordRenewalController::class, 'showExpired'])->name('password.expired');
@@ -55,31 +54,31 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/archivos/{archivo}/descargar', [DescargaVerificadorController::class, 'descargar'])
         ->name('archivos.descargar');
 
-    // Historial global: Accesible por todos los roles autenticados (Renombrado de Consulta a Historial)
+    // Historial global: Protegido dinámicamente si cuenta con alguna de las capacidades de consulta
     Route::get('/historial', [ActividadController::class, 'historial'])
-        ->middleware('role:admin,director,auditor,cargador,unidad')
+        ->middleware('permission:historial.ver-global|historial.ver-regional|historial.ver-unidad|actividades.importar')
         ->name('actividades.historial');
 
-    // Módulo de Correos Fallidos compartido para Auditor y Administrador
+    // Módulo de Correos Fallidos compartido
     Route::get('/correos-fallidos', function () {
         return view('auditor.failed-mails');
-    })->middleware('role:admin,auditor')->name('auditor.correos-fallidos');
+    })->middleware('permission:correos.ver-historial')->name('auditor.correos-fallidos');
 
-    // Rutas exclusivas del Auditor (Dashboard con estadísticas de solo lectura)
-    Route::middleware(['role:auditor'])->group(function () {
+    // Rutas de Auditoría
+    Route::middleware(['permission:historial.ver-global'])->group(function () {
         Route::get('/auditor/dashboard', AuditorDashboardController::class)->name('auditor.dashboard');
         Route::post('/auditor/unidades/{unidad}/renotificar', [AuditorDashboardController::class, 'renotificarUnidad'])->name('auditor.unidades.renotificar');
     });
-    // Rutas exclusivas del Director Regional
-    Route::middleware(['role:director'])->group(function () {
+
+    // Rutas del Director Regional
+    Route::middleware(['permission:historial.ver-regional'])->group(function () {
         Route::get('/director/dashboard', [DirectorDashboardController::class, 'index'])->name('director.dashboard');
         Route::post('/director/unidades/{unidad}/renotificar', [DirectorDashboardController::class, 'renotificarUnidad'])->name('director.unidades.renotificar');
     });
 
-    //  Rutas exclusivas de Administración
-    Route::middleware(['role:admin'])->group(function () {
+    // Rutas de Administración Crítica
+    Route::middleware(['permission:usuarios.crear'])->group(function () {
         Route::get('/admin/dashboard', AdminDashboardController::class)->name('admin.dashboard');
-
         Route::get('/admin/actividades', [ActividadController::class, 'historial'])->name('admin.actividades');
 
         // Catálogo de usuarios
@@ -96,15 +95,15 @@ Route::middleware(['auth'])->group(function () {
         Route::patch('/admin/usuarios/{user}/toggle', [AdminUserController::class, 'toggleUsuario'])->name('admin.usuarios.toggle');
     });
 
-    // Rutas exclusivas de Carga Masiva (Excel)
-    Route::middleware(['role:admin,cargador'])->group(function () {
+    // Rutas de Carga Masiva (Excel)
+    Route::middleware(['permission:actividades.importar'])->group(function () {
         Route::get('/actividades/importar', function () {
             return view('actividades.import');
         })->name('actividades.importar');
     });
 
-    // Rutas exclusivas de Unidades Operativas
-    Route::middleware(['role:unidad'])->group(function () {
+    // Rutas de Unidades Operativas
+    Route::middleware(['permission:actividades.verificar'])->group(function () {
         Route::get('/unidad/dashboard', function () {
             return view('unidad.dashboard');
         })->name('unidad.dashboard');

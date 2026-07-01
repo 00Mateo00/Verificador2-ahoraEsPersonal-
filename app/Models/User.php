@@ -8,6 +8,7 @@ use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -20,6 +21,7 @@ use Laravel\Fortify\TwoFactorAuthenticatable;
     'name',
     'email',
     'password',
+    'role_id',
     'rol',
     'activo',
     'password_changed_at',
@@ -45,8 +47,53 @@ class User extends Authenticatable implements PasskeyUser
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
             'password_changed_at' => 'datetime',
-            'rol' => UserRole::class,
         ];
+    }
+
+    /**
+     * Relación con el rol maestro.
+     */
+    public function role(): BelongsTo
+    {
+        return $this->belongsTo(Role::class);
+    }
+
+    /**
+     * Accessor para emular la antigua columna 'rol' usando la relación con la tabla 'roles'.
+     * Garantiza compatibilidad retroactiva completa con todos los controladores y vistas.
+     */
+    public function getRolAttribute(): ?UserRole
+    {
+        if (! $this->role) {
+            return null;
+        }
+
+        return UserRole::tryFrom($this->role->name);
+    }
+
+    /**
+     * Mutator para interceptar la asignación del antiguo campo 'rol' y mapearlo a la nueva columna 'role_id'.
+     * Garantiza compatibilidad retroactiva completa con Fortify, seeders y controladores.
+     */
+    public function setRolAttribute($value): void
+    {
+        $roleName = $value instanceof UserRole ? $value->value : $value;
+        $role = Role::where('name', $roleName)->first();
+        if ($role) {
+            $this->attributes['role_id'] = $role->id;
+        }
+    }
+
+    /**
+     * Valida si el usuario posee un permiso a través de su rol asignado.
+     */
+    public function hasPermissionTo(string $permission): bool
+    {
+        if (! $this->role) {
+            return false;
+        }
+
+        return $this->role->permissions()->where('name', $permission)->exists();
     }
 
     /**

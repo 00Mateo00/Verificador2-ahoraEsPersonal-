@@ -12,6 +12,12 @@
         </x-alert>
     @endif
 
+    @if (session()->has('status_neutral'))
+        <x-alert type="neutral">
+            {{ session('status_neutral') }}
+        </x-alert>
+    @endif
+
 
     <!-- PASO 1: SUBIDA DE ARCHIVO -->
     @if($step === 1)
@@ -22,9 +28,9 @@
         x-on:livewire-upload-error="isUploading = false"
         x-on:livewire-upload-progress="progress = $event.detail.progress">
 
-        <h3 style="margin-bottom: 10px; color: #0d1b2a; font-size: 1.3rem;">Importar Planilla Masiva de Actividades</h3>
+        <h3 style="margin-bottom: 10px; color: #0d1b2a; font-size: 1.3rem;">Importar Planilla de Actividades</h3>
         <p style="color: #64748b; font-size: 0.9rem; margin-bottom: 20px;">
-            Cargue el archivo Excel (.xlsx) estructurado bajo las cabeceras institucionales requeridas para poblar automáticamente el verificador de actividades.
+            Cargue el archivo Excel (.xlsx) estructurado bajo las cabeceras institucionales requeridas.
         </p>
 
         
@@ -94,26 +100,62 @@
         </span>
         @enderror
 
-        @if($excelFile)
-        <div x-show="!isUploading" style="margin-top: 25px; display: flex; justify-content: flex-end;" x-cloak>
-            <button type="button" 
-                    wire:click="uploadFile" 
-                    class="btn-dashboard-primary" 
-                    wire:loading.attr="disabled" 
-                    wire:target="excelFile, uploadFile">
-                <span wire:loading.remove wire:target="uploadFile">Procesar Planilla</span>
-                <span wire:loading wire:target="uploadFile">Validando Planilla...</span>
-            </button>
         </div>
-        @endif
-    </div>
     @endif
 
     <!-- PASO 2: PREVISUALIZACIÓN DE FILAS -->
     @if($step === 2)
-    <div>
+    <div x-data="importSummary(@js($validRows ?? []))"
         <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #cbd5e1; padding-bottom: 15px; margin-bottom: 20px; flex-wrap: wrap; gap: 10px;">
-            <h3 style="margin: 0; color: #0d1b2a; font-size: 1.4rem;">Previsualización de Carga</h3>
+            <h3 style="margin: 0; color: #0F69C4; font-size: 1.4rem;">{{ $originalFileName }}</h3>
+
+            <!-- Bloque de Contadores (Para ser estilizado) -->
+            <div class="import-stats-container">
+                <p>Total de Actividades por Categorías</p>
+                
+                <div class="stats-grid">
+                    <!-- Categoría: Tipo Actividad -->
+                    <div class="stat-box">
+                        <h4>Tipo Actividad</h4>
+                        <ul>
+                            <div x-for="(count, name) in stats.tipos" :key="name">
+                                <li>
+                                    <h1 x-text="name"></h1>
+                                    <strong x-text="count"></strong>
+                                </li>
+                            </div>
+                        </ul>
+                    </div>
+
+                    <!-- Categoría: Sub Tipo Actividad -->
+                    <div class="stat-box">
+                        <h4>Sub Tipo Actividad</h4>
+                        <ul>
+                            <template x-for="(count, name) in stats.subtipos" :key="name">
+                                <li>
+                                    <span x-text="name"></span>
+                                    <strong x-text="count"></strong>
+                                </li>
+                            </template>
+                        </ul>
+                    </div>
+
+                    <!-- Categoría: Tipo Unidad -->
+                    <div class="stat-box">
+                        <h4>Tipo Unidad</h4>
+                        <ul>
+                            <template x-for="(count, name) in stats.unidades" :key="name">
+                                <li>
+                                    <span x-text="name"></span>
+                                    <strong x-text="count"></strong>
+                                </li>
+                            </template>
+                        </ul>
+                    </div>
+                </div>
+
+                <p>A continuación se presenta una muestra de los registros contenidos en el archivo Excel correspondientes al período seleccionado.</p>
+            </div>
             <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
                 @if($omittedRows > 0)
                 <span style="background-color: rgba(239, 51, 64, 0.08); color: #ef3340; font-weight: 700; padding: 6px 12px; border-radius: 20px; font-size: 0.85rem; border: 1px solid rgba(239, 51, 64, 0.15);">
@@ -297,15 +339,18 @@
             <span x-text="timeLeft" style="font-size: 3rem; font-weight: 800; color: #ef3340; font-family: monospace;">10</span>
         </div>
 
-        <p style="color: #64748b; font-size: 0.85rem; margin-bottom: 35px; max-width: 500px; margin-left: auto; margin-right: auto;">
-            Si ha detectado algún error de último momento, puede suspender la importación antes de que expire el tiempo haciendo clic en el botón de abajo de manera inmediata.
-        </p>
-
-        <div style="display: flex; justify-content: center;">
-            <button type="button" @click="cancel" class="btn-dashboard-primary">
-                ⛔ CANCELAR OPERACIÓN
+        <div style="display: flex; justify-content: center; gap: 15px; margin-bottom: 35px;">
+            <button type="button" @click="cancel" class="btn-acc" style="border: 1px solid #cbd5e1; padding: 12px 24px; font-weight: 700;">
+                 CANCELAR ENVÍO
+            </button>
+            <button type="button" @click="$wire.set('step', 4)" class="btn-dashboard-primary" style="padding: 12px 24px;">
+                ENVIAR AHORA
             </button>
         </div>
+
+        <p style="color: #64748b; font-size: 0.85rem; max-width: 500px; margin-left: auto; margin-right: auto;">
+            Puede esperar a que el temporizador finalice o forzar el envío inmediato si ya verificó los datos.
+        </p>
     </div>
     @endif
 
@@ -348,20 +393,5 @@
     </div>
     @endif
 
-    <!-- PASO 5: ÉXITO -->
-    @if($step === 5)
-    <div style="text-align: center; padding: 40px 0;">
-        <div style="font-size: 4rem; margin-bottom: 20px;">🎉</div>
-        <h3 style="color: #2b8a3e; font-size: 1.8rem; margin-bottom: 10px; font-weight: 700;">Planilla Importada con Éxito</h3>
-        <p style="color: #475569; font-size: 1rem; margin-bottom: 35px; max-width: 600px; margin-left: auto; margin-right: auto;">
-            Se han procesado, validado e ingresado de forma íntegra las <strong>{{ $totalRows }}</strong> actividades en la base de datos de Intranet. Los correos de notificación a las unidades ya se encuentran agendados en la cola de procesamiento.
-        </p>
-
-        <div style="display: flex; justify-content: center; gap: 15px;">
-            <button type="button" wire:click="resetForm" class="btn-dashboard-primary">
-                Cargar Nueva Planilla
-            </button>
-        </div>
-    </div>
-    @endif
+    <!-- PASO 5 ELIMINADO: AHORA REDIRIGE AL DASHBOARD -->
 </div>

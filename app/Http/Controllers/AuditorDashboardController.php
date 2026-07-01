@@ -6,6 +6,7 @@ use App\Mail\NuevasActividadesPendientes;
 use App\Models\Actividad;
 use App\Models\CargaExcel;
 use App\Models\Region;
+use App\Models\Scopes\StatisticalYearScope;
 use App\Models\Unidad;
 use App\Services\MailService;
 
@@ -27,17 +28,20 @@ class AuditorDashboardController extends Controller
         $selectedYear = (int) request('ano', $currentYear);
 
         // 1. Métricas operacionales filtradas de acuerdo a la vista y selectores
-        $queryCargadas = Actividad::where('estado', 'CARGADA');
-        $queryVerificadas = Actividad::where('estado', 'VERIFICADA');
+        $queryCargadas = Actividad::query()->where('estado', 'CARGADA');
+        $queryVerificadas = Actividad::query()->where('estado', 'VERIFICADA');
 
-        if ($view !== 'global') {
-            $queryCargadas->where('AÑO', $selectedYear);
-            $queryVerificadas->where('AÑO', $selectedYear);
+        if ($view === 'global') {
+            $queryCargadas->withoutGlobalScope(StatisticalYearScope::class);
+            $queryVerificadas->withoutGlobalScope(StatisticalYearScope::class);
+        } elseif ($selectedYear !== $currentYear) {
+            $queryCargadas->withoutGlobalScope(StatisticalYearScope::class)->where('AÑO', $selectedYear);
+            $queryVerificadas->withoutGlobalScope(StatisticalYearScope::class)->where('AÑO', $selectedYear);
+        }
 
-            if ($view === 'mes') {
-                $queryCargadas->where('MES', $selectedMonth);
-                $queryVerificadas->where('MES', $selectedMonth);
-            }
+        if ($view === 'mes') {
+            $queryCargadas->where('MES', $selectedMonth);
+            $queryVerificadas->where('MES', $selectedMonth);
         }
 
         $totalCargadas = $queryCargadas->count();
@@ -51,23 +55,35 @@ class AuditorDashboardController extends Controller
 
         // 2. Estadísticas territoriales consolidadas por región (Eager Loading para prevenir N+1)
         $regionesEstadisticas = Region::query()
-            ->with(['user', 'unidades' => function ($query) use ($selectedYear, $selectedMonth, $view) {
+            ->with(['user', 'unidades' => function ($query) use ($selectedYear, $selectedMonth, $view, $currentYear) {
                 $query->withCount([
-                    'actividadesAsignadas as cargadas_count' => function ($q) use ($selectedYear, $selectedMonth, $view) {
-                        $q->where('estado', 'CARGADA')
-                            ->when($view !== 'global', function ($subQ) use ($selectedYear) {
-                                $subQ->where('AÑO', $selectedYear);
-                            })
-                            ->when($view === 'mes', function ($subQ) use ($selectedMonth) {
-                                $subQ->where('MES', $selectedMonth);
-                            });
-                    },
-                    'actividadesAsignadas' => function ($query) use ($selectedYear, $selectedMonth, $view) {
-                        $query->where('estado', 'VERIFICADA');
+                    'actividadesAsignadas as cargadas_count' => function ($q) use ($selectedYear, $selectedMonth, $view, $currentYear) {
+                        $q->where('estado', 'CARGADA');
+
+                        if ($view === 'global') {
+                            $q->withoutGlobalScope(StatisticalYearScope::class);
+                        } elseif ($selectedYear !== $currentYear) {
+                            $q->withoutGlobalScope(StatisticalYearScope::class)
+                                ->where('AÑO', $selectedYear);
+                        }
+
                         if ($view === 'mes') {
-                            $query->where('MES', $selectedMonth)->where('AÑO', $selectedYear);
-                        } elseif ($view === 'ano') {
-                            $query->where('AÑO', $selectedYear);
+                            $q->where('MES', $selectedMonth);
+                        }
+                    },
+
+                    'actividadesAsignadas as verificadas_count' => function ($q) use ($selectedYear, $selectedMonth, $view, $currentYear) {
+                        $q->where('estado', 'VERIFICADA');
+
+                        if ($view === 'global') {
+                            $q->withoutGlobalScope(StatisticalYearScope::class);
+                        } elseif ($selectedYear !== $currentYear) {
+                            $q->withoutGlobalScope(StatisticalYearScope::class)
+                                ->where('AÑO', $selectedYear);
+                        }
+
+                        if ($view === 'mes') {
+                            $q->where('MES', $selectedMonth);
                         }
                     },
                 ]);
@@ -75,7 +91,7 @@ class AuditorDashboardController extends Controller
             ->get()
             ->map(function ($region) {
                 $cargadas = $region->unidades->sum('cargadas_count');
-                $verificadas = $region->unidades->sum('actividades_asignadas_count');
+                $verificadas = $region->unidades->sum('verificadas_count');
                 $total = $cargadas + $verificadas;
 
                 return [
@@ -89,8 +105,9 @@ class AuditorDashboardController extends Controller
                 ];
             });
 
-        // 3. Unidades con actividades pendientes para el reenvío de notificaciones (Solo en vistas mes/ano)
+        // 3. Unidades con actividades pendientes para el reenvío de notificaciones
         $unidadesPendientes = collect();
+
         if ($view !== 'global') {
             $unidadesPendientes = Unidad::query()
                 ->with(['user', 'region'])
@@ -133,6 +150,11 @@ class AuditorDashboardController extends Controller
      */
     public function renotificarUnidad(Unidad $unidad)
     {
+        // Control de concurrencia: si ya fue notificada hoy, solo refrescar estado
+        if ($unidad->ultima_notificacion_at?->isToday()) {
+            return back()->with('success', "La unidad '{$unidad->user->name}' ya había sido notificada hoy por otro proceso. El estado ha sido actualizado.");
+        }
+
         $sent = MailService::sendSafe(
             $unidad->user->email,
             new NuevasActividadesPendientes($unidad),
@@ -140,6 +162,9 @@ class AuditorDashboardController extends Controller
         );
 
         if ($sent) {
+            $unidad->ultima_notificacion_at = now();
+            $unidad->save();
+
             return back()->with('success', "Se ha enviado una nueva renotificación de forma síncrona a la unidad '{$unidad->user->name}'.");
         }
 

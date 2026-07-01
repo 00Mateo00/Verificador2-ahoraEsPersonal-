@@ -65,6 +65,14 @@
                         <p>{{ $errors->first() }}</p>
                     </div>
                     @endif
+
+                    @if(session('error'))
+                    <div class="alert-error-top" style="background-color: #fff1f2; border-color: #fecdd3;">
+                        <strong style="color: #be123c;">⚠ Acceso Denegado</strong>
+                        <p style="color: #9f1239;">{{ session('error') }}</p>
+                    </div>
+                    @endif
+
                     <div class="login-card-header">
                         <h2>Acceso al Sistema</h2>
                         <p>Gestión de verificadores centralizada</p>

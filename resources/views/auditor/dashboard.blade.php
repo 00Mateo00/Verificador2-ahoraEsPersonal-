@@ -137,12 +137,15 @@
 
 </div>
 
-<!-- Sección Central: Estadísticas Territoriales por Región -->
+<!-- Sección Central: Estadísticas Territoriales por Región con Desplegables de Unidades (Buscador Fuzzy & Filtros Integrados) -->
 <div style="background-color: #ffffff; border: 1px solid rgba(226, 232, 240, 0.8); border-radius: 8px; padding: 25px; margin-bottom: 35px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.02);">
     <h3 style="margin-top: 0; margin-bottom: 20px; font-size: 1.15rem; color: #0d1b2a; font-weight: 700; border-bottom: 2px solid #f1f5f9; padding-bottom: 12px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
         <span> Avance y Desempeño Territorial por Región</span>
         <span style="font-size: 0.8rem; color: #64748b; font-weight: 500;">Periodo: @if($view === 'mes') {{ $meses[$selectedMonth] }} - {{ $selectedYear }} @elseif($view === 'ano') Año {{ $selectedYear }} @else Histórico Global @endif</span>
     </h3>
+    <p style="color: #64748b; font-size: 0.85rem; margin-top: -10px; margin-bottom: 20px;">
+        Haga clic sobre cualquier región para desplegar de forma interactiva el listado completo de unidades operativas correspondientes.
+    </p>
     
     <div style="overflow-x: auto;">
         <table class="table-custom-data" style="width: 100%; border-collapse: collapse; min-width: 700px;">
@@ -150,26 +153,45 @@
                 <tr>
                     <th style="padding: 12px 16px; background-color: #f1f5f9; text-align: left; font-size: 0.8rem; font-weight: 700; color: #475569;">Región</th>
                     <th style="padding: 12px 16px; background-color: #f1f5f9; text-align: left; font-size: 0.8rem; font-weight: 700; color: #475569;">Director Regional</th>
-                    <th style="padding: 12px 16px; background-color: #f1f5f9; text-align: center; font-size: 0.8rem; font-weight: 700; color: #475569;">Unidades</th>
-                    <th style="padding: 12px 16px; background-color: #f1f5f9; text-align: center; font-size: 0.8rem; font-weight: 700; color: #475569;">Cargadas</th>
-                    <th style="padding: 12px 16px; background-color: #f1f5f9; text-align: center; font-size: 0.8rem; font-weight: 700; color: #475569;">Verificadas</th>
-                    <th style="padding: 12px 16px; background-color: #f1f5f9; text-align: right; font-size: 0.8rem; font-weight: 700; color: #475569; width: 180px;">Progreso</th>
+                    <th style="padding: 12px 16px; background-color: #f1f5f9; text-align: center; font-size: 0.8rem; font-weight: 700; color: #475569; width: 100px;">Unidades</th>
+                    <th style="padding: 12px 16px; background-color: #f1f5f9; text-align: center; font-size: 0.8rem; font-weight: 700; color: #475569; width: 100px;">Cargadas</th>
+                    <th style="padding: 12px 16px; background-color: #f1f5f9; text-align: center; font-size: 0.8rem; font-weight: 700; color: #475569; width: 100px;">Verificadas</th>
+                    <th style="padding: 12px 16px; background-color: #f1f5f9; text-align: center; font-size: 0.8rem; font-weight: 700; color: #475569; width: 180px;">Progreso</th>
                 </tr>
             </thead>
             <tbody>
                 @foreach($regionesEstadisticas as $stat)
-                <tr style="border-bottom: 1px solid #e2e8f0;">
-                    <td style="padding: 14px 16px; font-weight: 700; color: #0F69C4; font-size: 0.9rem;">{{ $stat['nombre'] }}</td>
+                <!-- Fila Principal de la Región (Toggle JS) -->
+                <tr class="js-region-toggle" 
+                    data-target="region-detail-{{ $stat['id'] }}"
+                    style="border-bottom: 1px solid #e2e8f0; cursor: pointer; transition: background-color 0.15s ease;">
+                    <td style="padding: 14px 16px; font-weight: 700; color: #0F69C4; font-size: 0.9rem;">
+                        {{ $stat['nombre'] }} 
+                        <span style="font-size: 0.72rem; color: #64748b; font-weight: normal; display: block; margin-top: 2px;">Haga clic para expandir unidades <span class="js-accordion-icon">▼</span></span>
+                    </td>
                     <td style="padding: 14px 16px; font-size: 0.85rem; color: #475569;">{{ $stat['director'] }}</td>
                     <td style="padding: 14px 16px; font-size: 0.85rem; color: #334155; text-align: center; font-weight: 600;">{{ $stat['unidades_count'] }}</td>
                     <td style="padding: 14px 16px; font-size: 0.85rem; color: #ef3340; text-align: center; font-weight: 600;">{{ $stat['cargadas'] }}</td>
                     <td style="padding: 14px 16px; font-size: 0.85rem; color: #2b8a3e; text-align: center; font-weight: 600;">{{ $stat['verificadas'] }}</td>
-                    <td style="padding: 14px 16px; text-align: right;">
-                        <div style="display: flex; align-items: center; justify-content: flex-end; gap: 10px;">
+                    <td style="padding: 14px 16px; text-align: center;">
+                        <div style="display: flex; align-items: center; justify-content: center; gap: 10px;">
                             <span style="font-size: 0.8rem; font-weight: 700; color: #0d1b2a;">{{ $stat['avance'] }}%</span>
                             <div style="width: 80px; height: 8px; background-color: #e2e8f0; border-radius: 4px; overflow: hidden; display: inline-block;">
                                 <div style="width: {{ $stat['avance'] }}%; height: 100%; background-color: #2b8a3e;"></div>
                             </div>
+                        </div>
+                    </td>
+                </tr>
+
+                <!-- Contenedor Desplegable JS -->
+                <tr id="region-detail-{{ $stat['id'] }}" 
+                    style="background-color: #f8fafc; display: none;">
+                    <td colspan="6" style="padding: 25px; border-bottom: 1px solid #cbd5e1;">
+                        <div style="background-color: #ffffff; border: 1px solid #cbd5e1; border-radius: 12px; padding: 25px; box-shadow: 0 4px 12px rgba(15, 23, 42, 0.03);">
+                            <h4 style="margin-top: 0; margin-bottom: 20px; color: #0d1b2a; border-bottom: 2px solid #f1f5f9; padding-bottom: 10px;">
+                                Unidades Operativas - Región {{ $stat['nombre'] }}
+                            </h4>
+                            <x-unidades-list :unidades="$stat['unidades']" />
                         </div>
                     </td>
                 </tr>
@@ -212,7 +234,7 @@
                     <form action="{{ route('auditor.unidades.renotificar', $up->id) }}" method="POST" onsubmit="this.querySelector('button').disabled = true; this.querySelector('button').innerHTML = 'Enviando... ⏳';">
                         @csrf
                         <button type="submit" class="btn-acc" style="padding: 8px 14px; font-size: 0.8rem; font-weight: 700; border-color: #0F69C4; color: #0F69C4 !important; background-color: rgba(15, 105, 196, 0.02); border-radius: 4px; cursor: pointer;">
-                            Renotificar ✉️
+                            Renotificar 
                         </button>
                     </form>
                 </div>

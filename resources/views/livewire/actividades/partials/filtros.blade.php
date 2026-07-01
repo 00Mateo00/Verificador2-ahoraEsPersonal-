@@ -46,25 +46,6 @@ $isAdmin = $isAdmin ?? false;
     <!-- Filtros Avanzados (Desplegable) -->
     <div x-show="advancedOpen" x-transition class="dashboard-filter-advanced" x-bind:style="advancedOpen ? 'display:grid' : 'display:none'">
 
-        <div class="form-group-item" style="margin: 0;">
-            <label for="mes" style="font-size: 0.8rem; font-weight: 600; color: #475569; display: block; margin-bottom: 6px;">Mes de Actividad</label>
-            <select wire:model.live="mes" id="mes" class="form-select-control" style="width: 100%; box-sizing: border-box; padding: 12px 14px; border: 1px solid #dee2e6; border-radius: 4px;">
-                <option value="">Todos los meses</option>
-                <option value="1">Enero</option>
-                <option value="2">Febrero</option>
-                <option value="3">Marzo</option>
-                <option value="4">Abril</option>
-                <option value="5">Mayo</option>
-                <option value="6">Junio</option>
-                <option value="7">Julio</option>
-                <option value="8">Agosto</option>
-                <option value="9">Septiembre</option>
-                <option value="10">Octubre</option>
-                <option value="11">Noviembre</option>
-                <option value="12">Diciembre</option>
-            </select>
-        </div>
-
         @if(Auth::user()->rol === \App\Enums\UserRole::Admin || Auth::user()->rol === \App\Enums\UserRole::Auditor)
         <div class="form-group-item" style="margin: 0;">
             <label for="director_filtro" style="font-size: 0.8rem; font-weight: 600; color: #475569; display: block; margin-bottom: 6px;">Director Regional</label>
@@ -73,17 +54,6 @@ $isAdmin = $isAdmin ?? false;
                 @foreach($directoresRegionales as $dir)
                     <option value="{{ $dir->id }}">{{ $dir->name }}</option>
                 @endforeach
-            </select>
-        </div>
-
-        <div class="form-group-item" style="margin: 0;">
-            <label for="tipo" style="font-size: 0.8rem; font-weight: 600; color: #475569; display: block; margin-bottom: 6px;">Tipo Actividad</label>
-            <select wire:model.live="tipo" id="tipo" class="form-select-control" style="width: 100%; box-sizing: border-box; padding: 12px 14px; border: 1px solid #dee2e6; border-radius: 4px;">
-                <option value="">Todos los tipos...</option>
-                <option value="Capacitación Interna">Capacitación Interna</option>
-                <option value="Reunión Bilateral">Reunión Bilateral</option>
-                <option value="Auditoría de Control">Auditoría de Control</option>
-                <option value="Despliegue en Terreno">Despliegue en Terreno</option>
             </select>
         </div>
         @endif
@@ -99,7 +69,7 @@ $isAdmin = $isAdmin ?? false;
             <span wire:loading.remove wire:target="$refresh"> Actualizar Datos</span>
             <span wire:loading wire:target="$refresh">⏳ Actualizando...</span>
         </button>
-        <button type="button" wire:click="$set('buscar', ''); $set('ano', ''); $set('mes', ''); $set('director_filtro', ''); $set('tipo', ''); $set('actividad_id', ''); $set('unidad_filtro', '');" class="btn-secondary" style="padding: 8px 16px; font-size: 0.85rem; border: 1px solid #cbd5e1; border-radius: 4px; cursor: pointer; background: transparent;">
+        <button type="button" wire:click="$set('buscar', ''); $set('ano', ''); $set('director_filtro', ''); $set('tipo', ''); $set('actividad_id', ''); $set('unidad_filtro', '');" class="btn-secondary" style="padding: 8px 16px; font-size: 0.85rem; border: 1px solid #cbd5e1; border-radius: 4px; cursor: pointer; background: transparent;">
             Limpiar Filtros
         </button>
     </div>

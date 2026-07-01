@@ -3,17 +3,18 @@
 namespace App\Livewire\Actividades;
 
 use App\Enums\UserRole;
+use App\Livewire\PaginatedComponent;
 use App\Models\Actividad;
 use App\Models\Archivo;
 use App\Models\CargaExcel;
 use App\Models\Region;
+use App\Models\Scopes\StatisticalYearScope;
 use App\Models\Unidad;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Livewire\Attributes\Url;
-use App\Livewire\PaginatedComponent;
 use Livewire\WithFileUploads;
 
 class ConsultaList extends PaginatedComponent
@@ -30,9 +31,6 @@ class ConsultaList extends PaginatedComponent
     #[Url(as: 'ano')]
     public string $ano = '';
 
-    #[Url(as: 'mes')]
-    public string $mes = '';
-
     #[Url(as: 'act')]
     public string $tipo = '';
 
@@ -46,6 +44,14 @@ class ConsultaList extends PaginatedComponent
     #[Url(as: 'id')]
     public string $actividad_id = '';
 
+    /**
+     * Inicializar filtros por defecto (año más reciente de forma persistente).
+     */
+    public function mount()
+    {
+        $this->ano = (string) (Actividad::max('AÑO') ?: date('Y'));
+    }
+
     // Reiniciar paginación al cambiar filtros
     public function updatedBuscar()
     {
@@ -53,11 +59,6 @@ class ConsultaList extends PaginatedComponent
     }
 
     public function updatedAno()
-    {
-        $this->resetPage();
-    }
-
-    public function updatedMes()
     {
         $this->resetPage();
     }
@@ -80,11 +81,21 @@ class ConsultaList extends PaginatedComponent
     private function getFilteredActivitiesQuery()
     {
         $user = Auth::user();
+        $isModoEdicion = session('modo_edicion');
 
-        $query = Actividad::query()
-            ->where('activo', true)
-            ->where('estado', 'VERIFICADA')
-            ->forUser($user, (int) $this->unidad_filtro ?: null);
+        $query = Actividad::query();
+
+        // Si se selecciona un año específico en el filtro, omitimos el Scope del Año Estadístico actual
+        if (! empty($this->ano)) {
+            $query->withoutGlobalScope(StatisticalYearScope::class)->where('AÑO', $this->ano);
+        }
+
+        // El Administrador en Modo Edición puede ver registros desactivados
+        if (!($user->rol === UserRole::Admin && $isModoEdicion)) {
+            $query->where('activo', true);
+        }
+
+        $query->forUser($user, (int) $this->unidad_filtro ?: null);
 
         if (! empty($this->actividad_id)) {
             $query->where('actividad_id', $this->actividad_id);
@@ -99,14 +110,6 @@ class ConsultaList extends PaginatedComponent
             });
         }
 
-        if (! empty($this->ano)) {
-            $query->where('AÑO', $this->ano);
-        }
-
-        if (! empty($this->mes)) {
-            $query->where('MES', $this->mes);
-        }
-
         if (! empty($this->tipo)) {
             $query->where('TIPO_ACTIVIDAD', $this->tipo);
         }
@@ -117,7 +120,7 @@ class ConsultaList extends PaginatedComponent
             $query->whereIn('unidad_id_asignada', $unidadIds);
         }
 
-        return $query->with(['archivos', 'unidadAsignada'])
+        return $query->with(['archivos', 'unidadAsignada', 'cargaExcel'])
             ->orderBy('FECHA', 'desc')
             ->orderBy('actividad_id', 'desc');
     }
@@ -157,6 +160,22 @@ class ConsultaList extends PaginatedComponent
         if ($actividad) {
             $actividad->update(['activo' => false]);
             session()->flash('success', 'La actividad ha sido desactivada del sistema con éxito.');
+        }
+    }
+
+    /**
+     * Reactivar una actividad previamente desactivada (Solo Administradores en Modo Edición).
+     */
+    public function reactivarActividad($actividadId)
+    {
+        if (Auth::user()->rol !== UserRole::Admin || ! session('modo_edicion')) {
+            abort(403, 'No autorizado para realizar esta acción.');
+        }
+
+        $actividad = Actividad::find($actividadId);
+        if ($actividad) {
+            $actividad->update(['activo' => true]);
+            session()->flash('success', 'La actividad ha sido reactivada y ya es visible para todos los usuarios.');
         }
     }
 
@@ -219,10 +238,14 @@ class ConsultaList extends PaginatedComponent
     public function render()
     {
         $user = Auth::user();
-        $userRol = $user->rol;
+        $userRol = $user->rol; // Restaura el accesor retrocompatible para subconsultas
 
-        // Si es Cargador, se muestra únicamente su historial de cargas agrupadas
-        if ($userRol === UserRole::Cargador) {
+        $canViewHistory = $user->hasPermissionTo('historial.ver-global') ||
+                          $user->hasPermissionTo('historial.ver-regional') ||
+                          $user->hasPermissionTo('historial.ver-unidad');
+
+        // Si el usuario no tiene permisos para ver historiales generales pero sí cuenta con el de importar (Cargador puro)
+        if (! $canViewHistory && $user->hasPermissionTo('actividades.importar')) {
             $cargasAgrupadas = CargaExcel::where('user_id', $user->id)
                 ->with(['actividades' => function ($q) {
                     $q->where('activo', true);
@@ -235,26 +258,14 @@ class ConsultaList extends PaginatedComponent
             ]);
         }
 
-        $perPage = 25;
-        if (! empty($this->mes)) {
-            $perPage = 100;
-        } elseif (! empty($this->ano)) {
-            $perPage = 50;
-        }
+        $perPage = 50;
 
         $query = $this->getFilteredActivitiesQuery();
         $totalResults = $query->count();
         $actividades = $query->paginate($perPage);
 
-        $monthQuery = Actividad::query()
-            ->where('activo', true)
-            ->where('estado', 'VERIFICADA')
-            ->forUser($user, (int) $this->unidad_filtro ?: null);
-
-        $monthCounts = $monthQuery->selectRaw("SUBSTRING_INDEX(FECHA, '-', -2) as ym, count(*) as total")
-            ->groupBy('ym')
-            ->pluck('total', 'ym')
-            ->toArray();
+        // Se elimina la agrupación por meses estadísticos
+        $monthCounts = [];
 
         // Cargar las unidades asociadas al usuario autenticado para el filtro dinámico
         $unidadesAsignadas = [];
@@ -283,19 +294,22 @@ class ConsultaList extends PaginatedComponent
                 ->get();
         }
 
-        // Cargar directores regionales para el filtro de Auditor / Admin
+        // Cargar directores regionales para el filtro de Auditor / Admin (Relacionalmente)
         $directoresRegionales = [];
         if ($userRol === UserRole::Admin || $userRol === UserRole::Auditor) {
-            $directoresRegionales = User::where('rol', UserRole::Director)->orderBy('name', 'asc')->get();
+            $directoresRegionales = User::whereHas('role', function ($query) {
+                $query->where('name', 'director');
+            })->orderBy('name', 'asc')->get();
         }
 
         return view('livewire.actividades.consulta-list', [
             'actividades' => $actividades,
-            'monthCounts' => $monthCounts,
+            'monthCounts' => [],
             'totalResults' => $totalResults,
             'unidadesAsignadas' => $unidadesAsignadas,
             'directoresRegionales' => $directoresRegionales,
-            'isDateRangeActive' => ! empty($this->mes),
+            'isDateRangeActive' => false,
+            'cargasAgrupadas' => collect(), // Fallback de resguardo defensivo
         ]);
     }
 }

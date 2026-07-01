@@ -3,15 +3,18 @@
 namespace App\Providers;
 
 use App\Listeners\LogFailedNotification;
+use App\Models\Permission;
 use Carbon\CarbonImmutable;
 use Illuminate\Auth\Notifications\ResetPassword;
 use Illuminate\Notifications\Events\NotificationFailed;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Pagination\Paginator;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Validation\Rules\Password;
 
@@ -35,6 +38,7 @@ class AppServiceProvider extends ServiceProvider
 
         $this->configureDefaults();
         $this->registerAuditorPolicies();
+        $this->registerDynamicPermissionGates();
         $this->configurePasswordResetEmail();
 
         // Registrar listener global para capturar fallos de notificaciones (ej: Fortify resets)
@@ -54,8 +58,34 @@ class AppServiceProvider extends ServiceProvider
     {
         // El Gate "mutate" evalúa si el usuario autenticado tiene permisos para realizar mutaciones de estado
         Gate::define('mutate', function ($user) {
-            return $user->rol !== 'auditor';
+            return $user->role && $user->role->name !== 'auditor';
         });
+    }
+
+    /**
+     * Registro de compuertas de acceso dinámicas basadas en los permisos relacionales de la base de datos.
+     */
+    protected function registerDynamicPermissionGates(): void
+    {
+        if (app()->runningInConsole()) {
+            return;
+        }
+
+        try {
+            if (Schema::hasTable('permissions')) {
+                $permissions = Cache::rememberForever('system_permissions_gates_list', function () {
+                    return Permission::pluck('name')->toArray();
+                });
+
+                foreach ($permissions as $permission) {
+                    Gate::define($permission, function ($user) use ($permission) {
+                        return $user->hasPermissionTo($permission);
+                    });
+                }
+            }
+        } catch (\Throwable $e) {
+            // Previene fallos durante fases tempranas de migración o bootstrapping
+        }
     }
 
     /**

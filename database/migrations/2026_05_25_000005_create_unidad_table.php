@@ -12,6 +12,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('region_id')->nullable()->constrained('region', 'id')->nullOnDelete();
             $table->foreignId('user_id')->nullable()->constrained('users', 'id')->nullOnDelete();
+            $table->timestamp('ultima_notificacion_at')->nullable();
         });
     }
 

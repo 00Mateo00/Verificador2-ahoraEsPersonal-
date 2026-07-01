@@ -2,7 +2,7 @@
 
 namespace App\Models;
 
-use App\Enums\UserRole;
+use App\Models\Scopes\StatisticalYearScope;
 use App\Services\ExcelService;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -123,22 +123,6 @@ class Actividad extends Model
         return $data;
     }
 
-    /*     public static function createFromExcelRow(
-        array $row,
-        int $cargaId,
-        ?int $unidadIdAsignada
-    ): array {
-
-
-        return self::create(
-            self::fromExcelRow(
-                $row,
-                $cargaId,
-                $unidadIdAsignada
-            )
-        );
-    } */
-
     public function __construct(array $attributes = [])
     {
         parent::__construct($attributes);
@@ -152,17 +136,25 @@ class Actividad extends Model
         ];
     }
 
+    /**
+     * Registro de Scopes Globales para el modelo.
+     */
+    protected static function booted(): void
+    {
+        static::addGlobalScope(new StatisticalYearScope);
+    }
+
     public function scopeForUser($query, User $user, ?int $filteredUnidadId = null)
     {
-        $rol = $user->rol;
-
-        if ($rol === UserRole::Unidad) {
+        // 1. Si el usuario está restringido al historial de su propia Unidad
+        if ($user->hasPermissionTo('historial.ver-unidad')) {
             $userUnidadId = $user->unidad ? $user->unidad->id : null;
 
             return $query->where('unidad_id_asignada', $userUnidadId);
         }
 
-        if ($rol === UserRole::Director) {
+        // 2. Si el usuario está restringido a la supervisión de su Región
+        if ($user->hasPermissionTo('historial.ver-regional')) {
             $userRegionId = $user->region ? $user->region->id : null;
             $unidadIds = $userRegionId
                 ? Unidad::query()->where('region_id', $userRegionId)->pluck('id')->toArray()
@@ -175,7 +167,7 @@ class Actividad extends Model
             return $query->whereIn('unidad_id_asignada', $unidadIds);
         }
 
-        // Admin, Auditor, Cargador (Acceso global)
+        // 3. Acceso Global (historial.ver-global)
         if ($filteredUnidadId) {
             return $query->where('unidad_id_asignada', $filteredUnidadId);
         }
@@ -197,5 +189,13 @@ class Actividad extends Model
     public function archivos(): HasMany
     {
         return $this->hasMany(Archivo::class, 'actividad_id', 'actividad_id');
+    }
+
+    /**
+     * Relación con el lote de importación de Excel propietario.
+     */
+    public function cargaExcel(): BelongsTo
+    {
+        return $this->belongsTo(CargaExcel::class, 'carga_id', 'carga_id');
     }
 }

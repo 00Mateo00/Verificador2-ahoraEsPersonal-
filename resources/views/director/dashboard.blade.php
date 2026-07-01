@@ -139,61 +139,13 @@
     </div>
 </div>
 
-<!--  Avance Individual de Unidades Operativas (Exclusivo de su Región) -->
+<!--  Avance Individual de Unidades Operativas (Exclusivo de su Región) con Buscador Fuzzy y Filtros Frontend -->
 <div class="dashboard-card">
-    <h3 style="margin-top: 0; margin-bottom: 20px; font-size: 1.15rem; color: #0d1b2a; font-weight: 700; border-bottom: 2px solid #f1f5f9; padding-bottom: 12px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
-        <span> Avance Individual de Unidades Asignadas</span>
-        <span style="font-size: 0.8rem; color: #64748b; font-weight: 500;">Ordenado por menor porcentaje de avance</span>
+    <h3 style="margin-top: 0; margin-bottom: 20px; font-size: 1.15rem; color: #0d1b2a; font-weight: 700; border-bottom: 2px solid #f1f5f9; padding-bottom: 12px;">
+         Control y Monitoreo de Unidades Asignadas
     </h3>
     
-    <div style="overflow-x: auto;">
-        <table class="table-custom-data" style="width: 100%; border-collapse: collapse; min-width: 700px;">
-            <thead>
-                <tr>
-                    <th style="padding: 12px 16px; background-color: #f1f5f9; text-align: left; font-size: 0.8rem; font-weight: 700; color: #475569;">Unidad</th>
-                    <th style="padding: 12px 16px; background-color: #f1f5f9; text-align: center; font-size: 0.8rem; font-weight: 700; color: #475569; width: 120px;">Pendientes</th>
-                    <th style="padding: 12px 16px; background-color: #f1f5f9; text-align: center; font-size: 0.8rem; font-weight: 700; color: #475569; width: 120px;">Verificadas</th>
-                    <th style="padding: 12px 16px; background-color: #f1f5f9; text-align: right; font-size: 0.8rem; font-weight: 700; color: #475569; width: 180px;">Progreso</th>
-                    <th style="padding: 12px 16px; background-color: #f1f5f9; text-align: right; font-size: 0.8rem; font-weight: 700; color: #475569; width: 160px;">Acciones</th>
-                </tr>
-            </thead>
-            <tbody>
-               @foreach($unidadesEstadisticas as $stat)
-                    <tr style="border-bottom: 1px solid #e2e8f0;">
-                        <td style="padding: 14px 16px; font-weight: 700; color: #0F69C4; font-size: 0.9rem;">
-                            {{ $stat['nombre'] }}
-                            <span style="display: block; font-size: 0.75rem; color: #64748b; font-weight: normal; margin-top: 2px;">{{ $stat['email'] }}</span>
-                        </td>
-                        <td style="padding: 14px 16px; font-size: 0.85rem; color: #ef3340; text-align: center; font-weight: 600;">{{ $stat['cargadas'] }}</td>
-                        <td style="padding: 14px 16px; font-size: 0.85rem; color: #2b8a3e; text-align: center; font-weight: 600;">{{ $stat['verificadas'] }}</td>
-                        <td style="padding: 14px 16px; text-align: right;">
-                            <div style="display: flex; align-items: center; justify-content: flex-end; gap: 10px;">
-                                <span style="font-size: 0.8rem; font-weight: 700; color: #0d1b2a;">{{ $stat['avance'] }}%</span>
-                                <div style="width: 80px; height: 8px; background-color: #e2e8f0; border-radius: 4px; overflow: hidden; display: inline-block;">
-                                    <div style="width: {{ $stat['avance'] }}%; height: 100%; background-color: #2b8a3e;"></div>
-                                </div>
-                            </div>
-                        </td>
-                        <td style="padding: 14px 16px; text-align: right;">
-                            <div style="display: flex; gap: 8px; justify-content: flex-end; align-items: center;">
-                                @if($stat['avance'] < 100.0)
-                                    <form action="{{ route('director.unidades.renotificar', $stat['id']) }}" method="POST" onsubmit="this.querySelector('button').disabled = true; this.querySelector('button').innerHTML = 'Enviando... ⏳';">
-                                        @csrf
-                                        <button type="submit" class="btn-acc" style="padding: 6px 12px; font-size: 0.8rem; font-weight: 700; border-color: #0F69C4; color: #0F69C4 !important; background-color: rgba(15, 105, 196, 0.02); border-radius: 4px; cursor: pointer; height: auto;">
-                                            Renotificar ✉️
-                                        </button>
-                                    </form>
-                                
-                                @else
-                                    <p>al dia</p>
-
-                                @endif
-                            </div>
-                        </td>
-                    </tr>
-                    @endforeach
-            </tbody>
-        </table>
-    </div>
+    <!-- Renderizado del Listado Territorial Normalizado con Buscador Fuzzy -->
+    <x-unidades-list :unidades="$unidadesEstadisticas" />
 </div>
 @endsection

@@ -10,10 +10,18 @@ class Unidad extends Model
 {
     protected $table = 'unidad';
 
+    // Desactivar marcas de tiempo ya que la tabla no posee las columnas created_at/updated_at
+    public $timestamps = false;
+
     protected $fillable = [
         'id',
         'region_id',
         'user_id',
+        'ultima_notificacion_at',
+    ];
+
+    protected $casts = [
+        'ultima_notificacion_at' => 'datetime',
     ];
 
     /**

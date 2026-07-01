@@ -1,5 +1,5 @@
-<div x-data="{ advancedOpen: false }" @if(Auth::user()->rol === \App\Enums\UserRole::Auditor) wire:poll.600s @endif>
-    @if(Auth::user()->rol === \App\Enums\UserRole::Cargador)
+<div x-data="{ advancedOpen: false }" @can('correos.ver-historial') wire:poll.600s @endcan>
+    @if(!Auth::user()->hasPermissionTo('historial.ver-global') && !Auth::user()->hasPermissionTo('historial.ver-regional') && !Auth::user()->hasPermissionTo('historial.ver-unidad') && Auth::user()->hasPermissionTo('actividades.importar'))
         <!-- Vista Historial de Cargas Masivas Agrupadas (Cargador) -->
         <div style="display: flex; flex-direction: column; gap: 20px;">
             @if($cargasAgrupadas->isEmpty())

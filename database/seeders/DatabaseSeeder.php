@@ -16,6 +16,8 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
+        // Registrar e inicializar la matriz relacional de Roles y Permisos.
+        $this->call(RolePermissionSeeder::class);
 
         $regiones = [
             [

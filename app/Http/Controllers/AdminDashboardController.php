@@ -13,12 +13,14 @@ class AdminDashboardController extends Controller
      */
     public function __invoke()
     {
-        // Métricas operacionales consolidadas
+        // Métricas operacionales consolidadas (Filtradas automáticamente por el scope de Año Estadístico en curso)
         $totalCargadas = Actividad::where('estado', 'CARGADA')->count();
         $totalVerificadas = Actividad::where('estado', 'VERIFICADA')->count();
         $totalActividades = $totalCargadas + $totalVerificadas;
         $porcentajeVerificacion = $totalActividades > 0 ? round(($totalVerificadas / $totalActividades) * 100, 1) : 0;
-        $totalPlanillas = CargaExcel::count();
+        
+        // Las planillas de carga se filtran para el año en curso
+        $totalPlanillas = CargaExcel::whereYear('created_at', (int) date('Y'))->count();
 
         // Estadísticas territoriales consolidadas por región (Eager Loading para prevenir N+1)
         $regionesEstadisticas = Region::query()
