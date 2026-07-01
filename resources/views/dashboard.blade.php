@@ -109,7 +109,7 @@
                     <th style="padding: 12px 16px; background-color: #f1f5f9; text-align: center; font-size: 0.8rem; font-weight: 700; color: #475569; width: 100px;">Unidades</th>
                     <th style="padding: 12px 16px; background-color: #f1f5f9; text-align: center; font-size: 0.8rem; font-weight: 700; color: #475569; width: 100px;">Cargadas</th>
                     <th style="padding: 12px 16px; background-color: #f1f5f9; text-align: center; font-size: 0.8rem; font-weight: 700; color: #475569; width: 100px;">Verificadas</th>
-                    <th style="padding: 12px 16px; background-color: #f1f5f9; text-align: right; font-size: 0.8rem; font-weight: 700; color: #475569; width: 180px;">Progreso</th>
+                    <th style="padding: 12px 16px; background-color: #f1f5f9; text-align: center; font-size: 0.8rem; font-weight: 700; color: #475569; width: 180px;">Progreso</th>
                 </tr>
             </thead>
             <tbody>
@@ -125,8 +125,8 @@
                     <td style="padding: 14px 16px; font-size: 0.85rem; color: #334155; text-align: center; font-weight: 600;">{{ $stat['unidades_count'] }}</td>
                     <td style="padding: 14px 16px; font-size: 0.85rem; color: #ef3340; text-align: center; font-weight: 600;">{{ $stat['cargadas'] }}</td>
                     <td style="padding: 14px 16px; font-size: 0.85rem; color: #2b8a3e; text-align: center; font-weight: 600;">{{ $stat['verificadas'] }}</td>
-                    <td style="padding: 14px 16px; text-align: right;">
-                        <div style="display: flex; align-items: center; justify-content: flex-end; gap: 10px;">
+                    <td style="padding: 14px 16px; text-align: center;">
+                        <div style="display: flex; align-items: center; justify-content: center; gap: 10px;">
                             <span style="font-size: 0.8rem; font-weight: 700; color: #0d1b2a;">{{ $stat['avance'] }}%</span>
                             <div style="width: 80px; height: 8px; background-color: #e2e8f0; border-radius: 4px; overflow: hidden; display: inline-block;">
                                 <div style="width: {{ $stat['avance'] }}%; height: 100%; background-color: #2b8a3e;"></div>
